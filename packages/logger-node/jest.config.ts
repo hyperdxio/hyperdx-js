@@ -1,4 +1,6 @@
-export default {
+import type { Config } from 'jest';
+
+const config: Config = {
   testEnvironment: 'node',
   preset: 'ts-jest/presets/default-esm',
   transform: {
@@ -16,3 +18,5 @@ export default {
     '!src/**/*.d.mts',
   ],
 };
+
+export default config;
