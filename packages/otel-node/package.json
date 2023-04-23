@@ -2,5 +2,38 @@
   "name": "@hyperdx/node-otel",
   "author": "Warren <warren@users.noreply.github.com>",
   "license": "MIT",
-  "version": "0.0.0"
+  "version": "0.0.0",
+  "homepage": "https://www.hyperdx.io",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/hyperdxio/hyperdx-js.git"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "files": [
+    "build/*"
+  ],
+  "main": "build/bin/opentelemetry-instrument.js",
+  "bin": "build/bin/opentelemetry-instrument.js",
+  "scripts": {
+    "start": "node build/src/main.js",
+    "clean": "rimraf coverage build tmp",
+    "prebuild": "npm run clean",
+    "build": "npm run clean && tsc -p tsconfig.release.json",
+    "postbuild": "npm run build:types",
+    "build:types": "tsc -d -p tsconfig.release.json --declarationMap --emitDeclarationOnly",
+    "build:watch": "tsc -w -p tsconfig.json",
+    "lint": "eslint . --ext .ts --ext .mts",
+    "ci:lint": "yarn lint && yarn tsc --noEmit",
+    "test": "jest --coverage",
+    "prettier": "prettier --config .prettierrc --write .",
+    "test:watch": "jest --watch"
+  },
+  "dependencies": {
+    "@opentelemetry/api": "^1.4.1",
+    "@opentelemetry/auto-instrumentations-node": "^0.36.5",
+    "@opentelemetry/exporter-trace-otlp-proto": "^0.38.0",
+    "@opentelemetry/sdk-trace-node": "^1.12.0"
+  }
 }

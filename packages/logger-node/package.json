@@ -10,7 +10,7 @@
   "homepage": "https://www.hyperdx.io",
   "repository": {
     "type": "git",
-    "url": "https://github.com/hyperdxio/logger-node.git"
+    "url": "https://github.com/hyperdxio/hyperdx-js.git"
   },
   "publishConfig": {
     "access": "public"

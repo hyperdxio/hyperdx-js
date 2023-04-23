@@ -6,7 +6,7 @@
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "importHelpers": true,
-    "lib": ["esnext"],
+    "lib": ["esnext", "dom"],
     "module": "commonjs",
     "moduleResolution": "node",
     "noFallthroughCasesInSwitch": true,
@@ -23,6 +23,6 @@
     "strictNullChecks": false,
     "target": "es2019"
   },
-  "include": ["src/**/*", "__tests__/**/*"],
+  "include": ["src/**/*", "bin/**/*", "__tests__/**/*"],
   "exclude": ["node_modules", "build"]
 }
