@@ -1,5 +1,12 @@
 # @hyperdx/node-opentelemetry
 
+## 0.0.3
+
+### Patch Changes
+
+- 262ea14: feat: add getWinsonTransport
+- 3cef441: feat: set default otel endpoint
+
 ## 0.0.2
 
 ### Patch Changes
