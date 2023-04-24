@@ -11,6 +11,8 @@
   ],
   "scripts": {
     "ci:build": "npx nx run-many --target=build",
+    "ci:test": "npx nx run-many --target=test",
+    "ci:lint": "npx nx run-many --target=ci:lint",
     "prepare": "husky install"
   },
   "lint-staged": {

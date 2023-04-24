@@ -1,4 +1,5 @@
 /**/*.d.ts
 /**/*.js
 /**/*.json
+jest.config.ts
 build/**
