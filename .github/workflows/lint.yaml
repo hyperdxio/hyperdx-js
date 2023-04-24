@@ -19,6 +19,6 @@ jobs:
         with:
           node-version-file: '.nvmrc'
       - name: Install root dependencies
-        uses: bahmutov/npm-install@v1
+        uses: yarn
       - name: Run lint + type check
         run: yarn ci:lint
