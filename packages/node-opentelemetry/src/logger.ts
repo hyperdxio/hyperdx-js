@@ -1,3 +1,5 @@
+// FIXME: somehow it fails in gha
+// @ts-ignore
 import { HyperDXWinston } from '@hyperdx/node-logger';
 
 import * as config from './config';
