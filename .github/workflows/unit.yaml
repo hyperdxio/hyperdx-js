@@ -1,4 +1,4 @@
-name: Linting
+name: Unit
 on:
   push:
     branches: [main]
@@ -22,3 +22,5 @@ jobs:
         uses: yarn
       - name: Run lint + type check
         run: yarn ci:lint
+      - name: Run tests
+        run: yarn ci:test
