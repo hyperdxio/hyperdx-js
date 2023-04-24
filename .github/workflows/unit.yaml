@@ -1,4 +1,4 @@
-name: Linting
+name: Unit
 on:
   push:
     branches: [main]
@@ -8,7 +8,7 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 jobs:
-  lint:
+  main:
     timeout-minutes: 8
     runs-on: ubuntu-20.04
     steps:
@@ -18,7 +18,10 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version-file: '.nvmrc'
+          cache: 'yarn'
       - name: Install root dependencies
-        uses: bahmutov/npm-install@v1
+        run: yarn
       - name: Run lint + type check
         run: yarn ci:lint
+      - name: Run tests
+        run: yarn ci:test
