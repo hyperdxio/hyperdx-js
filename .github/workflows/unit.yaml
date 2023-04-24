@@ -8,7 +8,7 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 jobs:
-  lint:
+  main:
     timeout-minutes: 8
     runs-on: ubuntu-20.04
     steps:
@@ -19,7 +19,7 @@ jobs:
         with:
           node-version-file: '.nvmrc'
       - name: Install root dependencies
-        uses: yarn
+        run: yarn
       - name: Run lint + type check
         run: yarn ci:lint
       - name: Run tests
