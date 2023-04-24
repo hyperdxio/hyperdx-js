@@ -53,3 +53,17 @@ OTEL_SERVICE_NAME='<NAME_OF_YOUR_APP_OR_SERVICE>'
 ```sh
 npx @hyperdx/node-opentelemetry index.js
 ```
+
+### (Optional) Running Node.js Application with custom entry point (nodemon, ts-node, etc.)
+
+Add the following line into the top of `tracing.ts` file
+
+```ts
+import '@hyperdx/node-opentelemetry/build/src/tracing';
+```
+
+Run your application with the following command
+
+```sh
+<CUSTOM_ENTRY_POINT> --require ./tracing.ts index.js
+```
