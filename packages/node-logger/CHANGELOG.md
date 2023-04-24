@@ -1,5 +1,11 @@
 # @hyperdx/node-logger
 
+## 0.0.7
+
+### Patch Changes
+
+- 6accd2a: doc: update git link (package.json)
+
 ## 0.0.6
 
 ### Patch Changes
