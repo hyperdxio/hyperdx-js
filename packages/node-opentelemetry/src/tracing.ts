@@ -8,15 +8,17 @@ import { registerInstrumentations } from '@opentelemetry/instrumentation';
 
 const env = process.env;
 
-if (
-  env.OTEL_EXPORTER_OTLP_ENDPOINT &&
-  (env.HYPERDX_API_KEY || env.OTEL_EXPORTER_OTLP_HEADERS)
-) {
+// set default OTEL_EXPORTER_OTLP_ENDPOINT
+env.OTEL_EXPORTER_OTLP_ENDPOINT =
+  env.OTEL_EXPORTER_OTLP_ENDPOINT ?? 'https://in-otel.hyperdx.io';
+
+// patch OTEL_EXPORTER_OTLP_HEADERS to include API key
+if (env.HYPERDX_API_KEY) {
+  env.OTEL_EXPORTER_OTLP_HEADERS = `${env.OTEL_EXPORTER_OTLP_HEADERS},authorization=${env.HYPERDX_API_KEY}`;
+}
+
+if (env.OTEL_EXPORTER_OTLP_ENDPOINT && env.OTEL_EXPORTER_OTLP_HEADERS) {
   console.warn('Tracing is enabled...');
-  // patch OTEL_EXPORTER_OTLP_HEADERS to include API key
-  if (env.HYPERDX_API_KEY) {
-    env.OTEL_EXPORTER_OTLP_HEADERS = `${env.OTEL_EXPORTER_OTLP_HEADERS},authorization=${env.HYPERDX_API_KEY}`;
-  }
 
   const resource = Resource.default().merge(
     new Resource({
