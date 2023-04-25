@@ -24,7 +24,7 @@
     "start": "node build/src/main.js",
     "clean": "rimraf coverage build tmp",
     "prebuild": "npm run clean",
-    "build": "npm run clean && tsc -p tsconfig.release.json",
+    "build": "tsc -p tsconfig.release.json",
     "postbuild": "npm run build:types",
     "build:types": "tsc -d -p tsconfig.release.json --declarationMap --emitDeclarationOnly",
     "build:watch": "tsc -w -p tsconfig.json",
