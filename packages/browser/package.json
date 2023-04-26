@@ -11,6 +11,12 @@
   "devDependencies": {
     "zone.js": "0.11.4"
   },
+  "files": [
+    "build/*"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "start": "node build/src/main.js",
     "clean": "rimraf coverage build tmp",
