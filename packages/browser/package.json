@@ -1,0 +1,28 @@
+{
+  "name": "@hyperdx/browser",
+  "version": "0.14.0",
+  "main": "build/src/index.js",
+  "typings": "build/src/index.d.ts",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "@hyperdx/otel-web": "^0.14.0",
+    "@hyperdx/otel-web-session-recorder": "^0.14.0"
+  },
+  "devDependencies": {
+    "zone.js": "0.11.4"
+  },
+  "scripts": {
+    "start": "node build/src/main.js",
+    "clean": "rimraf coverage build tmp",
+    "prebuild": "npm run clean",
+    "build": "tsc -p tsconfig.release.json",
+    "postbuild": "npm run build:types",
+    "build:types": "tsc -d -p tsconfig.release.json --declarationMap --emitDeclarationOnly",
+    "build:watch": "tsc -w -p tsconfig.json",
+    "lint": "eslint . --ext .ts --ext .mts",
+    "ci:lint": "yarn lint && yarn tsc --noEmit",
+    "test": "jest --coverage",
+    "prettier": "prettier --config .prettierrc --write .",
+    "test:watch": "jest --watch"
+  }
+}
