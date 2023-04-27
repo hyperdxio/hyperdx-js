@@ -28,6 +28,7 @@
     "clean": "rimraf coverage build tmp",
     "prebuild": "npm run clean",
     "build": "rollup --config rollup.config.ts --configPlugin typescript",
+    "postbuild": "mv build/src/index.d.ts build/index.d.ts && rmdir build/src",
     "build:watch": "rollup --config rollup.config.ts --configPlugin typescript -w",
     "lint": "eslint . --ext .ts --ext .mts",
     "ci:lint": "yarn lint && yarn tsc --noEmit",
