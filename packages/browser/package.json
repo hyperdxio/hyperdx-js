@@ -1,14 +1,20 @@
 {
   "name": "@hyperdx/browser",
   "version": "0.14.0",
-  "main": "build/src/index.js",
-  "typings": "build/src/index.d.ts",
   "license": "Apache-2.0",
+  "main": "build/index.js",
+  "types": "build/index.d.ts",
   "dependencies": {
     "@hyperdx/otel-web": "^0.14.0",
     "@hyperdx/otel-web-session-recorder": "^0.14.0"
   },
   "devDependencies": {
+    "@rollup/plugin-json": "^6.0.0",
+    "@rollup/plugin-commonjs": "^24.1.0",
+    "@rollup/plugin-node-resolve": "^15.0.2",
+    "@rollup/plugin-terser": "^0.4.1",
+    "@rollup/plugin-typescript": "^11.1.0",
+    "rollup": "^3.21.0",
     "zone.js": "0.11.4"
   },
   "files": [
@@ -21,10 +27,8 @@
     "start": "node build/src/main.js",
     "clean": "rimraf coverage build tmp",
     "prebuild": "npm run clean",
-    "build": "tsc -p tsconfig.release.json",
-    "postbuild": "npm run build:types",
-    "build:types": "tsc -d -p tsconfig.release.json --declarationMap --emitDeclarationOnly",
-    "build:watch": "tsc -w -p tsconfig.json",
+    "build": "rollup --config rollup.config.ts --configPlugin typescript",
+    "build:watch": "rollup --config rollup.config.ts --configPlugin typescript -w",
     "lint": "eslint . --ext .ts --ext .mts",
     "ci:lint": "yarn lint && yarn tsc --noEmit",
     "test": "jest --coverage",
