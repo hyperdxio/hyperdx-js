@@ -3,3 +3,4 @@
 /**/*.json
 jest.config.ts
 build/**
+rollup.config.ts

@@ -7,7 +7,7 @@
     "forceConsistentCasingInFileNames": true,
     "importHelpers": true,
     "lib": ["esnext", "dom"],
-    "module": "commonjs",
+    "module": "ESNext",
     "moduleResolution": "node",
     "noFallthroughCasesInSwitch": true,
     "noImplicitAny": false,
@@ -21,9 +21,10 @@
     "sourceMap": true,
     "strict": true,
     "strictNullChecks": false,
+    "declaration": true,
     "target": "es2019"
   },
   "files": ["../../node_modules/zone.js/dist/zone.js.d.ts"],
-  "include": ["src/**/*", "bin/**/*", "__tests__/**/*"],
+  "include": ["src/**/*", "__tests__/**/*"],
   "exclude": ["node_modules", "build"]
 }
