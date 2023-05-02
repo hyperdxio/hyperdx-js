@@ -6,6 +6,9 @@ import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions'
 import { getNodeAutoInstrumentations } from '@opentelemetry/auto-instrumentations-node';
 import { registerInstrumentations } from '@opentelemetry/instrumentation';
 
+import { init as initLogger } from './logger';
+import { version as PKG_VERSION } from '../package.json';
+
 const env = process.env;
 
 // set default OTEL_EXPORTER_OTLP_ENDPOINT
@@ -18,7 +21,7 @@ if (env.HYPERDX_API_KEY) {
 }
 
 if (env.OTEL_EXPORTER_OTLP_ENDPOINT && env.OTEL_EXPORTER_OTLP_HEADERS) {
-  console.warn('Tracing is enabled...');
+  console.warn(`[v${PKG_VERSION}] Tracing is enabled...`);
 
   const resource = Resource.default().merge(
     new Resource({
@@ -46,3 +49,6 @@ if (env.OTEL_EXPORTER_OTLP_ENDPOINT && env.OTEL_EXPORTER_OTLP_HEADERS) {
     'OTEL_EXPORTER_OTLP_ENDPOINT and OTEL_EXPORTER_OTLP_HEADERS are not set, tracing is disabled',
   );
 }
+
+// Initialize logger
+initLogger();
