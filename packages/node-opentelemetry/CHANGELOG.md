@@ -1,5 +1,11 @@
 # @hyperdx/node-opentelemetry
 
+## 0.0.4
+
+### Patch Changes
+
+- 955b893: feat: capture console log events
+
 ## 0.0.3
 
 ### Patch Changes

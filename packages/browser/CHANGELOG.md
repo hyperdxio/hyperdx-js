@@ -1,5 +1,11 @@
 # @hyperdx/browser
 
+## 0.14.3
+
+### Patch Changes
+
+- 7850d77: Reduce browser bundle size
+
 ## 0.14.2
 
 ### Patch Changes
