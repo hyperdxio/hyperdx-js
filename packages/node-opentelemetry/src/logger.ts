@@ -15,7 +15,6 @@ const SERVICE_NAME = env.OTEL_SERVICE_NAME as string;
 export const getWinsonTransport = (maxLevel = 'info') => {
   return HYPERDX_API_KEY
     ? new HyperDXWinston({
-        baseUrl: 'http://localhost:8002',
         apiKey: HYPERDX_API_KEY,
         maxLevel,
         service: SERVICE_NAME,
