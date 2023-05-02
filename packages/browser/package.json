@@ -6,7 +6,7 @@
   "types": "build/index.d.ts",
   "dependencies": {
     "@hyperdx/otel-web": "0.14.1",
-    "@hyperdx/otel-web-session-recorder": "^0.14.0"
+    "@hyperdx/otel-web-session-recorder": "^0.14.1"
   },
   "devDependencies": {
     "@rollup/plugin-commonjs": "^24.1.0",
@@ -15,6 +15,7 @@
     "@rollup/plugin-terser": "^0.4.1",
     "@rollup/plugin-typescript": "^11.1.0",
     "rollup": "^3.21.0",
+    "rollup-plugin-visualizer": "^5.9.0",
     "zone.js": "0.11.4"
   },
   "files": [
