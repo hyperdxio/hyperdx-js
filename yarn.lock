@@ -656,10 +656,10 @@
   resolved "https://registry.yarnpkg.com/@humanwhocodes/object-schema/-/object-schema-1.2.1.tgz#b520529ec21d8e5945a1851dfd1c32e94e39ff45"
   integrity sha512-ZnQMnLV4e7hDlUvw8H+U8ASL02SS2Gn6+9Ac3wGGLIe7+je2AeAOxPY+izIPJDfFDb7eDjev0Us8MO1iFRN8hA==
 
-"@hyperdx/otel-web-session-recorder@^0.14.0":
-  version "0.14.0"
-  resolved "https://registry.yarnpkg.com/@hyperdx/otel-web-session-recorder/-/otel-web-session-recorder-0.14.0.tgz#783ce6481f49876e625dd9b47394ac3b76e74ab3"
-  integrity sha512-YK7zhQDePEwKZIictvqNQLc5s1L0SJa++wXH8EQR4WfH2s1nRQAsTDNRjv7zg/TLo76U3kp5oEJlAjvU8P4Y0A==
+"@hyperdx/otel-web-session-recorder@^0.14.1":
+  version "0.14.1"
+  resolved "https://registry.yarnpkg.com/@hyperdx/otel-web-session-recorder/-/otel-web-session-recorder-0.14.1.tgz#ad0b90d13871fa396b0741918e1173fb5106b8c3"
+  integrity sha512-SJT1b2O06veZ4x2ihcT+e/VGUkDfhLGJixTEwW0iOr8VbMO3yjX74LOjeKkl6LmV5hbcFy0PUCv7ijDXSpT0Vw==
   dependencies:
     "@babel/runtime" "~7.18.3"
     "@opentelemetry/api" "^1.3.0"
@@ -5977,6 +5977,16 @@ rimraf@^5.0.0:
   dependencies:
     glob "^10.0.0"
 
+rollup-plugin-visualizer@^5.9.0:
+  version "5.9.0"
+  resolved "https://registry.yarnpkg.com/rollup-plugin-visualizer/-/rollup-plugin-visualizer-5.9.0.tgz#013ac54fb6a9d7c9019e7eb77eced673399e5a0b"
+  integrity sha512-bbDOv47+Bw4C/cgs0czZqfm8L82xOZssk4ayZjG40y9zbXclNk7YikrZTDao6p7+HDiGxrN0b65SgZiVm9k1Cg==
+  dependencies:
+    open "^8.4.0"
+    picomatch "^2.3.1"
+    source-map "^0.7.4"
+    yargs "^17.5.1"
+
 rollup@^3.21.0:
   version "3.21.0"
   resolved "https://registry.yarnpkg.com/rollup/-/rollup-3.21.0.tgz#0a71517db56e150222670f88e5e7acfa4fede7c8"
@@ -6242,6 +6252,11 @@ source-map@^0.6.0, source-map@^0.6.1:
   version "0.6.1"
   resolved "https://registry.yarnpkg.com/source-map/-/source-map-0.6.1.tgz#74722af32e9614e9c287a8d0bbde48b5e2f1a263"
   integrity sha512-UjgapumWlbMhkBgzT7Ykc5YXUT46F0iKu8SGXq0bcwP5dz/h0Plj6enJqjz1Zbq2l5WaqYnrVbwWOWMyF3F47g==
+
+source-map@^0.7.4:
+  version "0.7.4"
+  resolved "https://registry.yarnpkg.com/source-map/-/source-map-0.7.4.tgz#a9bbe705c9d8846f4e08ff6765acf0f1b0898656"
+  integrity sha512-l3BikUxvPOcn5E74dZiq5BGsTb5yEwhaTSzccU6t4sDOH8NWJCstKO5QT2CvtFoK6F0saL7p9xHAqHOlCPJygA==
 
 spawndamnit@^2.0.0:
   version "2.0.0"
@@ -6985,6 +7000,19 @@ yargs@^17.3.1, yargs@^17.6.2, yargs@^17.7.1:
   version "17.7.1"
   resolved "https://registry.yarnpkg.com/yargs/-/yargs-17.7.1.tgz#34a77645201d1a8fc5213ace787c220eabbd0967"
   integrity sha512-cwiTb08Xuv5fqF4AovYacTFNxk62th7LKJ6BL9IGUpTJrWoU7/7WdQGTP2SjKf1dUNBGzDd28p/Yfs/GI6JrLw==
+  dependencies:
+    cliui "^8.0.1"
+    escalade "^3.1.1"
+    get-caller-file "^2.0.5"
+    require-directory "^2.1.1"
+    string-width "^4.2.3"
+    y18n "^5.0.5"
+    yargs-parser "^21.1.1"
+
+yargs@^17.5.1:
+  version "17.7.2"
+  resolved "https://registry.yarnpkg.com/yargs/-/yargs-17.7.2.tgz#991df39aca675a192b816e1e0363f9d75d2aa269"
+  integrity sha512-7dSzzRQ++CKnNI/krKnYRV7JKKPUXMEh61soaHKg9mrWEhzFWhFnxPxGl+69cD1Ou63C13NUPCnmIcrvqCuM6w==
   dependencies:
     cliui "^8.0.1"
     escalade "^3.1.1"

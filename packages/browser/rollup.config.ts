@@ -3,6 +3,7 @@ import commonjs from '@rollup/plugin-commonjs';
 import resolve from '@rollup/plugin-node-resolve';
 import terser from '@rollup/plugin-terser';
 import json from '@rollup/plugin-json';
+import { visualizer } from 'rollup-plugin-visualizer';
 
 export default {
   input: 'src/index.ts',
@@ -11,7 +12,6 @@ export default {
       file: 'build/index.js',
       format: 'umd',
       name: 'HyperDX',
-      plugins: [terser()],
     },
   ],
   plugins: [
@@ -19,7 +19,21 @@ export default {
     typescript(),
     commonjs(),
     resolve({
-      browser: true,
+      mainFields: ['module', 'browser', 'main'],
+      dedupe: [
+        '@opentelemetry/semantic-conventions',
+        '@opentelemetry/sdk-trace-web',
+        '@opentelemetry/instrumentation',
+        '@opentelemetry/core',
+        '@opentelemetry/api',
+      ],
     }),
+    terser({
+      sourceMap: true,
+    }),
+    // visualizer({
+    //   sourcemap: true,
+    //   open: true,
+    // }),
   ],
 };
