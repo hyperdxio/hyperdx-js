@@ -27,7 +27,7 @@ export const init = () => {
   const transport = getWinsonTransport(MAX_LEVEL);
 
   if (transport) {
-    console.warn(`[v${PKG_VERSION}] Capturing consle logs...`);
+    console.warn(`[v${PKG_VERSION}] Capturing console logs...`);
 
     const _logger = winston.createLogger({
       level: MAX_LEVEL,
