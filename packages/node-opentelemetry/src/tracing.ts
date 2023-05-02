@@ -7,6 +7,7 @@ import { getNodeAutoInstrumentations } from '@opentelemetry/auto-instrumentation
 import { registerInstrumentations } from '@opentelemetry/instrumentation';
 
 import { init as initLogger } from './logger';
+import { version as PKG_VERSION } from '../package.json';
 
 const env = process.env;
 
@@ -17,14 +18,10 @@ env.OTEL_EXPORTER_OTLP_ENDPOINT =
 // patch OTEL_EXPORTER_OTLP_HEADERS to include API key
 if (env.HYPERDX_API_KEY) {
   env.OTEL_EXPORTER_OTLP_HEADERS = `${env.OTEL_EXPORTER_OTLP_HEADERS},authorization=${env.HYPERDX_API_KEY}`;
-} else {
-  env.HYPERDX_API_KEY = env.OTEL_EXPORTER_OTLP_HEADERS?.split('=')[1];
 }
 
 if (env.OTEL_EXPORTER_OTLP_ENDPOINT && env.OTEL_EXPORTER_OTLP_HEADERS) {
-  console.warn('Tracing is enabled...');
-
-  initLogger();
+  console.warn(`[v${PKG_VERSION}] Tracing is enabled...`);
 
   const resource = Resource.default().merge(
     new Resource({
@@ -52,3 +49,6 @@ if (env.OTEL_EXPORTER_OTLP_ENDPOINT && env.OTEL_EXPORTER_OTLP_HEADERS) {
     'OTEL_EXPORTER_OTLP_ENDPOINT and OTEL_EXPORTER_OTLP_HEADERS are not set, tracing is disabled',
   );
 }
+
+// Initialize logger
+initLogger();
