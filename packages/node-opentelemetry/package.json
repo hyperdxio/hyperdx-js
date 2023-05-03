@@ -29,8 +29,8 @@
     "lint": "eslint . --ext .ts --ext .mts",
     "ci:lint": "yarn lint && yarn tsc --noEmit",
     "test": "jest --coverage",
-    "prettier": "prettier --config .prettierrc --write .",
-    "test:watch": "jest --watch"
+    "dev:test": "jest --watchAll",
+    "prettier": "prettier --config .prettierrc --write ."
   },
   "dependencies": {
     "@hyperdx/node-logger": "^0.0.7",
@@ -38,10 +38,12 @@
     "@opentelemetry/auto-instrumentations-node": "^0.36.5",
     "@opentelemetry/exporter-trace-otlp-proto": "^0.38.0",
     "@opentelemetry/sdk-trace-node": "^1.12.0",
+    "lodash": "^4.17.21",
     "tslib": "^2.5.0",
     "winston": "^3.8.2"
   },
   "devDependencies": {
+    "@types/lodash": "^4.14.194",
     "express": "^4.18.2"
   }
 }
