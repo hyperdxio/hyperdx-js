@@ -1,5 +1,11 @@
 # @hyperdx/node-opentelemetry
 
+## 0.0.5
+
+### Patch Changes
+
+- da72add: fix: parse console log
+
 ## 0.0.4
 
 ### Patch Changes
