@@ -1,7 +1,5 @@
 import _ from 'lodash';
 import winston from 'winston';
-// FIXME: somehow this fails in gha
-// @ts-ignore
 import { HyperDXWinston } from '@hyperdx/node-logger';
 
 import { version as PKG_VERSION } from '../package.json';
