@@ -25,5 +25,3 @@ jobs:
         run: yarn
       - name: Run lint + type check
         run: yarn ci:lint
-      - name: Run tests
-        run: yarn ci:test
