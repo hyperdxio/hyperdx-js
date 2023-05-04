@@ -2,9 +2,9 @@
 
 OpenTelemetry Node Library for [HyperDX](https://www.hyperdx.io/)
 
-## Installation
+### Install HyperDX OpenTelemetry Instrumentation Package
 
-Install the library into your project.
+Use the following command to install the OpenTelemetry package.
 
 ```sh
 npm install @hyperdx/node-opentelemetry
@@ -16,22 +16,25 @@ or
 yarn add @hyperdx/node-opentelemetry
 ```
 
-## Quick Start
+### Add The Logger Transport
 
-### Adding Logger
+To collect logs from your application, you'll need to add a few lines of code to
+configure your logging module.
 
-#### Winston
+#### Winston Transport
 
-```
+```ts
 import winston from 'winston';
 import { getWinsonTransport } from '@hyperdx/node-opentelemetry';
 
+const MAX_LEVEL = 'info';
+
 const logger = winston.createLogger({
-  level: 'info',
+  level: MAX_LEVEL,
   format: winston.format.json(),
   transports: [
     new winston.transports.Console(),
-    getWinsonTransport(), // append this to the existing transports
+    getWinsonTransport(MAX_LEVEL), // append this to the existing transports
   ],
 });
 
@@ -48,22 +51,24 @@ export HYPERDX_API_KEY=<YOUR_HYPERDX_API_KEY_HERE> \
 OTEL_SERVICE_NAME='<NAME_OF_YOUR_APP_OR_SERVICE>'
 ```
 
-### Running Node.js Application with One Liner
+### Run the Application with HyperDX OpenTelemetry CLI
+
+#### Option 1 (Recommended)
+
+Now you can run the application with the HyperdxDX `opentelemetry-instrument`
+CLI.
 
 ```sh
-npx @hyperdx/node-opentelemetry index.js
+npx opentelemetry-instrument index.js
 ```
 
-### (Optional) Running Node.js Application with custom entry point (nodemon, ts-node, etc.)
+#### Option 2
 
-Add the following line into the top of `tracing.ts` file
+In case you want to run the application with a custom entry point (nodemon,
+ts-node, etc.).
 
-```ts
-import '@hyperdx/node-opentelemetry/build/src/tracing';
-```
-
-Run your application with the following command
+Run your application with the following command (example using `ts-node`):
 
 ```sh
-<CUSTOM_ENTRY_POINT> --require ./tracing.ts index.js
+ts-node -r '@hyperdx/node-opentelemetry/build/src/tracing' index.js
 ```
