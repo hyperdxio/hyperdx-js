@@ -102,7 +102,8 @@ export class Logger {
         },
       )
       .catch((e) => {
-        console.error(e);
+        // FIXME: ignore this for now (inifinite loop with console.error patch)
+        // console.error(e);
       });
   }
 }
