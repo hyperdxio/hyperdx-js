@@ -1,5 +1,3 @@
-// FIXME: somehow this fails in gha
-// @ts-ignore
 import { HyperDXWinston } from '@hyperdx/node-logger';
 
 const env = process.env;

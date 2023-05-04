@@ -1,4 +1,5 @@
 import _ from 'lodash';
+
 import { Logger, parseWinstonLog } from '@hyperdx/node-logger/build/src/logger';
 
 import { version as PKG_VERSION } from '../package.json';
