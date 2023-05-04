@@ -6,7 +6,7 @@ import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions'
 import { getNodeAutoInstrumentations } from '@opentelemetry/auto-instrumentations-node';
 import { registerInstrumentations } from '@opentelemetry/instrumentation';
 
-import { init as initLogger } from './logger';
+import { patchConsoleLog } from './patch';
 import { version as PKG_VERSION } from '../package.json';
 
 const env = process.env;
@@ -50,5 +50,5 @@ if (env.OTEL_EXPORTER_OTLP_ENDPOINT && env.OTEL_EXPORTER_OTLP_HEADERS) {
   );
 }
 
-// Initialize logger
-initLogger();
+// patch console.log
+patchConsoleLog();
