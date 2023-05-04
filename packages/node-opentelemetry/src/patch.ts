@@ -1,5 +1,6 @@
 import _ from 'lodash';
 
+// @ts-ignore
 import { Logger, parseWinstonLog } from '@hyperdx/node-logger/build/src/logger';
 
 import { version as PKG_VERSION } from '../package.json';
