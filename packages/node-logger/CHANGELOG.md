@@ -1,5 +1,11 @@
 # @hyperdx/node-logger
 
+## 0.0.8
+
+### Patch Changes
+
+- 7bf4889: style: move internal logger class to a seprate file
+
 ## 0.0.7
 
 ### Patch Changes

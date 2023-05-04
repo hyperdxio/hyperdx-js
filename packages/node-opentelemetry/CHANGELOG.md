@@ -1,5 +1,13 @@
 # @hyperdx/node-opentelemetry
 
+## 0.0.6
+
+### Patch Changes
+
+- 7bf4889: fix: winston logger conflict
+- Updated dependencies [7bf4889]
+  - @hyperdx/node-logger@0.0.8
+
 ## 0.0.5
 
 ### Patch Changes
