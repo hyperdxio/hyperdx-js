@@ -45,7 +45,6 @@ export const _parseConsoleArgs = (args: any[]) => {
 export const patchConsoleLog = () => {
   if (HYPERDX_API_KEY) {
     const _logger = new Logger({
-      baseUrl: 'http://localhost:8002',
       apiKey: HYPERDX_API_KEY,
       service: SERVICE_NAME,
     });
