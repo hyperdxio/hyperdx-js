@@ -1,7 +1,7 @@
 import Rum from '@hyperdx/otel-web';
 import SessionRecorder from '@hyperdx/otel-web-session-recorder';
 
-const URL_BASE = 'https://otel-in.hyperdx.io';
+const URL_BASE = 'https://in-otel.hyperdx.io';
 
 function hasWindow() {
   return typeof window !== 'undefined';
