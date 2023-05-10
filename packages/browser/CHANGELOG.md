@@ -1,5 +1,11 @@
 # @hyperdx/browser
 
+## 0.14.4
+
+### Patch Changes
+
+- a7099d7: fix: wrong URL_BASE
+
 ## 0.14.3
 
 ### Patch Changes
