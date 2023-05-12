@@ -5,7 +5,4 @@ import type { HyperDXNestLogger as HyperDXNestLoggerT } from './nest';
 
 export type HyperDXNestLogger = HyperDXNestLoggerT;
 
-export default {
-  HyperDXNestLoggerModule,
-  HyperDXWinston,
-};
+export { HyperDXWinston, HyperDXNestLoggerModule };

@@ -17,3 +17,11 @@ export const getWinsonTransport = (maxLevel = 'info') => {
       })
     : null;
 };
+
+export const getPinoTransport = () => ({
+  transport: '@hyperdx/node-logger/build/src/pino',
+  options: {
+    apiKey: HYPERDX_API_KEY,
+    service: SERVICE_NAME,
+  },
+});

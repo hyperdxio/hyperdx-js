@@ -87,6 +87,7 @@ export class Logger {
     };
   }
 
+  // TODO: implement flush and buffers ??
   postMessage(level: string, body: string, meta: Record<string, any> = {}) {
     this.client
       .post(
