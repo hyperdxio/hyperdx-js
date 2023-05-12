@@ -51,6 +51,32 @@ const logger = winston.createLogger({
 export default logger;
 ```
 
+### Pino Transport
+
+Create a new HyperDX Pino Transport and append it to your list of transports. Example:
+
+```
+import pino from 'pino';
+
+const logger = pino(
+  pino.transport({
+    targets: [
+      {
+        target: '@hyperdx/node-logger/build/src/pino',
+        options: {
+          apiKey: ***HYPERDX_API_KEY***,
+          service: 'my-app',
+        },
+        level: 'info',
+      },
+      // other transports
+    ],
+  }),
+);
+
+export default logger;
+```
+
 ### NestJS Custom Logger
 
 (powered by [nest-winston](https://www.npmjs.com/package/nest-winston?activeTab=readme))
