@@ -18,10 +18,9 @@
   "files": [
     "build/*"
   ],
-  "main": "build/src/main.js",
-  "typings": "build/src/main.d.ts",
+  "main": "build/src/index.js",
+  "typings": "build/src/index.d.ts",
   "scripts": {
-    "start": "node build/src/main.js",
     "clean": "rimraf coverage build tmp",
     "prebuild": "npm run clean",
     "build": "tsc -p tsconfig.release.json",
