@@ -8,15 +8,12 @@ const HYPERDX_API_KEY = (env.HYPERDX_API_KEY ??
 
 const SERVICE_NAME = env.OTEL_SERVICE_NAME as string;
 
-export const getWinsonTransport = (maxLevel = 'info') => {
-  return HYPERDX_API_KEY
-    ? new HyperDXWinston({
-        apiKey: HYPERDX_API_KEY,
-        maxLevel,
-        service: SERVICE_NAME,
-      })
-    : null;
-};
+export const getWinsonTransport = (maxLevel = 'info') =>
+  new HyperDXWinston({
+    apiKey: HYPERDX_API_KEY,
+    maxLevel,
+    service: SERVICE_NAME,
+  });
 
 export const getPinoTransport = (maxLevel = 'info') => ({
   transport: '@hyperdx/node-logger/build/src/pino',

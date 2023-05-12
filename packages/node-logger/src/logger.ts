@@ -63,6 +63,11 @@ export class Logger {
     baseUrl?: string;
     service?: string;
   }) {
+    if (!apiKey) {
+      console.error(
+        '------------ [HyperDX Logger] API key not found ------------',
+      );
+    }
     this.service = service ?? 'default app';
     this.client = axios.create({
       baseURL: baseUrl ?? this.INGESTOR_API_URL,
