@@ -1,5 +1,14 @@
 # @hyperdx/node-opentelemetry
 
+## 0.0.7
+
+### Patch Changes
+
+- b0a4cff: doc: update README
+- afe3bfd: feat: add pino transport
+- Updated dependencies [afe3bfd]
+  - @hyperdx/node-logger@0.0.9
+
 ## 0.0.6
 
 ### Patch Changes

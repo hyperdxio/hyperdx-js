@@ -1,5 +1,11 @@
 # @hyperdx/node-logger
 
+## 0.0.9
+
+### Patch Changes
+
+- afe3bfd: feat: add pino transport
+
 ## 0.0.8
 
 ### Patch Changes
