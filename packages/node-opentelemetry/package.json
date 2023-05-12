@@ -19,7 +19,6 @@
     "opentelemetry-instrument": "build/bin/opentelemetry-instrument.js"
   },
   "scripts": {
-    "start": "node build/src/main.js",
     "clean": "rimraf coverage build tmp",
     "prebuild": "npm run clean",
     "build": "tsc -p tsconfig.release.json",
