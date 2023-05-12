@@ -18,10 +18,9 @@
   "files": [
     "build/*"
   ],
-  "main": "build/src/main.js",
-  "typings": "build/src/main.d.ts",
+  "main": "build/src/index.js",
+  "typings": "build/src/index.d.ts",
   "scripts": {
-    "start": "node build/src/main.js",
     "clean": "rimraf coverage build tmp",
     "prebuild": "npm run clean",
     "build": "tsc -p tsconfig.release.json",
@@ -40,15 +39,17 @@
     "axios-retry": "^3.4.0",
     "lodash": "^4.17.21",
     "nest-winston": "^1.9.1",
+    "pino-abstract-transport": "^1.0.0",
     "reflect-metadata": "^0.1.13",
-    "rxjs": "^7.8.0",
+    "rxjs": "^7.8.1",
     "strip-ansi": "^6.0.1",
     "tslib": "^2.4.1",
     "winston": "^3.8.2",
     "winston-transport": "^4.5.0"
   },
   "devDependencies": {
-    "@types/lodash": "^4.14.192"
+    "@types/lodash": "^4.14.192",
+    "pino": "^8.14.1"
   },
   "peerDependencies": {},
   "keywords": [

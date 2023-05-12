@@ -2,8 +2,13 @@ const express = require('express');
 const PORT = parseInt(process.env.PORT || '9999');
 const app = express();
 
+const pino = require('pino');
 const winston = require('winston');
-const { getWinsonTransport, init } = require('./build/src/logger');
+const {
+  getWinsonTransport,
+  getPinoTransport,
+  init,
+} = require('./build/src/logger');
 
 const logger = winston.createLogger({
   level: 'info',
@@ -12,6 +17,8 @@ const logger = winston.createLogger({
     getWinsonTransport('info'), // append this to the existing transports
   ],
 });
+
+const pinoLogger = pino();
 
 app.get('/', (req, res) => {
   console.debug({
@@ -22,6 +29,7 @@ app.get('/', (req, res) => {
   });
   console.error('BANG !!!');
   logger.info('YOOOOOOOOOOOOOOOOOO');
+  pinoLogger.info('🍕');
   res.send('Hello World');
 });
 

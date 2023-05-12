@@ -63,6 +63,14 @@ export class Logger {
     baseUrl?: string;
     service?: string;
   }) {
+    if (!apiKey) {
+      console.error('⚠️  [HyperDX Logger] API key not found');
+    }
+    if (!service) {
+      console.warn(
+        '⚠️  [HyperDX Logger] Service name not found. Use "default app"',
+      );
+    }
     this.service = service ?? 'default app';
     this.client = axios.create({
       baseURL: baseUrl ?? this.INGESTOR_API_URL,
@@ -87,6 +95,7 @@ export class Logger {
     };
   }
 
+  // TODO: implement flush and buffers ??
   postMessage(level: string, body: string, meta: Record<string, any> = {}) {
     this.client
       .post(

@@ -1,4 +1,3 @@
-import Transport from 'winston-transport';
 import winston from 'winston';
 import {
   WINSTON_MODULE_NEST_PROVIDER,
@@ -6,7 +5,7 @@ import {
   WinstonModule,
 } from 'nest-winston';
 
-import { Logger, parseWinstonLog } from './logger';
+import HyperDXWinston from './winston';
 
 type HyperDXNestLoggerModuleConfigs = {
   apiKey: string;
@@ -46,33 +45,5 @@ export class HyperDXNestLoggerModule {
 
   static forRoot(configs?: HyperDXNestLoggerModuleConfigs) {
     return WinstonModule.forRoot(this.toWinstonLoggerConfigs(configs));
-  }
-}
-
-export class HyperDXWinston extends Transport {
-  private readonly logger: Logger;
-
-  constructor({
-    apiKey,
-    baseUrl,
-    maxLevel,
-    service,
-  }: {
-    apiKey: string;
-    baseUrl?: string;
-    maxLevel?: string;
-    service?: string;
-  }) {
-    super({ level: maxLevel ?? 'info' });
-    this.logger = new Logger({ apiKey, baseUrl, service });
-  }
-
-  log(
-    info: { message: string | Record<string, any>; level: string },
-    callback: () => void,
-  ) {
-    const { level, message, meta } = parseWinstonLog(info);
-    this.logger.postMessage(level, message, meta);
-    callback();
   }
 }
