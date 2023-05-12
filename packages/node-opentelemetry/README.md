@@ -47,13 +47,12 @@ export default logger;
 import pino from 'pino';
 import { getPinoTransport } from '@hyperdx/node-opentelemetry';
 
+const MAX_LEVEL = 'info';
+
 const logger = pino(
   pino.transport({
     targets: [
-      {
-        ...getPinoTransport(),
-        level: 'info',
-      },
+      getPinoTransport(MAX_LEVEL),
       // other transports
     ],
   }),
