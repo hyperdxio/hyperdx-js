@@ -16,7 +16,7 @@ export const getWinsonTransport = (maxLevel = 'info') =>
   });
 
 export const getPinoTransport = (maxLevel = 'info') => ({
-  transport: '@hyperdx/node-logger/build/src/pino',
+  target: '@hyperdx/node-logger/build/src/pino',
   options: {
     apiKey: HYPERDX_API_KEY,
     service: SERVICE_NAME,

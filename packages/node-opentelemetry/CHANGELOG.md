@@ -1,5 +1,11 @@
 # @hyperdx/node-opentelemetry
 
+## 0.0.8
+
+### Patch Changes
+
+- fix: pino transport integration
+
 ## 0.0.7
 
 ### Patch Changes
