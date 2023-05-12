@@ -32,13 +32,8 @@ describe('Logger', () => {
       message: 'Hello Pino! 🍕🍕🍕',
       foo: 'bar',
     });
-    logger.warn({
-      message: 'Hello Pino! 🍕🍕🍕',
-      foo: 'bar',
-    });
-    logger.error({
-      message: 'Hello Pino! 🍕🍕🍕',
-    });
+    logger.warn('Hello Pino! 🍕🍕🍕');
+    logger.error('Hello Pino! 🍕🍕🍕');
   });
 
   it('winston', () => {

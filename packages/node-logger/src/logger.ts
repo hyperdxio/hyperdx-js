@@ -24,6 +24,24 @@ const jsonStringify = (input: any) => {
   }
 };
 
+export type PinoLogLine = {
+  level: number;
+  time: number;
+  pid: number;
+  hostname: string;
+  msg: string;
+};
+
+export const parsePinoLog = (log: PinoLogLine) => {
+  const { level, msg, ...meta } = log;
+  const bodyMsg = isString(msg) ? msg : jsonStringify(log);
+  return {
+    level,
+    message: bodyMsg,
+    meta: log,
+  };
+};
+
 export const parseWinstonLog = (log: {
   message: string | Record<string, any>;
   level: string;

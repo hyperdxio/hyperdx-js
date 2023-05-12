@@ -1,18 +1,10 @@
 import build from 'pino-abstract-transport';
 
-import { Logger } from './logger';
+import { Logger, parsePinoLog } from './logger';
 import { version as PKG_VERSION } from '../package.json';
 
-export type PinoLogLine = {
-  level: number;
-  time: number;
-  pid: number;
-  hostname: string;
-  msg: string;
-};
-
 // map pino level to text
-const LEVELS = {
+const PINO_LEVELS = {
   10: 'trace',
   20: 'debug',
   30: 'info',
@@ -32,8 +24,8 @@ export default (opts: {
     return build(
       async function (source) {
         for await (const obj of source) {
-          const { level, message, ...meta } = obj;
-          logger.postMessage(LEVELS[level], message, meta);
+          const { level, message, meta } = parsePinoLog(obj);
+          logger.postMessage(PINO_LEVELS[level], message, meta);
         }
       },
       {
