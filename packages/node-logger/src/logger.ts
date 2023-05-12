@@ -64,8 +64,11 @@ export class Logger {
     service?: string;
   }) {
     if (!apiKey) {
-      console.error(
-        '------------ [HyperDX Logger] API key not found ------------',
+      console.error('⚠️  [HyperDX Logger] API key not found');
+    }
+    if (!service) {
+      console.warn(
+        '⚠️  [HyperDX Logger] Service name not found. Use "default app"',
       );
     }
     this.service = service ?? 'default app';
