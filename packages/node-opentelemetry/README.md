@@ -41,6 +41,25 @@ const logger = winston.createLogger({
 export default logger;
 ```
 
+#### Pino Transport
+
+```ts
+import pino from 'pino';
+import { getPinoTransport } from '@hyperdx/node-opentelemetry';
+
+const logger = pino(
+  pino.transport({
+    targets: [
+      {
+        ...getPinoTransport(),
+        level: 'info',
+      },
+      // other transports
+    ],
+  }),
+);
+```
+
 ### Configure Environment Variables
 
 Afterwards you'll need to configure the following environment variables in your

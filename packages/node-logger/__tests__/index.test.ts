@@ -13,16 +13,21 @@ const HYPERDX_BASE_URL = 'http://localhost:8002';
 
 describe('Logger', () => {
   it('pino', () => {
-    const logger = pino({
-      transport: {
-        target,
-        options: {
-          apiKey: HYPERDX_API_KEY,
-          baseUrl: HYPERDX_BASE_URL,
-          service: SERVICE_NAME,
-        },
-      },
-    });
+    const logger = pino(
+      pino.transport({
+        targets: [
+          {
+            target,
+            options: {
+              apiKey: HYPERDX_API_KEY,
+              baseUrl: HYPERDX_BASE_URL,
+              service: SERVICE_NAME,
+            },
+            level: 'info',
+          },
+        ],
+      }),
+    );
     logger.info({
       message: 'Hello Pino! 🍕🍕🍕',
       foo: 'bar',
