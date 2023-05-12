@@ -1,5 +1,11 @@
 # @hyperdx/node-logger
 
+## 0.0.10
+
+### Patch Changes
+
+- b0c2a4c: fix: pino log parsing logic
+
 ## 0.0.9
 
 ### Patch Changes

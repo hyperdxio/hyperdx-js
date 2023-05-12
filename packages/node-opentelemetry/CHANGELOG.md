@@ -1,5 +1,12 @@
 # @hyperdx/node-opentelemetry
 
+## 0.0.9
+
+### Patch Changes
+
+- Updated dependencies [b0c2a4c]
+  - @hyperdx/node-logger@0.0.10
+
 ## 0.0.8
 
 ### Patch Changes
