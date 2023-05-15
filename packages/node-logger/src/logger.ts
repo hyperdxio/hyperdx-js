@@ -10,6 +10,8 @@ import axiosRetry, {
 import stripAnsi from 'strip-ansi';
 import { isPlainObject, isString } from 'lodash';
 
+const REQUEST_TIMEOUT = 60000;
+
 // internal types
 export type HdxLog = {
   b: string; // message body
@@ -101,6 +103,9 @@ export class Logger {
         Authorization: `Bearer ${apiKey}`,
       },
       httpsAgent: new https.Agent({ keepAlive: true }),
+      timeout: REQUEST_TIMEOUT,
+      maxContentLength: Infinity,
+      maxBodyLength: Infinity,
     });
     axiosRetry(this.client, {
       retries: 3,
