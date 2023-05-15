@@ -1,7 +1,12 @@
 import os from 'os';
+import https from 'https';
 
 import axios from 'axios';
-import axiosRetry, { exponentialDelay } from 'axios-retry';
+import axiosRetry, {
+  exponentialDelay,
+  isNetworkError,
+  isRetryableError,
+} from 'axios-retry';
 import stripAnsi from 'strip-ansi';
 import { isPlainObject, isString } from 'lodash';
 
@@ -95,10 +100,21 @@ export class Logger {
       headers: {
         Authorization: `Bearer ${apiKey}`,
       },
+      httpsAgent: new https.Agent({ keepAlive: true }),
     });
     axiosRetry(this.client, {
       retries: 3,
       retryDelay: exponentialDelay,
+      retryCondition: (error) => {
+        if (isNetworkError(error)) {
+          return true;
+        }
+        if (!error.config) {
+          // Cannot determine if the request can be retried
+          return false;
+        }
+        return isRetryableError(error);
+      },
     });
   }
 
