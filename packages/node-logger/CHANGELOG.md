@@ -1,5 +1,11 @@
 # @hyperdx/node-logger
 
+## 0.1.0
+
+### Minor Changes
+
+- 404afcd: fix: retry POST request + specify timeout
+
 ## 0.0.10
 
 ### Patch Changes
