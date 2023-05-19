@@ -3,7 +3,9 @@ import _ from 'lodash';
 // @ts-ignore
 import { Logger, parseWinstonLog } from '@hyperdx/node-logger/build/src/logger';
 
-import { version as PKG_VERSION } from '../package.json';
+import { name as PKG_NAME, version as PKG_VERSION } from '../package.json';
+
+const LOG_PREFIX = `[${PKG_NAME} v${PKG_VERSION}]`;
 
 const env = process.env;
 
@@ -49,7 +51,7 @@ export const patchConsoleLog = () => {
       service: SERVICE_NAME,
     });
 
-    console.warn(`[v${PKG_VERSION}] Capturing console logs...`);
+    console.warn(`${LOG_PREFIX} Capturing console logs...`);
 
     const _log = (level: string, ...args: any[]) => {
       const parsedLog = parseWinstonLog({
