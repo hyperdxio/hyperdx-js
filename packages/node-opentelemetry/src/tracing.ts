@@ -17,6 +17,15 @@ const LOG_PREFIX = `[${PKG_NAME} v${PKG_VERSION}]`;
 
 const env = process.env;
 
+// set default OTEL_EXPORTER_OTLP_ENDPOINT
+env.OTEL_EXPORTER_OTLP_ENDPOINT =
+  env.OTEL_EXPORTER_OTLP_ENDPOINT ?? 'https://in-otel.hyperdx.io';
+
+// patch OTEL_EXPORTER_OTLP_HEADERS to include API key
+if (env.HYPERDX_API_KEY) {
+  env.OTEL_EXPORTER_OTLP_HEADERS = `${env.OTEL_EXPORTER_OTLP_HEADERS},authorization=${env.HYPERDX_API_KEY}`;
+}
+
 const sdk = new NodeSDK({
   traceExporter: new OTLPTraceExporter(),
   instrumentations: [getNodeAutoInstrumentations()],
@@ -30,15 +39,6 @@ const sdk = new NodeSDK({
     processDetector,
   ],
 });
-
-// set default OTEL_EXPORTER_OTLP_ENDPOINT
-env.OTEL_EXPORTER_OTLP_ENDPOINT =
-  env.OTEL_EXPORTER_OTLP_ENDPOINT ?? 'https://in-otel.hyperdx.io';
-
-// patch OTEL_EXPORTER_OTLP_HEADERS to include API key
-if (env.HYPERDX_API_KEY) {
-  env.OTEL_EXPORTER_OTLP_HEADERS = `${env.OTEL_EXPORTER_OTLP_HEADERS},authorization=${env.HYPERDX_API_KEY}`;
-}
 
 if (env.OTEL_EXPORTER_OTLP_ENDPOINT && env.OTEL_EXPORTER_OTLP_HEADERS) {
   console.warn(`${LOG_PREFIX} Tracing is enabled...`);

@@ -1,5 +1,11 @@
 # @hyperdx/node-opentelemetry
 
+## 0.1.1
+
+### Patch Changes
+
+- fix: attach default otel envs
+
 ## 0.1.0
 
 ### Minor Changes
