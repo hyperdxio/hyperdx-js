@@ -1,5 +1,5 @@
 const express = require('express');
-const PORT = parseInt(process.env.PORT || '9999');
+const PORT = parseInt(process.env.PORT || '7777');
 const app = express();
 
 const pino = require('pino');
