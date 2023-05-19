@@ -1,5 +1,11 @@
 # @hyperdx/node-opentelemetry
 
+## 0.1.0
+
+### Minor Changes
+
+- 63467c3: feat: add resource detectors
+
 ## 0.0.10
 
 ### Patch Changes
