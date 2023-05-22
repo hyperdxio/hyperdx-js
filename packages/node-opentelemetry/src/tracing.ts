@@ -27,7 +27,9 @@ if (env.HYPERDX_API_KEY) {
 }
 
 const sdk = new NodeSDK({
-  traceExporter: new OTLPTraceExporter(),
+  traceExporter: new OTLPTraceExporter({
+    timeoutMillis: 60000,
+  }),
   instrumentations: [getNodeAutoInstrumentations()],
   resourceDetectors: [
     alibabaCloudEcsDetector,
