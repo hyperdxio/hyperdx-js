@@ -115,6 +115,10 @@ export class Logger {
     };
   }
 
+  sendAndClose(callback?: (error: Error, bulk: object) => void): void {
+    this.client?.sendAndClose(callback);
+  }
+
   postMessage(
     level: string,
     body: string,

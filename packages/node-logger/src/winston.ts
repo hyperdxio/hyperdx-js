@@ -24,8 +24,24 @@ export default class HyperDXWinston extends Transport {
     info: { message: string | Record<string, any>; level: string },
     callback: () => void,
   ) {
+    setImmediate(() => {
+      this.emit('logged', info);
+    });
+
     const { level, message, meta } = parseWinstonLog(info);
     this.logger.postMessage(level, message, meta);
     callback();
+  }
+
+  finish(callback) {
+    this.logger.sendAndClose(callback);
+  }
+
+  close(cb) {
+    this.finish(() => {
+      this.emit('finish');
+      this.emit('close');
+      if (cb) cb();
+    });
   }
 }
