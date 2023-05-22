@@ -37,11 +37,11 @@ export default class HyperDXWinston extends Transport {
     this.logger.sendAndClose(callback);
   }
 
-  close(cb) {
+  // FIXME: type error ??
+  close() {
     this.finish(() => {
       this.emit('finish');
       this.emit('close');
-      if (cb) cb();
     });
   }
 }
