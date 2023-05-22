@@ -1,5 +1,11 @@
 # @hyperdx/node-logger
 
+## 0.2.0
+
+### Minor Changes
+
+- 982587e: feat: add new internal logger with batch processing support
+
 ## 0.1.0
 
 ### Minor Changes

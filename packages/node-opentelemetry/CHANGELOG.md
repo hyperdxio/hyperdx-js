@@ -1,5 +1,13 @@
 # @hyperdx/node-opentelemetry
 
+## 0.1.2
+
+### Patch Changes
+
+- d504b14: feat: extend trace exporter timeout
+- Updated dependencies [982587e]
+  - @hyperdx/node-logger@0.2.0
+
 ## 0.1.1
 
 ### Patch Changes

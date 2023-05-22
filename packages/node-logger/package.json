@@ -2,7 +2,7 @@
   "name": "@hyperdx/node-logger",
   "author": "Warren <warren@users.noreply.github.com>",
   "license": "MIT",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "",
   "engines": {
     "node": ">= 18.12 <19"
