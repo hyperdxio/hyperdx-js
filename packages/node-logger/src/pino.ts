@@ -30,7 +30,15 @@ export default (opts: {
       },
       {
         async close(err) {
-          // TODO: IMPLEMENT ME
+          await new Promise<void>((resolve, reject) =>
+            logger.sendAndClose((_err) => {
+              if (_err) {
+                reject(_err);
+                return;
+              }
+              resolve();
+            }),
+          );
         },
       },
     );

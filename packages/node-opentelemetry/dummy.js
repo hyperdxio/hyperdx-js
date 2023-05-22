@@ -28,7 +28,12 @@ app.get('/', (req, res) => {
     query: req.query,
   });
   console.error('BANG !!!');
-  logger.info('YOOOOOOOOOOOOOOOOOO');
+  logger.info({
+    message: '🍕',
+    headers: req.headers,
+    method: req.method,
+    url: req.url,
+  });
   pinoLogger.info('🍕');
   res.send('Hello World');
 });
