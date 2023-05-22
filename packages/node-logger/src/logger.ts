@@ -1,16 +1,10 @@
 import os from 'os';
-import https from 'https';
+import { URL } from 'url';
 
-import axios from 'axios';
-import axiosRetry, {
-  exponentialDelay,
-  isNetworkError,
-  isRetryableError,
-} from 'axios-retry';
 import stripAnsi from 'strip-ansi';
 import { isPlainObject, isString } from 'lodash';
 
-const REQUEST_TIMEOUT = 60000;
+import { ILogger, createLogger, jsonToString } from './_logger';
 
 // internal types
 export type HdxLog = {
@@ -20,15 +14,6 @@ export type HdxLog = {
   st: string; // level in text
   sv: string; // service name
   ts: Date; // timestamp
-};
-
-const jsonStringify = (input: any) => {
-  try {
-    const str = JSON.stringify(input);
-    return str;
-  } catch (e) {
-    return '';
-  }
 };
 
 export type PinoLogLine = {
@@ -41,7 +26,7 @@ export type PinoLogLine = {
 
 export const parsePinoLog = (log: PinoLogLine) => {
   const { level, msg, ...meta } = log;
-  const bodyMsg = isString(msg) ? msg : jsonStringify(log);
+  const bodyMsg = isString(msg) ? msg : jsonToString(log);
   return {
     level,
     message: bodyMsg,
@@ -56,7 +41,7 @@ export const parseWinstonLog = (log: {
   const level = log.level;
   const bodyMsg = isString(log.message)
     ? log.message
-    : jsonStringify(log.message);
+    : jsonToString(log.message);
 
   const meta = {
     ...log,
@@ -71,13 +56,9 @@ export const parseWinstonLog = (log: {
 };
 
 export class Logger {
-  private readonly HDX_PLATFORM = 'nodejs';
-
-  private readonly INGESTOR_API_URL = 'https://in.hyperdx.io';
-
   private readonly service: string;
 
-  private readonly client: ReturnType<typeof axios.create>;
+  private readonly client: ILogger | null;
 
   constructor({
     apiKey,
@@ -97,30 +78,50 @@ export class Logger {
       );
     }
     this.service = service ?? 'default app';
-    this.client = axios.create({
-      baseURL: baseUrl ?? this.INGESTOR_API_URL,
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-      },
-      httpsAgent: new https.Agent({ keepAlive: true }),
-      timeout: REQUEST_TIMEOUT,
-      maxContentLength: Infinity,
-      maxBodyLength: Infinity,
-    });
-    axiosRetry(this.client, {
-      retries: 3,
-      retryDelay: exponentialDelay,
-      retryCondition: (error) => {
-        if (isNetworkError(error)) {
-          return true;
-        }
-        if (!error.config) {
-          // Cannot determine if the request can be retried
-          return false;
-        }
-        return isRetryableError(error);
-      },
-    });
+    let protocol;
+    let host;
+    let port;
+    if (baseUrl) {
+      const url = new URL(baseUrl);
+      protocol = url.protocol.replace(':', '');
+      host = url.hostname;
+      port = url.port;
+    }
+
+    console.log(`${protocol}://${host}:${port}`);
+
+    this.client = apiKey
+      ? createLogger({
+          token: apiKey,
+          host,
+          port,
+          protocol,
+        })
+      : null;
+    // this.client = axios.create({
+    //   baseURL: baseUrl ?? this.INGESTOR_API_URL,
+    //   headers: {
+    //     Authorization: `Bearer ${apiKey}`,
+    //   },
+    //   httpsAgent: new https.Agent({ keepAlive: true }),
+    //   timeout: REQUEST_TIMEOUT,
+    //   maxContentLength: Infinity,
+    //   maxBodyLength: Infinity,
+    // });
+    // axiosRetry(this.client, {
+    //   retries: 3,
+    //   retryDelay: exponentialDelay,
+    //   retryCondition: (error) => {
+    //     if (isNetworkError(error)) {
+    //       return true;
+    //     }
+    //     if (!error.config) {
+    //       // Cannot determine if the request can be retried
+    //       return false;
+    //     }
+    //     return isRetryableError(error);
+    //   },
+    // });
   }
 
   private buildHdxLog(level: string, body: string): HdxLog {
@@ -134,24 +135,14 @@ export class Logger {
     };
   }
 
-  // TODO: implement flush and buffers ??
-  postMessage(level: string, body: string, meta: Record<string, any> = {}) {
-    this.client
-      .post(
-        '/',
-        {
-          ...meta,
-          __hdx: this.buildHdxLog(level, body),
-        },
-        {
-          params: {
-            hdx_platform: this.HDX_PLATFORM,
-          },
-        },
-      )
-      .catch((e) => {
-        // FIXME: ignore this for now (inifinite loop with console.error patch)
-        // console.error(e);
-      });
+  postMessage(
+    level: string,
+    body: string,
+    meta: Record<string, any> = {},
+  ): void {
+    this.client?.log({
+      ...meta,
+      __hdx: this.buildHdxLog(level, body),
+    });
   }
 }
