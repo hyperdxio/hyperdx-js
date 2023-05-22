@@ -55,6 +55,8 @@ export const parseWinstonLog = (log: {
   };
 };
 
+const DEFAULT_TIMEOUT = 30000;
+
 export class Logger {
   private readonly service: string;
 
@@ -93,10 +95,11 @@ export class Logger {
 
     this.client = apiKey
       ? createLogger({
-          token: apiKey,
           host,
           port,
           protocol,
+          timeout: DEFAULT_TIMEOUT,
+          token: apiKey,
         })
       : null;
   }
