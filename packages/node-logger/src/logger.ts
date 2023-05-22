@@ -86,9 +86,10 @@ export class Logger {
       protocol = url.protocol.replace(':', '');
       host = url.hostname;
       port = url.port;
+      console.warn(
+        `⚠️  [HyperDX Logger] Sending logs to ${protocol}://${host}:${port} `,
+      );
     }
-
-    console.log(`${protocol}://${host}:${port}`);
 
     this.client = apiKey
       ? createLogger({
@@ -98,30 +99,6 @@ export class Logger {
           protocol,
         })
       : null;
-    // this.client = axios.create({
-    //   baseURL: baseUrl ?? this.INGESTOR_API_URL,
-    //   headers: {
-    //     Authorization: `Bearer ${apiKey}`,
-    //   },
-    //   httpsAgent: new https.Agent({ keepAlive: true }),
-    //   timeout: REQUEST_TIMEOUT,
-    //   maxContentLength: Infinity,
-    //   maxBodyLength: Infinity,
-    // });
-    // axiosRetry(this.client, {
-    //   retries: 3,
-    //   retryDelay: exponentialDelay,
-    //   retryCondition: (error) => {
-    //     if (isNetworkError(error)) {
-    //       return true;
-    //     }
-    //     if (!error.config) {
-    //       // Cannot determine if the request can be retried
-    //       return false;
-    //     }
-    //     return isRetryableError(error);
-    //   },
-    // });
   }
 
   private buildHdxLog(level: string, body: string): HdxLog {
