@@ -93,8 +93,10 @@ export class Logger {
       );
     }
 
+    const debug = process.env.DEBUG === 'hyperdx';
     this.client = apiKey
       ? createLogger({
+          debug,
           host,
           port,
           protocol,
