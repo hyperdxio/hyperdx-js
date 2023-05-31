@@ -1,5 +1,13 @@
 # @hyperdx/node-opentelemetry
 
+## 0.1.4
+
+### Patch Changes
+
+- 74920d4: feat: add metrics file
+- 74920d4: fix: disable fs instrumentation
+- 74920d4: style: use built-in resource detectors from @opentelemetry/auto-instrumentations-node
+
 ## 0.1.3
 
 ### Patch Changes
