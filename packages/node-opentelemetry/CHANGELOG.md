@@ -1,5 +1,13 @@
 # @hyperdx/node-opentelemetry
 
+## 0.1.5
+
+### Patch Changes
+
+- 05f001b: feat: print out otel SDK configs
+- Updated dependencies [05f001b]
+  - @hyperdx/node-logger@0.2.2
+
 ## 0.1.4
 
 ### Patch Changes

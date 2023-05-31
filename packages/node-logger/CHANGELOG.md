@@ -1,5 +1,11 @@
 # @hyperdx/node-logger
 
+## 0.2.2
+
+### Patch Changes
+
+- 05f001b: style: log prefix
+
 ## 0.2.1
 
 ### Patch Changes
