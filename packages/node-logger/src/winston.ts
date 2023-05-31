@@ -37,7 +37,6 @@ export default class HyperDXWinston extends Transport {
     this.logger.sendAndClose(callback);
   }
 
-  // FIXME: type error ??
   close() {
     this.finish(() => {
       this.emit('finish');

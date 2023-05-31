@@ -1,5 +1,11 @@
 # @hyperdx/node-logger
 
+## 0.2.1
+
+### Patch Changes
+
+- chore: remove engines constraint
+
 ## 0.2.0
 
 ### Minor Changes
