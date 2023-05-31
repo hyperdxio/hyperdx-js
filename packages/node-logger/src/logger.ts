@@ -7,7 +7,7 @@ import { isPlainObject, isString } from 'lodash';
 import { ILogger, createLogger, jsonToString } from './_logger';
 import { name as PKG_NAME, version as PKG_VERSION } from '../package.json';
 
-const LOG_PREFIX = `ℹ️[ ${PKG_NAME} v${PKG_VERSION}]`;
+const LOG_PREFIX = `⚠️  ${PKG_NAME} v${PKG_VERSION}]`;
 
 // internal types
 export type HdxLog = {
