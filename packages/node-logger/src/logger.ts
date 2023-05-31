@@ -5,6 +5,9 @@ import stripAnsi from 'strip-ansi';
 import { isPlainObject, isString } from 'lodash';
 
 import { ILogger, createLogger, jsonToString } from './_logger';
+import { name as PKG_NAME, version as PKG_VERSION } from '../package.json';
+
+const LOG_PREFIX = `⚠️  ${PKG_NAME} v${PKG_VERSION}]`;
 
 // internal types
 export type HdxLog = {
@@ -72,12 +75,10 @@ export class Logger {
     service?: string;
   }) {
     if (!apiKey) {
-      console.error('⚠️  [HyperDX Logger] API key not found');
+      console.error(`${LOG_PREFIX} API key not found`);
     }
     if (!service) {
-      console.warn(
-        '⚠️  [HyperDX Logger] Service name not found. Use "default app"',
-      );
+      console.warn(`${LOG_PREFIX} Service name not found. Use "default app"`);
     }
     this.service = service ?? 'default app';
     let protocol;
@@ -89,7 +90,7 @@ export class Logger {
       host = url.hostname;
       port = url.port;
       console.warn(
-        `⚠️  [HyperDX Logger] Sending logs to ${protocol}://${host}:${port} `,
+        `${LOG_PREFIX} Sending logs to ${protocol}://${host}:${port} `,
       );
     }
 
