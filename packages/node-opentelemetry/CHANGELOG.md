@@ -1,5 +1,11 @@
 # @hyperdx/node-opentelemetry
 
+## 0.1.6
+
+### Patch Changes
+
+- chore: bump node-logger to v0.2.3
+
 ## 0.1.5
 
 ### Patch Changes
