@@ -1,5 +1,11 @@
 # @hyperdx/node-logger
 
+## 0.2.3
+
+### Patch Changes
+
+- 666372b: fix: axios esm import module issue
+
 ## 0.2.2
 
 ### Patch Changes
