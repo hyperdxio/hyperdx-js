@@ -40,6 +40,9 @@ class Browser {
               fetch: {
                 propagateTraceHeaderCorsUrls: tracePropagationTargets,
               },
+              xhr: {
+                propagateTraceHeaderCorsUrls: tracePropagationTargets,
+              },
             },
           }
         : {}),
