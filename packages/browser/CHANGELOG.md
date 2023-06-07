@@ -1,5 +1,11 @@
 # @hyperdx/browser
 
+## 0.14.5
+
+### Patch Changes
+
+- 8a6e86c: fix: Add trace propagation URL to XHR requests
+
 ## 0.14.4
 
 ### Patch Changes
