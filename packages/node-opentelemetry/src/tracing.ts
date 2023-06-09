@@ -20,6 +20,8 @@ env.OTEL_TRACES_SAMPLER_ARG = env.OTEL_TRACES_SAMPLER_ARG ?? '1';
 // patch OTEL_EXPORTER_OTLP_HEADERS to include API key
 if (env.HYPERDX_API_KEY) {
   env.OTEL_EXPORTER_OTLP_HEADERS = `${env.OTEL_EXPORTER_OTLP_HEADERS},authorization=${env.HYPERDX_API_KEY}`;
+} else {
+  console.warn(`⚠️  ${LOG_PREFIX} HYPERDX_API_KEY is not set`);
 }
 
 const sdk = new NodeSDK({
@@ -57,7 +59,7 @@ if (env.OTEL_EXPORTER_OTLP_ENDPOINT && env.OTEL_EXPORTER_OTLP_HEADERS) {
   sdk.start();
 } else {
   console.warn(
-    `${LOG_PREFIX} OTEL_EXPORTER_OTLP_ENDPOINT and OTEL_EXPORTER_OTLP_HEADERS are not set, tracing is disabled`,
+    `⚠️  ${LOG_PREFIX} OTEL_EXPORTER_OTLP_ENDPOINT and OTEL_EXPORTER_OTLP_HEADERS are not set, tracing is disabled`,
   );
 }
 

@@ -31,21 +31,20 @@
     "test:watch": "jest --watch"
   },
   "dependencies": {
-    "@nestjs/common": "^9.4.0",
+    "@nestjs/common": "^9.4.2",
     "axios": "^0.27.2",
     "json-stringify-safe": "^5.0.1",
     "lodash": "^4.17.21",
-    "nest-winston": "^1.9.1",
+    "nest-winston": "^1.9.2",
     "pino-abstract-transport": "^1.0.0",
     "reflect-metadata": "^0.1.13",
     "rxjs": "^7.8.1",
     "strip-ansi": "^6.0.1",
-    "tslib": "^2.4.1",
-    "winston": "^3.8.2",
+    "tslib": "^2.5.3",
+    "winston": "^3.9.0",
     "winston-transport": "^4.5.0"
   },
   "devDependencies": {
-    "@types/lodash": "^4.14.192",
     "pino": "^8.14.1"
   },
   "peerDependencies": {},
