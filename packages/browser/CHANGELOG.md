@@ -1,5 +1,17 @@
 # @hyperdx/browser
 
+## 0.16.1
+
+### Patch Changes
+
+- chore: Update otel-web to 0.16.1 to improve timing accuracy
+
+## 0.16.0
+
+### Minor Changes
+
+- chore: Update otel-web to 0.16.0 to update opentelemetry-js dependencies
+
 ## 0.14.5
 
 ### Patch Changes

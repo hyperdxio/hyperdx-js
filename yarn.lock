@@ -682,10 +682,10 @@
   resolved "https://registry.yarnpkg.com/@humanwhocodes/object-schema/-/object-schema-1.2.1.tgz#b520529ec21d8e5945a1851dfd1c32e94e39ff45"
   integrity sha512-ZnQMnLV4e7hDlUvw8H+U8ASL02SS2Gn6+9Ac3wGGLIe7+je2AeAOxPY+izIPJDfFDb7eDjev0Us8MO1iFRN8hA==
 
-"@hyperdx/otel-web-session-recorder@^0.16.0-rc0":
-  version "0.16.0-rc0"
-  resolved "https://registry.yarnpkg.com/@hyperdx/otel-web-session-recorder/-/otel-web-session-recorder-0.16.0-rc0.tgz#a4fd552c85a035a68322997c14feaa2de4385aef"
-  integrity sha512-duo3v/pIbbIsNdlEpWL9XZHQ0gd8KhMfB8thsyrqZY2iYRikan5y+eOG3Sgt0DLt9TtiyF308Ny2SZRu8fFrnQ==
+"@hyperdx/otel-web-session-recorder@^0.16.1":
+  version "0.16.1"
+  resolved "https://registry.yarnpkg.com/@hyperdx/otel-web-session-recorder/-/otel-web-session-recorder-0.16.1.tgz#7cf3069a9fb6808484f6a287d60a184e61e339ae"
+  integrity sha512-R255juD4OUdqYKddDADkIyBUiNMENeQK3YIKgpwk9KoVXdqNhC6LBaKcSBACxHUpiVHSrzPywHaIrSnC/D58iQ==
   dependencies:
     "@babel/runtime" "~7.18.3"
     "@opentelemetry/api" "^1.4.1"
@@ -696,10 +696,10 @@
     rrweb "^1.1.3"
     type-fest "^3.7.2"
 
-"@hyperdx/otel-web@^0.16.0-rc0":
-  version "0.16.0-rc0"
-  resolved "https://registry.yarnpkg.com/@hyperdx/otel-web/-/otel-web-0.16.0-rc0.tgz#962a2850ddced7551f299efa035c8dcf46d9d4f1"
-  integrity sha512-2GM/le7Vp3xw1I2JSSauElZ0Za5jGf08dV9qbM3rwFNRumg39VpLRYlsOtR2O7KLEO6EuP/FSO4JvHjFpnpnEQ==
+"@hyperdx/otel-web@^0.16.1":
+  version "0.16.1"
+  resolved "https://registry.yarnpkg.com/@hyperdx/otel-web/-/otel-web-0.16.1.tgz#c2a44669b71d1e8795add2b88046a3ff0601ecdb"
+  integrity sha512-s4bBZrU9OHrkuDkUNqosAzRs0RCOdJgqIL4i+zYgU/fSDgSQAC8CtmfineAeMEhbTCPBZVx+R6aN26Z27vPRxQ==
   dependencies:
     "@babel/runtime" "^7.21.0"
     "@opentelemetry/api" "^1.4.1"
@@ -707,9 +707,9 @@
     "@opentelemetry/exporter-trace-otlp-http" "^0.40.0"
     "@opentelemetry/exporter-zipkin" "^1.14.0"
     "@opentelemetry/instrumentation" "^0.40.0"
-    "@opentelemetry/instrumentation-document-load" "^0.32.2"
+    "@opentelemetry/instrumentation-document-load" "^0.32.3"
     "@opentelemetry/instrumentation-fetch" "^0.40.0"
-    "@opentelemetry/instrumentation-user-interaction" "^0.32.3"
+    "@opentelemetry/instrumentation-user-interaction" "^0.32.4"
     "@opentelemetry/instrumentation-xml-http-request" "^0.40.0"
     "@opentelemetry/resources" "^1.14.0"
     "@opentelemetry/sdk-trace-base" "^1.14.0"
@@ -1415,7 +1415,7 @@
     "@opentelemetry/semantic-conventions" "^1.0.0"
     semver "^7.3.2"
 
-"@opentelemetry/instrumentation-document-load@^0.32.2":
+"@opentelemetry/instrumentation-document-load@^0.32.3":
   version "0.32.3"
   resolved "https://registry.yarnpkg.com/@opentelemetry/instrumentation-document-load/-/instrumentation-document-load-0.32.3.tgz#74e96181b4e3e69e2254778cf8c970e9552cf049"
   integrity sha512-eK7ywJXlXsVYzAqpX8RikpEvJFIUOtKCybCdq68lsv2MVwx0Jev0Kycc+q+1mvKQBuhvEVk/5WEUSV9bbVn6qQ==
@@ -1673,7 +1673,7 @@
     "@opentelemetry/semantic-conventions" "^1.0.0"
     "@types/tedious" "^4.0.6"
 
-"@opentelemetry/instrumentation-user-interaction@^0.32.3":
+"@opentelemetry/instrumentation-user-interaction@^0.32.4":
   version "0.32.4"
   resolved "https://registry.yarnpkg.com/@opentelemetry/instrumentation-user-interaction/-/instrumentation-user-interaction-0.32.4.tgz#26c3dd7bc1270877b16b0845c096e183d61e4aa6"
   integrity sha512-keFfcPuKhtfvHgBCG7VdlwRP7ezpWqbwCinTPRnMDRvFqcGVgk6HwPXkbMDs2CtQm+a1Hal7Tg93RYy82F6XEA==
