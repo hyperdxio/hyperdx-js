@@ -1,5 +1,11 @@
 # @hyperdx/browser
 
+## 0.16.1
+
+### Minor Changes
+
+- chore: Update otel-web to 0.16.1 to improve timing accuracy
+
 ## 0.14.5
 
 ### Patch Changes
