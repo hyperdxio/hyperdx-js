@@ -1,5 +1,11 @@
 # @hyperdx/node-logger
 
+## 0.2.4-next.0
+
+### Patch Changes
+
+- 6a32017: chore: bump deps
+
 ## 0.2.3
 
 ### Patch Changes

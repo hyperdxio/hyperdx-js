@@ -1,0 +1,10 @@
+{
+  "mode": "pre",
+  "tag": "next",
+  "initialVersions": {
+    "@hyperdx/browser": "0.16.1",
+    "@hyperdx/node-logger": "0.2.3",
+    "@hyperdx/node-opentelemetry": "0.1.6"
+  },
+  "changesets": ["red-humans-grab", "shiny-rings-marry", "tiny-bottles-jump"]
+}

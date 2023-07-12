@@ -1,5 +1,14 @@
 # @hyperdx/node-opentelemetry
 
+## 0.1.7-next.0
+
+### Patch Changes
+
+- 6a32017: chore: bump deps
+- 6a32017: feat: improve alert messages
+- Updated dependencies [6a32017]
+  - @hyperdx/node-logger@0.2.4-next.0
+
 ## 0.1.6
 
 ### Patch Changes

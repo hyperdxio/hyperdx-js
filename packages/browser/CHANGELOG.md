@@ -1,5 +1,11 @@
 # @hyperdx/browser
 
+## 0.16.2-next.0
+
+### Patch Changes
+
+- f892ad1: Add `instrumentations`, `disableReplay` and `block/ignore/maskClass` options
+
 ## 0.16.1
 
 ### Patch Changes
