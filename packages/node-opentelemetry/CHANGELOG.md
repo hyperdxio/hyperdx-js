@@ -1,5 +1,11 @@
 # @hyperdx/node-opentelemetry
 
+## 0.1.7-next.1
+
+### Patch Changes
+
+- 8a20b01: chore: bump otel pkgs
+
 ## 0.1.7-next.0
 
 ### Patch Changes

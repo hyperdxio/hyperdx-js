@@ -6,5 +6,10 @@
     "@hyperdx/node-logger": "0.2.3",
     "@hyperdx/node-opentelemetry": "0.1.6"
   },
-  "changesets": ["red-humans-grab", "shiny-rings-marry", "tiny-bottles-jump"]
+  "changesets": [
+    "red-humans-grab",
+    "shiny-bats-notice",
+    "shiny-rings-marry",
+    "tiny-bottles-jump"
+  ]
 }
