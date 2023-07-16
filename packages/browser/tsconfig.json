@@ -23,7 +23,8 @@
     "sourceMap": true,
     "strict": true,
     "strictNullChecks": false,
-    "target": "es2019"
+    "target": "es2019",
+    "types": ["@types/intercom-web", "jest"]
   },
   "files": ["../../node_modules/zone.js/dist/zone.js.d.ts"],
   "include": ["src/**/*", "__tests__/**/*"],
