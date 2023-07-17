@@ -110,7 +110,9 @@ class Browser {
             }
           });
         })
-        .catch(() => {});
+        .catch(() => {
+          // Ignore if intercom isn't installed or can't be used
+        });
     }
   }
 
