@@ -1,5 +1,11 @@
 # @hyperdx/browser
 
+## 0.17.0-next.0
+
+### Minor Changes
+
+- 12bf328: Add Intercom Integration
+
 ## 0.16.2
 
 ### Patch Changes
