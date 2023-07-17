@@ -130,8 +130,15 @@ class Browser {
   }
 
   getSessionUrl(): string | undefined {
+    const now = Date.now();
+    // A session can only last 4 hours, so we just need to give a time hint of
+    // a 4 hour range
+    const FOUR_HOURS = 1000 * 60 * 60 * 4;
+    const start = now - FOUR_HOURS;
+    const end = now + FOUR_HOURS;
+
     return Rum.inited
-      ? `${UI_BASE}/sessions?q=process.tag.rum.sessionId%3A"${Rum.getSessionId()}"`
+      ? `${UI_BASE}/sessions?q=process.tag.rum.sessionId%3A"${Rum.getSessionId()}"&sid=${Rum.getSessionId()}&sfrom=${start}&sto=${end}&ts=${now}`
       : undefined;
   }
 }
