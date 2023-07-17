@@ -88,13 +88,12 @@ class Browser {
 
     if (disableIntercom !== true) {
       resolveAsyncGlobal('Intercom')
-        .catch()
         .then(() => {
           window.Intercom('onShow', () => {
             const sessionUrl = this.getSessionUrl();
             if (sessionUrl != null) {
               const metadata = {
-                hyperdxSessionUrl: this.getSessionUrl(),
+                hyperdxSessionUrl: sessionUrl,
               };
 
               // Use window.Intercom directly to avoid stale references
@@ -110,7 +109,8 @@ class Browser {
               span.end(now);
             }
           });
-        });
+        })
+        .catch(() => {});
     }
   }
 
@@ -129,7 +129,7 @@ class Browser {
 
   getSessionUrl(): string | undefined {
     return Rum.inited
-      ? `${UI_BASE}/sessions?q=process.tag.rum.sessionId%3A${Rum.getSessionId()}`
+      ? `${UI_BASE}/sessions?q=process.tag.rum.sessionId%3A"${Rum.getSessionId()}"`
       : undefined;
   }
 }
