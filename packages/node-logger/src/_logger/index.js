@@ -134,7 +134,7 @@ class HyperdxLogger {
 
   _defaultCallback(err) {
     if (err && !this.supressErrors) {
-      hdx(`[hyperdx-logger] error: ${err}`, err);
+      hdx(`[hyperdx-log-sender] error: ${err}`, err);
     }
   }
 
@@ -312,7 +312,7 @@ class HyperdxLogger {
   }
 
   _debug(msg) {
-    hdx(`[hyperdx-logger] ${msg}`);
+    hdx(`[hyperdx-log-sender] ${msg}`);
   }
 
   _tryAgainIn(sleepTimeMs, bulk) {
