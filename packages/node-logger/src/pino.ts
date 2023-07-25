@@ -2,7 +2,6 @@ import build from 'pino-abstract-transport';
 
 import hdx from './debug';
 import { Logger, parsePinoLog } from './logger';
-import { version as PKG_VERSION } from '../package.json';
 
 // map pino level to text
 const PINO_LEVELS = {
@@ -22,7 +21,7 @@ export default (opts: {
   try {
     hdx('Initializing HyperDX pino transport...');
     const logger = new Logger(opts);
-    hdx(`HyperDX pino transport [v${PKG_VERSION}] initialized!`);
+    hdx(`HyperDX pino transport initialized!`);
     return build(
       async function (source) {
         for await (const obj of source) {
