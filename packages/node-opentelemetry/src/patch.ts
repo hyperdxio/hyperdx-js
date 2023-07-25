@@ -3,7 +3,7 @@ import _ from 'lodash';
 // @ts-ignore
 import { Logger, parseWinstonLog } from '@hyperdx/node-logger/build/src/logger';
 
-import hdx, { LOG_PREFIX } from './debug';
+import hdx from './debug';
 
 const env = process.env;
 
@@ -49,7 +49,7 @@ export const patchConsoleLog = () => {
       service: SERVICE_NAME,
     });
 
-    hdx(`${LOG_PREFIX} Capturing console logs...`);
+    hdx(`Capturing console logs...`);
 
     const _log = (level: string, ...args: any[]) => {
       const parsedLog = parseWinstonLog({
