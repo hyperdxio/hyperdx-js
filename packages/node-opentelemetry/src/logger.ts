@@ -1,6 +1,8 @@
 // @ts-ignore
 import { HyperDXWinston } from '@hyperdx/node-logger';
 
+import hdx from './debug';
+
 const env = process.env;
 
 const HYPERDX_API_KEY = (env.HYPERDX_API_KEY ??
@@ -8,12 +10,14 @@ const HYPERDX_API_KEY = (env.HYPERDX_API_KEY ??
 
 const SERVICE_NAME = env.OTEL_SERVICE_NAME as string;
 
-export const getWinsonTransport = (maxLevel = 'info') =>
-  new HyperDXWinston({
+export const getWinsonTransport = (maxLevel = 'info') => {
+  hdx('Initializing winston transport');
+  return new HyperDXWinston({
     apiKey: HYPERDX_API_KEY,
     maxLevel,
     service: SERVICE_NAME,
   });
+};
 
 export const getPinoTransport = (maxLevel = 'info') => ({
   target: '@hyperdx/node-logger/build/src/pino',
