@@ -1,5 +1,12 @@
 # @hyperdx/node-logger
 
+## 0.2.5
+
+### Patch Changes
+
+- 90da807: feat: add more logs for debugging
+- 8863dab: style: reuse LOG_PREFIX
+
 ## 0.2.4
 
 ### Patch Changes

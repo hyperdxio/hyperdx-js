@@ -1,5 +1,14 @@
 # @hyperdx/node-opentelemetry
 
+## 0.1.8
+
+### Patch Changes
+
+- 8863dab: feat: debug mode
+- Updated dependencies [90da807]
+- Updated dependencies [8863dab]
+  - @hyperdx/node-logger@0.2.5
+
 ## 0.1.7
 
 ### Patch Changes
