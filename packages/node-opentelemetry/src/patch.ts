@@ -3,9 +3,7 @@ import _ from 'lodash';
 // @ts-ignore
 import { Logger, parseWinstonLog } from '@hyperdx/node-logger/build/src/logger';
 
-import { name as PKG_NAME, version as PKG_VERSION } from '../package.json';
-
-const LOG_PREFIX = `[${PKG_NAME} v${PKG_VERSION}]`;
+import { LOG_PREFIX } from './debug';
 
 const env = process.env;
 

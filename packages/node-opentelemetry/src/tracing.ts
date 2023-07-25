@@ -2,10 +2,8 @@ import { NodeSDK } from '@opentelemetry/sdk-node';
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-proto';
 import { getNodeAutoInstrumentations } from '@opentelemetry/auto-instrumentations-node';
 
+import { LOG_PREFIX } from './debug';
 import { patchConsoleLog } from './patch';
-import { name as PKG_NAME, version as PKG_VERSION } from '../package.json';
-
-const LOG_PREFIX = `[${PKG_NAME} v${PKG_VERSION}]`;
 
 const env = process.env;
 
