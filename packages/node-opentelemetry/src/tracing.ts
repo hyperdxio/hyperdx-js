@@ -2,12 +2,20 @@ import { NodeSDK } from '@opentelemetry/sdk-node';
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-proto';
 import { getNodeAutoInstrumentations } from '@opentelemetry/auto-instrumentations-node';
 
+import hdx, {
+  HDX_DEBUG_MODE_ENABLED,
+  LOG_PREFIX as _LOG_PREFIX,
+} from './debug';
 import { patchConsoleLog } from './patch';
-import { name as PKG_NAME, version as PKG_VERSION } from '../package.json';
 
-const LOG_PREFIX = `[${PKG_NAME} v${PKG_VERSION}]`;
+const LOG_PREFIX = `⚠️  ${_LOG_PREFIX}`;
 
 const env = process.env;
+
+// enable otel debug mode if HDX_DEBUG_MODE_ENABLED is set
+if (HDX_DEBUG_MODE_ENABLED) {
+  env.OTEL_LOG_LEVEL = 'debug';
+}
 
 // set default otel env vars
 env.OTEL_EXPORTER_OTLP_ENDPOINT =
@@ -21,8 +29,10 @@ env.OTEL_TRACES_SAMPLER_ARG = env.OTEL_TRACES_SAMPLER_ARG ?? '1';
 if (env.HYPERDX_API_KEY) {
   env.OTEL_EXPORTER_OTLP_HEADERS = `${env.OTEL_EXPORTER_OTLP_HEADERS},authorization=${env.HYPERDX_API_KEY}`;
 } else {
-  console.warn(`⚠️  ${LOG_PREFIX} HYPERDX_API_KEY is not set`);
+  console.warn(`${LOG_PREFIX} HYPERDX_API_KEY is not set`);
 }
+
+hdx('Initializing opentelemetry SDK');
 
 const sdk = new NodeSDK({
   traceExporter: new OTLPTraceExporter({
@@ -56,10 +66,11 @@ if (env.OTEL_EXPORTER_OTLP_ENDPOINT && env.OTEL_EXPORTER_OTLP_HEADERS) {
       2,
     )})...`,
   );
+  hdx('Starting opentelemetry SDK');
   sdk.start();
 } else {
   console.warn(
-    `⚠️  ${LOG_PREFIX} OTEL_EXPORTER_OTLP_ENDPOINT and OTEL_EXPORTER_OTLP_HEADERS are not set, tracing is disabled`,
+    `${LOG_PREFIX} OTEL_EXPORTER_OTLP_ENDPOINT and OTEL_EXPORTER_OTLP_HEADERS are not set, tracing is disabled`,
   );
 }
 
@@ -68,6 +79,7 @@ patchConsoleLog();
 
 // Graceful shutdown
 process.on('SIGTERM', () => {
+  hdx('SIGTERM received, shutting down');
   sdk
     .shutdown()
     .then(

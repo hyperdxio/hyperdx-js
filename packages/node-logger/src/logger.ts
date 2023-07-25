@@ -5,9 +5,9 @@ import stripAnsi from 'strip-ansi';
 import { isPlainObject, isString } from 'lodash';
 
 import { ILogger, createLogger, jsonToString } from './_logger';
-import { name as PKG_NAME, version as PKG_VERSION } from '../package.json';
+import { LOG_PREFIX as _LOG_PREFIX } from './debug';
 
-const LOG_PREFIX = `⚠️  [${PKG_NAME} v${PKG_VERSION}]`;
+const LOG_PREFIX = `⚠️  ${_LOG_PREFIX}`;
 
 // internal types
 export type HdxLog = {
