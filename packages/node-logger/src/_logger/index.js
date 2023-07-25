@@ -2,6 +2,7 @@ const { networkInterfaces } = require('os');
 const dgram = require('dgram');
 const zlib = require('zlib');
 
+const hdx = require('debug')('hyperdx');
 const stringifySafe = require('json-stringify-safe');
 const { assign } = require('lodash');
 
@@ -15,6 +16,7 @@ const jsonToString = (json) => {
   try {
     return JSON.stringify(json);
   } catch (ex) {
+    hdx(`Failed to stringify json. e = ${ex}`);
     return stringifySafe(json, null, null, () => {});
   }
 };
@@ -51,12 +53,10 @@ class HyperdxLogger {
     type = 'nodejs',
     sendIntervalMs = 10 * 1000,
     bufferSize = 100,
-    debug = false,
     numberOfRetries = 3,
     supressErrors = false,
     addTimestampWithNanoSecs = false,
     compress = true,
-    internalLogger = console,
     protocol = 'https',
     port,
     timeout,
@@ -74,12 +74,10 @@ class HyperdxLogger {
     this.type = type;
     this.sendIntervalMs = sendIntervalMs;
     this.bufferSize = bufferSize;
-    this.debug = debug;
     this.numberOfRetries = numberOfRetries;
     this.supressErrors = supressErrors;
     this.addTimestampWithNanoSecs = addTimestampWithNanoSecs;
     this.compress = compress;
-    this.internalLogger = internalLogger;
     this.sleepUntilNextRetry = sleepUntilNextRetry;
     this.setUserAgent = setUserAgent;
     this.timer = null;
@@ -136,7 +134,7 @@ class HyperdxLogger {
 
   _defaultCallback(err) {
     if (err && !this.supressErrors) {
-      this.internalLogger.log(`hyperdx-logger error: ${err}`, err);
+      hdx(`[hyperdx-log-sender] error: ${err}`, err);
     }
   }
 
@@ -314,7 +312,7 @@ class HyperdxLogger {
   }
 
   _debug(msg) {
-    if (this.debug) this.internalLogger.log(`hyperdx-nodejs: ${msg}`);
+    hdx(`[hyperdx-log-sender] ${msg}`);
   }
 
   _tryAgainIn(sleepTimeMs, bulk) {

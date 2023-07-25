@@ -4,7 +4,6 @@ interface ILoggerOptions {
   type?: string;
   sendIntervalMs?: number;
   bufferSize?: number;
-  debug?: boolean;
   numberOfRetries?: number;
   supressErrors?: boolean;
   addTimestampWithNanoSecs?: boolean;

@@ -7,7 +7,7 @@ import { isPlainObject, isString } from 'lodash';
 import { ILogger, createLogger, jsonToString } from './_logger';
 import { name as PKG_NAME, version as PKG_VERSION } from '../package.json';
 
-const LOG_PREFIX = `⚠️  ${PKG_NAME} v${PKG_VERSION}]`;
+const LOG_PREFIX = `⚠️  [${PKG_NAME} v${PKG_VERSION}]`;
 
 // internal types
 export type HdxLog = {
@@ -94,10 +94,8 @@ export class Logger {
       );
     }
 
-    const debug = process.env.DEBUG === 'hyperdx';
     this.client = apiKey
       ? createLogger({
-          debug,
           host,
           port,
           protocol,
@@ -105,6 +103,13 @@ export class Logger {
           token: apiKey,
         })
       : null;
+    if (this.client) {
+      console.log(`${LOG_PREFIX} started!`);
+    } else {
+      console.error(
+        `${LOG_PREFIX} failed to start! Please check your API key.`,
+      );
+    }
   }
 
   private buildHdxLog(level: string, body: string): HdxLog {
