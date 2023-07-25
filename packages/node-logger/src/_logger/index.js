@@ -1,8 +1,8 @@
 const { networkInterfaces } = require('os');
 const dgram = require('dgram');
 const zlib = require('zlib');
-const hdx = require('debug')('hyperdx');
 
+const hdx = require('debug')('hyperdx');
 const stringifySafe = require('json-stringify-safe');
 const { assign } = require('lodash');
 

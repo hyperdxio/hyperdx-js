@@ -12,13 +12,11 @@ export default class HyperDXWinston extends Transport {
     baseUrl,
     maxLevel,
     service,
-    debug,
   }: {
     apiKey: string;
     baseUrl?: string;
     maxLevel?: string;
     service?: string;
-    debug?: boolean;
   }) {
     hdx('Initializing HyperDX winston transport...');
     super({ level: maxLevel ?? 'info' });
@@ -30,21 +28,27 @@ export default class HyperDXWinston extends Transport {
     info: { message: string | Record<string, any>; level: string },
     callback: () => void,
   ) {
+    hdx('Received log from winston');
     setImmediate(() => {
       this.emit('logged', info);
     });
 
     const { level, message, meta } = parseWinstonLog(info);
+    hdx('Sending log to HyperDX');
     this.logger.postMessage(level, message, meta);
+    hdx('Log sent to HyperDX');
     callback();
   }
 
   finish(callback) {
+    hdx('Sending and closing HyperDX winston transport...');
     this.logger.sendAndClose(callback);
   }
 
   close() {
+    hdx('Closing HyperDX winston transport...');
     this.finish(() => {
+      hdx('HyperDX winston transport closed!');
       this.emit('finish');
       this.emit('close');
     });

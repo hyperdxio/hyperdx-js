@@ -1,5 +1,6 @@
 import build from 'pino-abstract-transport';
 
+import hdx from './debug';
 import { Logger, parsePinoLog } from './logger';
 import { version as PKG_VERSION } from '../package.json';
 
@@ -19,23 +20,28 @@ export default (opts: {
   service?: string;
 }) => {
   try {
+    hdx('Initializing HyperDX pino transport...');
     const logger = new Logger(opts);
-    console.log(`HyperDX pino transport [v${PKG_VERSION}] initialized!`);
+    hdx(`HyperDX pino transport [v${PKG_VERSION}] initialized!`);
     return build(
       async function (source) {
         for await (const obj of source) {
           const { level, message, meta } = parsePinoLog(obj);
+          hdx('Sending log to HyperDX');
           logger.postMessage(PINO_LEVELS[level], message, meta);
+          hdx('Log sent to HyperDX');
         }
       },
       {
         async close(err) {
+          hdx('Sending and closing HyperDX pino transport...');
           await new Promise<void>((resolve, reject) =>
             logger.sendAndClose((_err) => {
               if (_err) {
                 reject(_err);
                 return;
               }
+              hdx('HyperDX pino transport closed!');
               resolve();
             }),
           );
