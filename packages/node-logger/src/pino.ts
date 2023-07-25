@@ -20,7 +20,7 @@ export default (opts: {
 }) => {
   try {
     const logger = new Logger(opts);
-    console.log(`HyperDX pino transport [v${PKG_VERSION}] started!`);
+    console.log(`HyperDX pino transport [v${PKG_VERSION}] initialized!`);
     return build(
       async function (source) {
         for await (const obj of source) {
