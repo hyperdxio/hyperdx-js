@@ -51,6 +51,14 @@ const logger = winston.createLogger({
 export default logger;
 ```
 
+#### Options
+
+- **apiKey** - Required. Your HyperDX ingestion API key.
+- **service** - The name of the service.
+- **sendIntervalMs** - Time in milliseconds to wait between retry attempts. Default: `2000` (2 sec)
+- **bufferSize** - The maximum number of messages the logger will accumulate before sending them all as a bulk. Default: `100`.
+- **timeout** - The read/write/connection timeout in milliseconds. Default: `30000`.
+
 ### Pino Transport
 
 Create a new HyperDX Pino Transport and append it to your list of transports. Example:
@@ -76,6 +84,14 @@ const logger = pino(
 
 export default logger;
 ```
+
+#### Options
+
+- **apiKey** - Required. Your HyperDX ingestion API key.
+- **service** - The name of the service.
+- **sendIntervalMs** - Time in milliseconds to wait between retry attempts. Default: `2000` (2 sec)
+- **bufferSize** - The maximum number of messages the logger will accumulate before sending them all as a bulk. Default: `100`.
+- **timeout** - The read/write/connection timeout in milliseconds. Default: `30000`.
 
 ### NestJS Custom Logger
 

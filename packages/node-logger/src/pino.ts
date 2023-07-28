@@ -3,6 +3,8 @@ import build from 'pino-abstract-transport';
 import hdx from './debug';
 import { Logger, parsePinoLog } from './logger';
 
+import type { LoggerOptions } from './logger';
+
 // map pino level to text
 const PINO_LEVELS = {
   10: 'trace',
@@ -13,11 +15,7 @@ const PINO_LEVELS = {
   60: 'fatal',
 };
 
-export default (opts: {
-  apiKey: string;
-  baseUrl?: string;
-  service?: string;
-}) => {
+export default (opts: LoggerOptions) => {
   try {
     hdx('Initializing HyperDX pino transport...');
     const logger = new Logger(opts);

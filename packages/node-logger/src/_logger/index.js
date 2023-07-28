@@ -51,7 +51,7 @@ class HyperdxLogger {
     token,
     host = 'in.hyperdx.io',
     type = 'nodejs',
-    sendIntervalMs = 10 * 1000,
+    sendIntervalMs = 2 * 1000,
     bufferSize = 100,
     numberOfRetries = 3,
     supressErrors = false,

@@ -3,23 +3,34 @@ import Transport from 'winston-transport';
 import hdx from './debug';
 import { Logger, parseWinstonLog } from './logger';
 
+import type { LoggerOptions } from './logger';
+
+type HyperDXWinstonOptions = LoggerOptions & {
+  maxLevel?: string;
+};
+
 export default class HyperDXWinston extends Transport {
   private readonly logger: Logger;
 
   constructor({
     apiKey,
     baseUrl,
+    bufferSize,
     maxLevel,
+    sendIntervalMs,
     service,
-  }: {
-    apiKey: string;
-    baseUrl?: string;
-    maxLevel?: string;
-    service?: string;
-  }) {
+    timeout,
+  }: HyperDXWinstonOptions) {
     hdx('Initializing HyperDX winston transport...');
     super({ level: maxLevel ?? 'info' });
-    this.logger = new Logger({ apiKey, baseUrl, service });
+    this.logger = new Logger({
+      apiKey,
+      baseUrl,
+      bufferSize,
+      sendIntervalMs,
+      service,
+      timeout,
+    });
     hdx(`HyperDX winston transport initialized!`);
   }
 

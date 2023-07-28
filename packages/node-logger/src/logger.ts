@@ -60,6 +60,15 @@ export const parseWinstonLog = (log: {
 
 const DEFAULT_TIMEOUT = 30000;
 
+export type LoggerOptions = {
+  apiKey: string;
+  baseUrl?: string;
+  bufferSize?: number;
+  sendIntervalMs?: number;
+  service?: string;
+  timeout?: number; // The read/write/connection timeout in milliseconds
+};
+
 export class Logger {
   private readonly service: string;
 
@@ -68,11 +77,17 @@ export class Logger {
   constructor({
     apiKey,
     baseUrl,
+    bufferSize,
+    sendIntervalMs,
     service,
+    timeout,
   }: {
     apiKey: string;
     baseUrl?: string;
+    bufferSize?: number;
+    sendIntervalMs?: number;
     service?: string;
+    timeout?: number;
   }) {
     if (!apiKey) {
       console.error(`${LOG_PREFIX} API key not found`);
@@ -96,10 +111,12 @@ export class Logger {
 
     this.client = apiKey
       ? createLogger({
+          bufferSize,
           host,
           port,
           protocol,
-          timeout: DEFAULT_TIMEOUT,
+          sendIntervalMs,
+          timeout: timeout ?? DEFAULT_TIMEOUT,
           token: apiKey,
         })
       : null;
