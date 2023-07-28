@@ -15,7 +15,9 @@ const PINO_LEVELS = {
   60: 'fatal',
 };
 
-export default (opts: LoggerOptions) => {
+export type HyperDXPinoOptions = LoggerOptions;
+
+export default (opts: HyperDXPinoOptions) => {
   try {
     hdx('Initializing HyperDX pino transport...');
     const logger = new Logger(opts);

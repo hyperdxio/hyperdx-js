@@ -10,20 +10,37 @@ const HYPERDX_API_KEY = (env.HYPERDX_API_KEY ??
 
 const SERVICE_NAME = env.OTEL_SERVICE_NAME as string;
 
-export const getWinsonTransport = (maxLevel = 'info') => {
+type WinstonTransportOptions = {
+  baseUrl?: string;
+  bufferSize?: number;
+  sendIntervalMs?: number;
+  timeout?: number; // The read/write/connection timeout in milliseconds
+};
+
+type PinotTransportOptions = WinstonTransportOptions;
+
+export const getWinsonTransport = (
+  maxLevel = 'info',
+  options: WinstonTransportOptions = {},
+) => {
   hdx('Initializing winston transport');
   return new HyperDXWinston({
     apiKey: HYPERDX_API_KEY,
     maxLevel,
     service: SERVICE_NAME,
+    ...options,
   });
 };
 
-export const getPinoTransport = (maxLevel = 'info') => ({
+export const getPinoTransport = (
+  maxLevel = 'info',
+  options: PinotTransportOptions = {},
+) => ({
   target: '@hyperdx/node-logger/build/src/pino',
   options: {
     apiKey: HYPERDX_API_KEY,
     service: SERVICE_NAME,
+    ...options,
   },
   level: maxLevel,
 });

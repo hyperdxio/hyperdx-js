@@ -5,7 +5,7 @@ import { Logger, parseWinstonLog } from './logger';
 
 import type { LoggerOptions } from './logger';
 
-type HyperDXWinstonOptions = LoggerOptions & {
+export type HyperDXWinstonOptions = LoggerOptions & {
   maxLevel?: string;
 };
 

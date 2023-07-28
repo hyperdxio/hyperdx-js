@@ -150,6 +150,7 @@ class HyperdxLogger {
   }
 
   _timerSend() {
+    this._debug('Timer fired. Trying to wake up and send messages...');
     if (this.messages.length > 0) {
       this._debug(
         `Woke up and saw ${this.messages.length} messages to send. Sending now...`,
