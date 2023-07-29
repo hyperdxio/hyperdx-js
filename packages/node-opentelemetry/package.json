@@ -2,7 +2,7 @@
   "name": "@hyperdx/node-opentelemetry",
   "author": "Warren <warren@users.noreply.github.com>",
   "license": "MIT",
-  "version": "0.1.8",
+  "version": "0.1.9",
   "homepage": "https://www.hyperdx.io",
   "repository": {
     "type": "git",
@@ -32,7 +32,7 @@
     "prettier": "prettier --config .prettierrc --write ."
   },
   "dependencies": {
-    "@hyperdx/node-logger": "^0.2.5",
+    "@hyperdx/node-logger": "^0.2.6",
     "@opentelemetry/api": "^1.4.1",
     "@opentelemetry/auto-instrumentations-node": "^0.37.1",
     "@opentelemetry/exporter-metrics-otlp-proto": "^0.41.0",

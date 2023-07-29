@@ -1,5 +1,11 @@
 # @hyperdx/node-logger
 
+## 0.2.6
+
+### Patch Changes
+
+- 34d8d5e: feat: expose 'bufferSize', 'sendIntervalMs' and 'timeout' logger options
+
 ## 0.2.5
 
 ### Patch Changes

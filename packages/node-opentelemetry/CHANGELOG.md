@@ -1,5 +1,13 @@
 # @hyperdx/node-opentelemetry
 
+## 0.1.9
+
+### Patch Changes
+
+- 34d8d5e: feat: expose 'bufferSize', 'sendIntervalMs' and 'timeout' logger options
+- Updated dependencies [34d8d5e]
+  - @hyperdx/node-logger@0.2.6
+
 ## 0.1.8
 
 ### Patch Changes
