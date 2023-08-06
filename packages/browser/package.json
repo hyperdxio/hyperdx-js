@@ -5,8 +5,8 @@
   "main": "build/index.js",
   "types": "build/index.d.ts",
   "dependencies": {
-    "@hyperdx/otel-web": "0.16.2-0",
-    "@hyperdx/otel-web-session-recorder": "0.16.2-0"
+    "@hyperdx/otel-web": "^0.16.2-1",
+    "@hyperdx/otel-web-session-recorder": "^0.16.2-1"
   },
   "devDependencies": {
     "@rollup/plugin-commonjs": "^24.1.0",
