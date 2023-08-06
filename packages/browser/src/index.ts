@@ -120,6 +120,14 @@ class Browser {
     }
   }
 
+  addAction(name: string, attributes?: openTelemetry.Attributes) {
+    if (!hasWindow()) {
+      return;
+    }
+
+    Rum.addAction(name, attributes);
+  }
+
   setGlobalAttributes(
     attributes: Record<
       'userEmail' | 'userName' | 'teamName' | 'teamId' | string,
