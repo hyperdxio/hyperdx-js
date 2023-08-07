@@ -15,6 +15,7 @@ HyperDX.init({
   apiKey: '<YOUR_API_KEY_HERE>',
   service: 'my-frontend-app',
   tracePropagationTargets: [/api.myapp.domain/i], // Set to link traces from frontend to backend requests
+  captureConsole: true, // Capture console logs
 });
 ```
 
