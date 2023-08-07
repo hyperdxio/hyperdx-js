@@ -120,7 +120,7 @@ class Browser {
     }
   }
 
-  addAction(name: string, attributes?: openTelemetry.Attributes) {
+  addAction(name: string, attributes?: opentelemetry.Attributes) {
     if (!hasWindow()) {
       return;
     }
