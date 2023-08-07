@@ -33,3 +33,13 @@ HyperDX.setGlobalAttributes({
   // Other custom properties...
 });
 ```
+
+### (Optional) Send Custom Actions
+
+```js
+HyperDX.addAction('Form-Completed', {
+  formId: 'signup-form',
+  formName: 'Signup Form',
+  formType: 'signup',
+});
+```
