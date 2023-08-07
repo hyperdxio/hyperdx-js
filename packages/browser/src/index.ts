@@ -25,6 +25,7 @@ class Browser {
     instrumentations = {},
     disableReplay = false,
     disableIntercom = false,
+    captureConsole = false,
     blockClass,
     ignoreClass,
     maskClass,
@@ -38,6 +39,7 @@ class Browser {
     instrumentations?: Instrumentations;
     disableReplay?: boolean;
     disableIntercom?: boolean;
+    captureConsole?: boolean;
     blockClass?: string;
     ignoreClass?: string;
     maskClass?: string;
@@ -54,6 +56,8 @@ class Browser {
       apiKey,
       app: service,
       instrumentations: {
+        visibility: true,
+        console: captureConsole,
         fetch: {
           ...(tracePropagationTargets != null
             ? {
@@ -114,6 +118,14 @@ class Browser {
           // Ignore if intercom isn't installed or can't be used
         });
     }
+  }
+
+  addAction(name: string, attributes?: Record<string, any>) {
+    if (!hasWindow()) {
+      return;
+    }
+
+    Rum.addAction(name, attributes);
   }
 
   setGlobalAttributes(
