@@ -1,5 +1,11 @@
 # @hyperdx/browser
 
+## 0.18.0
+
+### Minor Changes
+
+- 9e5d1c2: feat: enable page visibility + console instrumentation
+
 ## 0.17.0
 
 ### Minor Changes
