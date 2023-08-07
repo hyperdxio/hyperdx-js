@@ -15,7 +15,7 @@ HyperDX.init({
   apiKey: '<YOUR_API_KEY_HERE>',
   service: 'my-frontend-app',
   tracePropagationTargets: [/api.myapp.domain/i], // Set to link traces from frontend to backend requests
-  captureConsole: true, // Capture console logs
+  captureConsole: true, // Capture console logs (default false)
 });
 ```
 
@@ -35,6 +35,10 @@ HyperDX.setGlobalAttributes({
 ```
 
 ### (Optional) Send Custom Actions
+
+To explicitly track a specific application event (ex. sign up, submission, etc.), you can call the `addAction` function with an event name and optional event metadata.
+
+Example:
 
 ```js
 HyperDX.addAction('Form-Completed', {
