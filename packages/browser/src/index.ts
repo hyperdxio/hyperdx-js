@@ -1,6 +1,6 @@
 import Rum from '@hyperdx/otel-web';
 import SessionRecorder from '@hyperdx/otel-web-session-recorder';
-import opentelemetry from '@opentelemetry/api';
+import opentelemetry, { Attributes } from '@opentelemetry/api';
 
 import type { RumOtelWebConfig } from '@hyperdx/otel-web';
 import { resolveAsyncGlobal } from './utils';
@@ -120,7 +120,7 @@ class Browser {
     }
   }
 
-  addAction(name: string, attributes?: Record<string, any>) {
+  addAction(name: string, attributes?: Attributes) {
     if (!hasWindow()) {
       return;
     }
