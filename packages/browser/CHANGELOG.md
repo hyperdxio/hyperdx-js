@@ -1,5 +1,11 @@
 # @hyperdx/browser
 
+## 0.18.1
+
+### Patch Changes
+
+- 842eaa8: fix: reflect attributes arg type (addAction)
+
 ## 0.18.0
 
 ### Minor Changes
