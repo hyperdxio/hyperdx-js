@@ -682,10 +682,10 @@
   resolved "https://registry.yarnpkg.com/@humanwhocodes/object-schema/-/object-schema-1.2.1.tgz#b520529ec21d8e5945a1851dfd1c32e94e39ff45"
   integrity sha512-ZnQMnLV4e7hDlUvw8H+U8ASL02SS2Gn6+9Ac3wGGLIe7+je2AeAOxPY+izIPJDfFDb7eDjev0Us8MO1iFRN8hA==
 
-"@hyperdx/otel-web-session-recorder@0.16.2-2":
-  version "0.16.2-2"
-  resolved "https://registry.yarnpkg.com/@hyperdx/otel-web-session-recorder/-/otel-web-session-recorder-0.16.2-2.tgz#f8f9b042abb7b3141ed3864c25bb2fc7283ebe96"
-  integrity sha512-dawZ5dDqWRdhxwe2ijjC2iuxXoSpoiRbzBbzsZldh840Awu5JhXsq1Y27wL7fH8ZRjiwfAJ7v24CljsvsZPpzg==
+"@hyperdx/otel-web-session-recorder@0.16.2-3":
+  version "0.16.2-3"
+  resolved "https://registry.yarnpkg.com/@hyperdx/otel-web-session-recorder/-/otel-web-session-recorder-0.16.2-3.tgz#79f0b414596c112c19efe74099a4f403db8020d9"
+  integrity sha512-0G2cEwAwAoqBw85lztRmH3IaraTSzbP7fdV4NoqSRSXpu5gfTprD85tRSEEm+EDzvL9eSM0j3rW0IEVMynEFtQ==
   dependencies:
     "@babel/runtime" "~7.18.3"
     "@opentelemetry/api" "^1.4.1"
@@ -696,10 +696,10 @@
     rrweb "^1.1.3"
     type-fest "^3.7.2"
 
-"@hyperdx/otel-web@0.16.2-2":
-  version "0.16.2-2"
-  resolved "https://registry.yarnpkg.com/@hyperdx/otel-web/-/otel-web-0.16.2-2.tgz#ed954647b3c0819a70d2cee7824b9dbe5741b4e8"
-  integrity sha512-vaKqupon63XV+alEx++JHpuCXgsTiI7cCWHERMNPjkuow7nzIGAYklVU4gtSEp+79W16zahEBiWsykxYjdJbkQ==
+"@hyperdx/otel-web@^0.16.2-3":
+  version "0.16.2-3"
+  resolved "https://registry.yarnpkg.com/@hyperdx/otel-web/-/otel-web-0.16.2-3.tgz#24310d8513fd5a4d9de5499f73df82e059f296f9"
+  integrity sha512-E/OthbbhJ1Wap0uoZgj2X0+EnpAUjD55AbowyD55Brp6dkbHw+0UDWR4Q92H+zB5xghBPtRSLOM2JpEJkrxyyg==
   dependencies:
     "@babel/runtime" "^7.21.0"
     "@opentelemetry/api" "^1.4.1"

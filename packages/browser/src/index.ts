@@ -29,6 +29,7 @@ class Browser {
     blockClass,
     ignoreClass,
     maskClass,
+    debug = false,
   }: {
     url?: string;
     apiKey: string;
@@ -43,6 +44,7 @@ class Browser {
     blockClass?: string;
     ignoreClass?: string;
     maskClass?: string;
+    debug?: boolean;
   }) {
     if (!hasWindow()) {
       return;
@@ -51,6 +53,7 @@ class Browser {
     const urlBase = url ?? URL_BASE;
 
     Rum.init({
+      debug,
       url: `${urlBase}/v1/traces`,
       allowInsecureUrl: true,
       apiKey,
