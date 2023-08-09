@@ -1,5 +1,11 @@
 # @hyperdx/browser
 
+## 0.18.2-next.0
+
+### Patch Changes
+
+- 259d57e: Fix recursive console capture bug, add debug flag for verbose logging.
+
 ## 0.18.1
 
 ### Patch Changes
