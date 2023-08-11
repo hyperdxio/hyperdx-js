@@ -17,6 +17,7 @@ const env = process.env;
 
 type TracingConfig = {
   instrumentations?: InstrumentationConfigMap;
+  captureConsole?: boolean;
 };
 
 export const initTracing = (config: TracingConfig) => {
@@ -41,6 +42,7 @@ export const initTracing = (config: TracingConfig) => {
   }
 
   hdx('Initializing opentelemetry SDK');
+  const consoleInstrumentationEnabled = config.captureConsole ?? true;
   const apiKey =
     env.HYPERDX_API_KEY ?? env.OTEL_EXPORTER_OTLP_HEADERS?.split('=')[1];
   const hdxConsoleInstrumentation = new HyperDXConsoleInstrumentation({
@@ -82,8 +84,11 @@ export const initTracing = (config: TracingConfig) => {
       )})...`,
     );
 
+    if (consoleInstrumentationEnabled) {
+      hdx('Enabling console instrumentation');
+      hdxConsoleInstrumentation.enable();
+    }
     hdx('Starting opentelemetry SDK');
-    hdxConsoleInstrumentation.enable();
     sdk.start();
   } else {
     console.warn(
@@ -94,6 +99,7 @@ export const initTracing = (config: TracingConfig) => {
   // Graceful shutdown
   process.on('SIGTERM', () => {
     hdx('SIGTERM received, shutting down');
+    hdxConsoleInstrumentation.disable();
     sdk
       .shutdown()
       .then(
