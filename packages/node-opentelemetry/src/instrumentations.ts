@@ -1,11 +1,16 @@
+import { ClientRequest, IncomingMessage, ServerResponse } from 'http';
+
 import * as shimmer from 'shimmer';
 import _ from 'lodash';
+import { Span as ISpan } from '@opentelemetry/api';
 
 import {
   Logger,
   LoggerOptions,
   parseWinstonLog,
 } from '@hyperdx/node-logger/build/src/logger';
+
+import hdx from './debug';
 
 export const _parseConsoleArgs = (args: any[]) => {
   const stringifiedArgs = [];
@@ -84,43 +89,63 @@ export const HyperDXHTTPInstrumentationConfig = {
       responseHeaders: ALL_HTTP_RESPONSE_HEADERS,
     },
   },
-  requestHook: (span, request: any) => {
-    const chunks = [];
-    const oldWrite = request.write.bind(request);
-    request.write = (data: any) => {
-      chunks.push(Buffer.from(data));
-      return oldWrite(data);
-    };
-    const oldEnd = request.end.bind(request);
-    request.end = (data: any) => {
-      if (data) {
-        chunks.push(Buffer.from(data));
-      }
-      if (chunks.length > 0) {
-        const body = Buffer.concat(chunks).toString('utf8');
-        span.setAttribute('http.request.body', body);
-      }
-      return oldEnd(data);
-    };
+  requestHook: (span: ISpan, request: ClientRequest | IncomingMessage) => {
+    if (request instanceof ClientRequest) {
+      const chunks = [];
+      const oldWrite = request.write.bind(request);
+      request.write = (data: any) => {
+        try {
+          chunks.push(Buffer.from(data));
+        } catch (e) {
+          hdx(`error in request.write: ${e}`);
+        }
+        return oldWrite(data);
+      };
+      const oldEnd = request.end.bind(request);
+      request.end = (data: any) => {
+        try {
+          if (data) {
+            chunks.push(Buffer.from(data));
+          }
+          if (chunks.length > 0) {
+            const body = Buffer.concat(chunks).toString('utf8');
+            span.setAttribute('http.request.body', body);
+          }
+        } catch (e) {
+          hdx(`error in request.end: ${e}`);
+        }
+        return oldEnd(data);
+      };
+    }
   },
-  responseHook: (span, response: any) => {
-    const chunks = [];
-    const oldWrite = response.write.bind(response);
-    response.write = (data: any) => {
-      chunks.push(Buffer.from(data));
-      return oldWrite(data);
-    };
-    const oldEnd = response.end.bind(response);
-    response.end = (data: any) => {
-      if (data) {
-        chunks.push(Buffer.from(data));
-      }
-      if (chunks.length > 0) {
-        const body = Buffer.concat(chunks).toString('utf8');
-        span.setAttribute('http.response.body', body);
-      }
-      return oldEnd(data);
-    };
+  responseHook: (span: ISpan, response: ServerResponse | IncomingMessage) => {
+    if (response instanceof ServerResponse) {
+      const chunks = [];
+      const oldWrite = response.write.bind(response);
+      response.write = (data: any) => {
+        try {
+          chunks.push(Buffer.from(data));
+        } catch (e) {
+          hdx(`error in response.write: ${e}`);
+        }
+        return oldWrite(data);
+      };
+      const oldEnd = response.end.bind(response);
+      response.end = (data: any) => {
+        try {
+          if (data) {
+            chunks.push(Buffer.from(data));
+          }
+          if (chunks.length > 0) {
+            const body = Buffer.concat(chunks).toString('utf8');
+            span.setAttribute('http.response.body', body);
+          }
+        } catch (e) {
+          hdx(`error in response.end: ${e}`);
+        }
+        return oldEnd(data);
+      };
+    }
   },
 };
 
