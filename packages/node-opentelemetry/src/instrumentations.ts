@@ -1,6 +1,7 @@
 import * as shimmer from 'shimmer';
 import _ from 'lodash';
 
+// @ts-ignore
 import {
   Logger,
   LoggerOptions,
