@@ -19,6 +19,8 @@ export const stringToBoolean = (stringValue: string | undefined) => {
   }
 };
 
+// TODO: Support more instrumentation configuration options
+
 initSDK({
   captureConsole: stringToBoolean(env.HDX_JS_CONSOLE_INSTRUMENT),
 });
