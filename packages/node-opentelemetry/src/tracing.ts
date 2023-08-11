@@ -23,4 +23,5 @@ export const stringToBoolean = (stringValue: string | undefined) => {
 
 initSDK({
   captureConsole: stringToBoolean(env.HDX_JS_CONSOLE_INSTRUMENT),
+  advancedNetworkCapture: stringToBoolean(env.HDX_JS_ADVANCED_NETWORK_CAPTURE),
 });

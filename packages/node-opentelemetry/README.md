@@ -100,7 +100,27 @@ import { initSDK } from '@hyperdx/node-opentelemetry';
 
 initSDK({
   captureConsole: true, // optional, default: true
+  advancedNetworkCapture: true, // optional, default: false
 });
 
 // Other instrumentation code...
+```
+
+### Advanced Instrumentation Configuration (Optional)
+
+#### Capture Console Logs
+
+By default, the OpenTelemetry SDK will capture console logs. You can disable it by setting `HDX_JS_CONSOLE_INSTRUMENT` flag to 0.
+
+```sh
+export HDX_JS_CONSOLE_INSTRUMENT=0
+```
+
+#### Advanced Network Capture
+
+By enabling network capture features, developers gain the capability to debug HTTP request headers and body payloads effectively.
+This can be accomplished simply by setting `HDX_JS_ADVANCED_NETWORK_CAPTURE` flag to 1.
+
+```sh
+export HDX_JS_ADVANCED_NETWORK_CAPTURE=1
 ```

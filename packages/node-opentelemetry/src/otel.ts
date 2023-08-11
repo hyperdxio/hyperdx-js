@@ -9,7 +9,10 @@ import hdx, {
   HDX_DEBUG_MODE_ENABLED,
   LOG_PREFIX as _LOG_PREFIX,
 } from './debug';
-import { HyperDXConsoleInstrumentation } from './instrumentations';
+import {
+  HyperDXConsoleInstrumentation,
+  HyperDXHTTPInstrumentationConfig,
+} from './instrumentations';
 
 const LOG_PREFIX = `⚠️  ${_LOG_PREFIX}`;
 
@@ -18,6 +21,7 @@ const env = process.env;
 type SDKConfig = {
   instrumentations?: InstrumentationConfigMap;
   captureConsole?: boolean;
+  advancedNetworkCapture?: boolean;
 };
 
 export const initSDK = (config: SDKConfig) => {
@@ -57,6 +61,12 @@ export const initSDK = (config: SDKConfig) => {
     // metricReader: metricReader,
     instrumentations: [
       getNodeAutoInstrumentations({
+        '@opentelemetry/instrumentation-http': config.advancedNetworkCapture
+          ? HyperDXHTTPInstrumentationConfig
+          : {
+              enabled: true,
+            },
+
         // FIXME: issue detected with fs instrumentation (infinite loop)
         '@opentelemetry/instrumentation-fs': {
           enabled: false,
