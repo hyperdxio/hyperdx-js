@@ -20,7 +20,7 @@ type TracingConfig = {
   captureConsole?: boolean;
 };
 
-export const initTracing = (config: TracingConfig) => {
+export const initSDK = (config: TracingConfig) => {
   // enable otel debug mode if HDX_DEBUG_MODE_ENABLED is set
   if (HDX_DEBUG_MODE_ENABLED) {
     env.OTEL_LOG_LEVEL = 'debug';

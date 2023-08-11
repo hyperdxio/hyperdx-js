@@ -90,3 +90,17 @@ Run your application with the following command (example using `ts-node`):
 ```sh
 ts-node -r '@hyperdx/node-opentelemetry/build/src/tracing' index.js
 ```
+
+#### Option 3
+
+You can also initialize the OpenTelemetry SDK manually in your own otel configuration file.
+
+```ts
+import { initSDK } from '@hyperdx/node-opentelemetry';
+
+initSDK({
+  captureConsole: true, // optional, default: true
+});
+
+// Other instrumentation code...
+```

@@ -1,4 +1,4 @@
-import { initTracing } from './otel';
+import { initSDK } from './otel';
 
 const env = process.env;
 
@@ -19,6 +19,6 @@ export const stringToBoolean = (stringValue: string | undefined) => {
   }
 };
 
-initTracing({
+initSDK({
   captureConsole: stringToBoolean(env.HDX_JS_CONSOLE_INSTRUMENT),
 });
