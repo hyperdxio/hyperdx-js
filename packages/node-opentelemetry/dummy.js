@@ -21,6 +21,7 @@ const logger = winston.createLogger({
 const pinoLogger = pino();
 
 app.get('/', (req, res) => {
+  console.info('@@@@@@@@@@@@');
   console.debug({
     headers: req.headers,
     method: req.method,

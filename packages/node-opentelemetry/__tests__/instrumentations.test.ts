@@ -1,4 +1,4 @@
-import { _parseConsoleArgs } from '../src/patch';
+import { _parseConsoleArgs } from '../src/instrumentations';
 
 describe('patch', () => {
   it('should parse console args', () => {
