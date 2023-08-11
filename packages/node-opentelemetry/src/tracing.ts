@@ -20,5 +20,5 @@ export const stringToBoolean = (stringValue: string | undefined) => {
 };
 
 initTracing({
-  captureConsole: stringToBoolean(env.HDX_JS_CONSOLE_INSTRUMENTATION_ENABLED),
+  captureConsole: stringToBoolean(env.HDX_JS_CONSOLE_INSTRUMENT),
 });
