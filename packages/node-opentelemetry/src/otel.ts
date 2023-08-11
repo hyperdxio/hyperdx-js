@@ -15,12 +15,12 @@ const LOG_PREFIX = `⚠️  ${_LOG_PREFIX}`;
 
 const env = process.env;
 
-type TracingConfig = {
+type SDKConfig = {
   instrumentations?: InstrumentationConfigMap;
   captureConsole?: boolean;
 };
 
-export const initSDK = (config: TracingConfig) => {
+export const initSDK = (config: SDKConfig) => {
   // enable otel debug mode if HDX_DEBUG_MODE_ENABLED is set
   if (HDX_DEBUG_MODE_ENABLED) {
     env.OTEL_LOG_LEVEL = 'debug';
