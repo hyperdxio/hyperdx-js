@@ -23,5 +23,7 @@ jobs:
           cache: 'yarn'
       - name: Install root dependencies
         run: yarn
+      - name: Build
+        run: yarn ci:build
       - name: Run lint + type check
         run: yarn ci:lint
