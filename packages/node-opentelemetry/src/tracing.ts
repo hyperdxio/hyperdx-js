@@ -22,6 +22,8 @@ export const stringToBoolean = (stringValue: string | undefined) => {
 // TODO: Support more instrumentation configuration options
 
 initSDK({
-  captureConsole: stringToBoolean(env.HDX_JS_CONSOLE_INSTRUMENT),
-  advancedNetworkCapture: stringToBoolean(env.HDX_JS_ADVANCED_NETWORK_CAPTURE),
+  captureConsole: stringToBoolean(env.HDX_NODE_CONSOLE_CAPTURE),
+  advancedNetworkCapture: stringToBoolean(
+    env.HDX_NODE_ADVANCED_NETWORK_CAPTURE,
+  ),
 });
