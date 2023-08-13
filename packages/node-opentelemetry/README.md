@@ -99,7 +99,7 @@ You can also initialize the OpenTelemetry SDK manually in your own otel configur
 import { initSDK } from '@hyperdx/node-opentelemetry';
 
 initSDK({
-  captureConsole: true, // optional, default: true
+  consoleCapture: true, // optional, default: true
   advancedNetworkCapture: true, // optional, default: false
 });
 

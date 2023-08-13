@@ -20,7 +20,7 @@ const env = process.env;
 
 type SDKConfig = {
   instrumentations?: InstrumentationConfigMap;
-  captureConsole?: boolean;
+  consoleCapture?: boolean;
   advancedNetworkCapture?: boolean;
 };
 
@@ -46,7 +46,7 @@ export const initSDK = (config: SDKConfig) => {
   }
 
   hdx('Initializing opentelemetry SDK');
-  const consoleInstrumentationEnabled = config.captureConsole ?? true;
+  const consoleInstrumentationEnabled = config.consoleCapture ?? true;
   const apiKey =
     env.HYPERDX_API_KEY ?? env.OTEL_EXPORTER_OTLP_HEADERS?.split('=')[1];
   const hdxConsoleInstrumentation = new HyperDXConsoleInstrumentation({
