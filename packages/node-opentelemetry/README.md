@@ -88,12 +88,12 @@ ts-node, etc.).
 Run your application with the following command (example using `ts-node`):
 
 ```sh
-ts-node -r '@hyperdx/node-opentelemetry/build/src/tracing' index.js
+npx ts-node -r '@hyperdx/node-opentelemetry/build/src/tracing' index.ts
 ```
 
 #### Option 3
 
-You can also initialize the OpenTelemetry SDK manually in your own otel configuration file.
+You can also manually instrument the SDK. In the `instrument.ts`, add the following code:
 
 ```ts
 import { initSDK } from '@hyperdx/node-opentelemetry';
@@ -104,6 +104,13 @@ initSDK({
 });
 
 // Other instrumentation code...
+// Details link: https://opentelemetry.io/docs/instrumentation/js/manual/#manual-instrumentation-setup
+```
+
+And run your application with the following command (example using `ts-node`):
+
+```sh
+npx ts-node -r './instrument.ts' index.ts
 ```
 
 ### Advanced Instrumentation Configuration (Optional)
@@ -119,7 +126,8 @@ export HDX_NODE_CONSOLE_CAPTURE=0
 
 #### Advanced Network Capture
 
-By enabling network capture features, developers gain the capability to debug HTTP request headers and body payloads effectively.
+By enabling advanced network capture, the SDK will additionally capture full HTTP request/response headers
+and bodies for all inbound HTTP requests, to help with more in-depth request debugging.
 This can be accomplished by setting `HDX_NODE_ADVANCED_NETWORK_CAPTURE` environment variable to 1.
 
 ```sh
