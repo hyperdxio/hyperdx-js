@@ -92,6 +92,8 @@ export const initSDK = (config: SDKConfig) => {
           sampler: env.OTEL_TRACES_SAMPLER,
           samplerArg: env.OTEL_TRACES_SAMPLER_ARG,
           serviceName: env.OTEL_SERVICE_NAME,
+          consoleCapture: consoleInstrumentationEnabled,
+          advancedNetworkCapture: config.advancedNetworkCapture,
         },
         null,
         2,
