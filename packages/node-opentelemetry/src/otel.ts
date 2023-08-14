@@ -9,10 +9,8 @@ import hdx, {
   HDX_DEBUG_MODE_ENABLED,
   LOG_PREFIX as _LOG_PREFIX,
 } from './debug';
-import {
-  HyperDXConsoleInstrumentation,
-  HyperDXHTTPInstrumentationConfig,
-} from './instrumentations';
+import HyperDXConsoleInstrumentation from './instrumentations/console';
+import { getHyperDXHTTPInstrumentationConfig } from './instrumentations/http';
 
 const LOG_PREFIX = `⚠️  ${_LOG_PREFIX}`;
 
@@ -62,11 +60,17 @@ export const initSDK = (config: SDKConfig) => {
     instrumentations: [
       getNodeAutoInstrumentations({
         '@opentelemetry/instrumentation-http': config.advancedNetworkCapture
-          ? HyperDXHTTPInstrumentationConfig
-          : {
-              enabled: true,
-            },
-
+          ? getHyperDXHTTPInstrumentationConfig({
+              httpCaptureHeadersClientRequest:
+                env.OTEL_INSTRUMENTATION_HTTP_CAPTURE_HEADERS_CLIENT_REQUEST,
+              httpCaptureHeadersClientResponse:
+                env.OTEL_INSTRUMENTATION_HTTP_CAPTURE_HEADERS_CLIENT_RESPONSE,
+              httpCaptureHeadersServerRequest:
+                env.OTEL_INSTRUMENTATION_HTTP_CAPTURE_HEADERS_SERVER_REQUEST,
+              httpCaptureHeadersServerResponse:
+                env.OTEL_INSTRUMENTATION_HTTP_CAPTURE_HEADERS_SERVER_RESPONSE,
+            })
+          : { enabled: true },
         // FIXME: issue detected with fs instrumentation (infinite loop)
         '@opentelemetry/instrumentation-fs': {
           enabled: false,
