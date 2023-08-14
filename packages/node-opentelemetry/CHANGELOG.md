@@ -1,5 +1,16 @@
 # @hyperdx/node-opentelemetry
 
+## 0.2.0-next.0
+
+### Minor Changes
+
+- 425b0a8: chore: bump @opentelemetry deps versions
+- 425b0a8: feat: HyperDX console instrumentation (refactoring) + http instrumentation (advanced network capture)
+
+### Patch Changes
+
+- 425b0a8: fix: attach trace/span id to console logs
+
 ## 0.1.9
 
 ### Patch Changes

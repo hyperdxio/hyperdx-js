@@ -6,5 +6,10 @@
     "@hyperdx/node-logger": "0.2.6",
     "@hyperdx/node-opentelemetry": "0.1.9"
   },
-  "changesets": ["fifty-goats-tell"]
+  "changesets": [
+    "cuddly-cars-smoke",
+    "few-carrots-rhyme",
+    "fifty-goats-tell",
+    "shaggy-radios-wave"
+  ]
 }
