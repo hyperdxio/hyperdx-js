@@ -1,6 +1,6 @@
 import * as shimmer from 'shimmer';
 import _ from 'lodash';
-
+import api from '@opentelemetry/api';
 import {
   Logger,
   LoggerOptions,
@@ -49,11 +49,15 @@ export default class HyperDXConsoleInstrumentation {
       message: _parseConsoleArgs(args),
       level,
     });
-    this._logger.postMessage(
-      parsedLog.level,
-      parsedLog.message,
-      parsedLog.meta,
-    );
+
+    const currentSpan = api.trace.getSpan(api.context.active());
+
+    this._logger.postMessage(parsedLog.level, parsedLog.message, {
+      ...parsedLog.meta,
+      // attached traceId and spanId,
+      trace_id: currentSpan?.spanContext().traceId,
+      span_id: currentSpan?.spanContext().spanId,
+    });
   }
 
   private readonly _consoleLogHandler = (original: Console['log']) => {
