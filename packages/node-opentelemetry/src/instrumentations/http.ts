@@ -99,14 +99,6 @@ export const getHyperDXHTTPInstrumentationConfig = ({
   ) => {
     if (response instanceof http.ServerResponse) {
       // incoming response (server)
-      /* Capture Headers */
-      const headers =
-        splitHttpCaptureHeadersString(httpCaptureHeadersServerResponse) ??
-        response.getHeaderNames();
-      headerCapture('response', headers)(span, (header) =>
-        response.getHeader(header),
-      );
-
       /* Capture Body */
       const chunks = [];
       const oldWrite = response.write.bind(response);
@@ -133,6 +125,16 @@ export const getHyperDXHTTPInstrumentationConfig = ({
         }
         return oldEnd(data);
       };
+
+      /* Capture Headers */
+      response.on('finish', () => {
+        const headers =
+          splitHttpCaptureHeadersString(httpCaptureHeadersServerResponse) ??
+          response.getHeaderNames();
+        headerCapture('response', headers)(span, (header) =>
+          response.getHeader(header),
+        );
+      });
     } else {
       // outgoing request (client)
       /* Capture Headers */
