@@ -127,9 +127,22 @@ export HDX_NODE_CONSOLE_CAPTURE=0
 #### Advanced Network Capture
 
 By enabling advanced network capture, the SDK will additionally capture full HTTP request/response headers
-and bodies for all inbound HTTP requests, to help with more in-depth request debugging.
+and bodies for all inbound/outbound HTTP requests, to help with more in-depth request debugging.
 This can be accomplished by setting `HDX_NODE_ADVANCED_NETWORK_CAPTURE` environment variable to 1.
 
 ```sh
 export HDX_NODE_ADVANCED_NETWORK_CAPTURE=1
+```
+
+By default, all request/response headers will be captured. You can specify a custom list of headers to capture
+by setting `OTEL_INSTRUMENTATION_HTTP_CAPTURE_HEADERS_CLIENT_REQUEST`,
+`OTEL_INSTRUMENTATION_HTTP_CAPTURE_HEADERS_CLIENT_RESPONSE`,
+`OTEL_INSTRUMENTATION_HTTP_CAPTURE_HEADERS_SERVER_REQUEST`,
+`OTEL_INSTRUMENTATION_HTTP_CAPTURE_HEADERS_SERVER_RESPONSE`
+environment variable to a comma-separated list of headers.
+
+For example:
+
+```sh
+export OTEL_INSTRUMENTATION_HTTP_CAPTURE_HEADERS_CLIENT_REQUEST=authorization,accept
 ```
