@@ -43,7 +43,11 @@ export const getHyperDXHTTPInstrumentationConfig = ({
       const oldWrite = request.write.bind(request);
       request.write = (data: any) => {
         try {
-          chunks.push(Buffer.from(data));
+          if (typeof data === 'string') {
+            chunks.push(Buffer.from(data));
+          } else {
+            chunks.push(data);
+          }
         } catch (e) {
           hdx(`error in request.write: ${e}`);
         }
@@ -53,7 +57,11 @@ export const getHyperDXHTTPInstrumentationConfig = ({
       request.end = (data: any) => {
         try {
           if (data) {
-            chunks.push(Buffer.from(data));
+            if (typeof data === 'string') {
+              chunks.push(Buffer.from(data));
+            } else {
+              chunks.push(data);
+            }
           }
           if (chunks.length > 0) {
             const body = Buffer.concat(chunks).toString('utf8');
@@ -119,7 +127,11 @@ export const getHyperDXHTTPInstrumentationConfig = ({
       const oldWrite = response.write.bind(response);
       response.write = (data: any) => {
         try {
-          chunks.push(Buffer.from(data));
+          if (typeof data === 'string') {
+            chunks.push(Buffer.from(data));
+          } else {
+            chunks.push(data);
+          }
         } catch (e) {
           hdx(`error in response.write: ${e}`);
         }
@@ -129,7 +141,11 @@ export const getHyperDXHTTPInstrumentationConfig = ({
       response.end = (data: any) => {
         try {
           if (data) {
-            chunks.push(Buffer.from(data));
+            if (typeof data === 'string') {
+              chunks.push(Buffer.from(data));
+            } else {
+              chunks.push(data);
+            }
           }
           if (chunks.length > 0) {
             const body = Buffer.concat(chunks).toString('utf8');
