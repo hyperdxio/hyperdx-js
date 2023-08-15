@@ -7,6 +7,8 @@ import {
   parseWinstonLog,
 } from '@hyperdx/node-logger/build/src/logger';
 
+import hdx from '../debug';
+
 export const _parseConsoleArgs = (args: any[]) => {
   const stringifiedArgs = [];
   let firstJson;
@@ -45,19 +47,23 @@ export default class HyperDXConsoleInstrumentation {
     if (type === 'log') {
       level = 'info';
     }
-    const parsedLog = parseWinstonLog({
-      message: _parseConsoleArgs(args),
-      level,
-    });
+    try {
+      const parsedLog = parseWinstonLog({
+        message: _parseConsoleArgs(args),
+        level,
+      });
 
-    const currentSpan = api.trace.getSpan(api.context.active());
+      const currentSpan = api.trace.getSpan(api.context.active());
 
-    this._logger.postMessage(parsedLog.level, parsedLog.message, {
-      ...parsedLog.meta,
-      // attached traceId and spanId,
-      trace_id: currentSpan?.spanContext().traceId,
-      span_id: currentSpan?.spanContext().spanId,
-    });
+      this._logger.postMessage(parsedLog.level, parsedLog.message, {
+        ...parsedLog.meta,
+        // attached traceId and spanId,
+        trace_id: currentSpan?.spanContext().traceId,
+        span_id: currentSpan?.spanContext().spanId,
+      });
+    } catch (e) {
+      hdx(`error in _patchConsole: ${e}`);
+    }
   }
 
   private readonly _consoleLogHandler = (original: Console['log']) => {
