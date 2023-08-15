@@ -27,12 +27,16 @@ export const getHyperDXHTTPInstrumentationConfig = ({
     if (request instanceof http.ClientRequest) {
       // outgoing request (client)
       /* Capture Headers */
-      const headers =
-        splitHttpCaptureHeadersString(httpCaptureHeadersClientRequest) ??
-        request.getRawHeaderNames();
-      headerCapture('request', headers)(span, (header) =>
-        request.getHeader(header),
-      );
+      try {
+        const headers =
+          splitHttpCaptureHeadersString(httpCaptureHeadersClientRequest) ??
+          request.getRawHeaderNames();
+        headerCapture('request', headers)(span, (header) =>
+          request.getHeader(header),
+        );
+      } catch (e) {
+        hdx(`error parsing outgoing-request headers in requestHook: ${e}`);
+      }
 
       /* Capture Body */
       const chunks = [];
@@ -63,13 +67,17 @@ export const getHyperDXHTTPInstrumentationConfig = ({
     } else {
       // incoming request (server)
       /* Capture Headers */
-      const headers =
-        splitHttpCaptureHeadersString(httpCaptureHeadersServerRequest) ??
-        request.headers;
-      headerCapture('request', Object.keys(headers))(
-        span,
-        (header) => headers[header],
-      );
+      try {
+        const headers =
+          splitHttpCaptureHeadersString(httpCaptureHeadersServerRequest) ??
+          request.headers;
+        headerCapture('request', Object.keys(headers))(
+          span,
+          (header) => headers[header],
+        );
+      } catch (e) {
+        hdx(`error parsing incoming-request headers in requestHook: ${e}`);
+      }
 
       /* Capture Body */
       const chunks = [];
@@ -128,23 +136,31 @@ export const getHyperDXHTTPInstrumentationConfig = ({
 
       /* Capture Headers */
       response.on('finish', () => {
-        const headers =
-          splitHttpCaptureHeadersString(httpCaptureHeadersServerResponse) ??
-          response.getHeaderNames();
-        headerCapture('response', headers)(span, (header) =>
-          response.getHeader(header),
-        );
+        try {
+          const headers =
+            splitHttpCaptureHeadersString(httpCaptureHeadersServerResponse) ??
+            response.getHeaderNames();
+          headerCapture('response', headers)(span, (header) =>
+            response.getHeader(header),
+          );
+        } catch (e) {
+          hdx(`error parsing incoming-response headers in responseHook: ${e}`);
+        }
       });
     } else {
       // outgoing request (client)
       /* Capture Headers */
-      const headers =
-        splitHttpCaptureHeadersString(httpCaptureHeadersClientResponse) ??
-        response.headers;
-      headerCapture('response', Object.keys(headers))(
-        span,
-        (header) => headers[header],
-      );
+      try {
+        const headers =
+          splitHttpCaptureHeadersString(httpCaptureHeadersClientResponse) ??
+          response.headers;
+        headerCapture('response', Object.keys(headers))(
+          span,
+          (header) => headers[header],
+        );
+      } catch (e) {
+        hdx(`error parsing outgoing-response headers in responseHook: ${e}`);
+      }
 
       /* Capture Body */
       const chunks = [];
