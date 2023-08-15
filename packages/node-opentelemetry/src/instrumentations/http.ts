@@ -81,23 +81,30 @@ export const getHyperDXHTTPInstrumentationConfig = ({
 
       /* Capture Body */
       const chunks = [];
-      request.on('data', (chunk) => {
-        try {
-          chunks.push(chunk);
-        } catch (e) {
-          hdx(`error in request.on('data'): ${e}`);
-        }
-      });
-
-      request.on('end', () => {
-        try {
-          if (chunks.length > 0) {
-            const body = Buffer.concat(chunks).toString('utf8');
-            span.setAttribute('http.request.body', body);
+      // HACK: so that the event is listened afterwards
+      setImmediate(() => {
+        request.on('data', (chunk) => {
+          try {
+            if (typeof chunk === 'string') {
+              chunks.push(Buffer.from(chunk));
+            } else {
+              chunks.push(chunk);
+            }
+          } catch (e) {
+            hdx(`error in request.on('data'): ${e}`);
           }
-        } catch (e) {
-          hdx(`error in request.on('end'): ${e}`);
-        }
+        });
+
+        request.on('end', () => {
+          try {
+            if (chunks.length > 0) {
+              const body = Buffer.concat(chunks).toString('utf8');
+              span.setAttribute('http.request.body', body);
+            }
+          } catch (e) {
+            hdx(`error in request.on('end'): ${e}`);
+          }
+        });
       });
     }
   },
@@ -131,11 +138,8 @@ export const getHyperDXHTTPInstrumentationConfig = ({
         } catch (e) {
           hdx(`error in response.end: ${e}`);
         }
-        return oldEnd(data);
-      };
 
-      /* Capture Headers */
-      response.on('finish', () => {
+        /* Capture Headers */
         try {
           const headers =
             splitHttpCaptureHeadersString(httpCaptureHeadersServerResponse) ??
@@ -146,7 +150,8 @@ export const getHyperDXHTTPInstrumentationConfig = ({
         } catch (e) {
           hdx(`error parsing incoming-response headers in responseHook: ${e}`);
         }
-      });
+        return oldEnd(data);
+      };
     } else {
       // outgoing request (client)
       /* Capture Headers */
@@ -164,22 +169,30 @@ export const getHyperDXHTTPInstrumentationConfig = ({
 
       /* Capture Body */
       const chunks = [];
-      response.on('data', (chunk) => {
-        try {
-          chunks.push(chunk);
-        } catch (e) {
-          hdx(`error in response.on('data'): ${e}`);
-        }
-      });
-      response.on('end', () => {
-        try {
-          if (chunks.length > 0) {
-            const body = Buffer.concat(chunks).toString('utf8');
-            span.setAttribute('http.response.body', body);
+      // HACK: so that the event is listened afterwards
+      setImmediate(() => {
+        response.on('data', (chunk) => {
+          try {
+            if (typeof chunk === 'string') {
+              chunks.push(Buffer.from(chunk));
+            } else {
+              chunks.push(chunk);
+            }
+          } catch (e) {
+            hdx(`error in response.on('data'): ${e}`);
           }
-        } catch (e) {
-          hdx(`error in response.on('end'): ${e}`);
-        }
+        });
+
+        response.on('end', () => {
+          try {
+            if (chunks.length > 0) {
+              const body = Buffer.concat(chunks).toString('utf8');
+              span.setAttribute('http.response.body', body);
+            }
+          } catch (e) {
+            hdx(`error in response.on('end'): ${e}`);
+          }
+        });
       });
     }
   },
