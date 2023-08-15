@@ -23,9 +23,19 @@ const logger = winston.createLogger({
 const pinoLogger = pino();
 
 async function sendGetRequest() {
+  const postData = JSON.stringify({
+    key1: 'value1',
+    key2: 'value2',
+  });
+
   const options = {
     hostname: 'hyperdx.free.beeceptor.com', // Replace with the API hostname
-    method: 'GET',
+    method: 'POST',
+    paht: '/',
+    headers: {
+      'Content-Type': 'application/json',
+      'Content-Length': postData.length,
+    },
   };
 
   return new Promise((resolve, reject) => {
@@ -45,6 +55,7 @@ async function sendGetRequest() {
       reject(error); // Reject the promise with the error
     });
 
+    req.write(postData);
     req.end();
   });
 }

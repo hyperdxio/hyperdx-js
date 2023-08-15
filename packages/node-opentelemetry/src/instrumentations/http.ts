@@ -43,7 +43,11 @@ export const getHyperDXHTTPInstrumentationConfig = ({
       const oldWrite = request.write.bind(request);
       request.write = (data: any) => {
         try {
-          chunks.push(Buffer.from(data));
+          if (typeof data === 'string') {
+            chunks.push(Buffer.from(data));
+          } else {
+            chunks.push(data);
+          }
         } catch (e) {
           hdx(`error in request.write: ${e}`);
         }
@@ -53,7 +57,11 @@ export const getHyperDXHTTPInstrumentationConfig = ({
       request.end = (data: any) => {
         try {
           if (data) {
-            chunks.push(Buffer.from(data));
+            if (typeof data === 'string') {
+              chunks.push(Buffer.from(data));
+            } else {
+              chunks.push(data);
+            }
           }
           if (chunks.length > 0) {
             const body = Buffer.concat(chunks).toString('utf8');
@@ -83,7 +91,11 @@ export const getHyperDXHTTPInstrumentationConfig = ({
       const chunks = [];
       request.on('data', (chunk) => {
         try {
-          chunks.push(chunk);
+          if (typeof chunk === 'string') {
+            chunks.push(Buffer.from(chunk));
+          } else {
+            chunks.push(chunk);
+          }
         } catch (e) {
           hdx(`error in request.on('data'): ${e}`);
         }
@@ -112,7 +124,11 @@ export const getHyperDXHTTPInstrumentationConfig = ({
       const oldWrite = response.write.bind(response);
       response.write = (data: any) => {
         try {
-          chunks.push(Buffer.from(data));
+          if (typeof data === 'string') {
+            chunks.push(Buffer.from(data));
+          } else {
+            chunks.push(data);
+          }
         } catch (e) {
           hdx(`error in response.write: ${e}`);
         }
@@ -122,7 +138,11 @@ export const getHyperDXHTTPInstrumentationConfig = ({
       response.end = (data: any) => {
         try {
           if (data) {
-            chunks.push(Buffer.from(data));
+            if (typeof data === 'string') {
+              chunks.push(Buffer.from(data));
+            } else {
+              chunks.push(data);
+            }
           }
           if (chunks.length > 0) {
             const body = Buffer.concat(chunks).toString('utf8');
@@ -131,11 +151,8 @@ export const getHyperDXHTTPInstrumentationConfig = ({
         } catch (e) {
           hdx(`error in response.end: ${e}`);
         }
-        return oldEnd(data);
-      };
 
-      /* Capture Headers */
-      response.on('finish', () => {
+        /* Capture Headers */
         try {
           const headers =
             splitHttpCaptureHeadersString(httpCaptureHeadersServerResponse) ??
@@ -146,7 +163,8 @@ export const getHyperDXHTTPInstrumentationConfig = ({
         } catch (e) {
           hdx(`error parsing incoming-response headers in responseHook: ${e}`);
         }
-      });
+        return oldEnd(data);
+      };
     } else {
       // outgoing request (client)
       /* Capture Headers */
@@ -164,13 +182,21 @@ export const getHyperDXHTTPInstrumentationConfig = ({
 
       /* Capture Body */
       const chunks = [];
-      response.on('data', (chunk) => {
-        try {
-          chunks.push(chunk);
-        } catch (e) {
-          hdx(`error in response.on('data'): ${e}`);
-        }
+      // HACK: register the listener on the next tick to avoid blocking issue
+      setImmediate(() => {
+        response.on('data', (chunk) => {
+          try {
+            if (typeof chunk === 'string') {
+              chunks.push(Buffer.from(chunk));
+            } else {
+              chunks.push(chunk);
+            }
+          } catch (e) {
+            hdx(`error in response.on('data'): ${e}`);
+          }
+        });
       });
+
       response.on('end', () => {
         try {
           if (chunks.length > 0) {
