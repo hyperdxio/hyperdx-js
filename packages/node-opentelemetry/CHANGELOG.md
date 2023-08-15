@@ -1,5 +1,12 @@
 # @hyperdx/node-opentelemetry
 
+## 0.2.0-next.2
+
+### Patch Changes
+
+- a9a1bdc: style: capture response headers in 'end' event
+- a9a1bdc: fix: regiester stream data event listern in next iteration of event loop
+
 ## 0.2.0-next.1
 
 ### Patch Changes
