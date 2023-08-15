@@ -1,5 +1,11 @@
 # @hyperdx/node-opentelemetry
 
+## 0.2.0-next.1
+
+### Patch Changes
+
+- 56906da: fix: more try-catch in instrumentation codes
+
 ## 0.2.0-next.0
 
 ### Minor Changes
