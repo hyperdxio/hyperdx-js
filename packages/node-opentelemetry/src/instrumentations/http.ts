@@ -89,30 +89,27 @@ export const getHyperDXHTTPInstrumentationConfig = ({
 
       /* Capture Body */
       const chunks = [];
-      // HACK: so that the event is listened afterwards
-      setImmediate(() => {
-        request.on('data', (chunk) => {
-          try {
-            if (typeof chunk === 'string') {
-              chunks.push(Buffer.from(chunk));
-            } else {
-              chunks.push(chunk);
-            }
-          } catch (e) {
-            hdx(`error in request.on('data'): ${e}`);
+      request.on('data', (chunk) => {
+        try {
+          if (typeof chunk === 'string') {
+            chunks.push(Buffer.from(chunk));
+          } else {
+            chunks.push(chunk);
           }
-        });
+        } catch (e) {
+          hdx(`error in request.on('data'): ${e}`);
+        }
+      });
 
-        request.on('end', () => {
-          try {
-            if (chunks.length > 0) {
-              const body = Buffer.concat(chunks).toString('utf8');
-              span.setAttribute('http.request.body', body);
-            }
-          } catch (e) {
-            hdx(`error in request.on('end'): ${e}`);
+      request.on('end', () => {
+        try {
+          if (chunks.length > 0) {
+            const body = Buffer.concat(chunks).toString('utf8');
+            span.setAttribute('http.request.body', body);
           }
-        });
+        } catch (e) {
+          hdx(`error in request.on('end'): ${e}`);
+        }
       });
     }
   },
@@ -185,7 +182,7 @@ export const getHyperDXHTTPInstrumentationConfig = ({
 
       /* Capture Body */
       const chunks = [];
-      // HACK: so that the event is listened afterwards
+      // HACK: register the listener on the next tick to avoid blocking issue
       setImmediate(() => {
         response.on('data', (chunk) => {
           try {
@@ -198,17 +195,17 @@ export const getHyperDXHTTPInstrumentationConfig = ({
             hdx(`error in response.on('data'): ${e}`);
           }
         });
+      });
 
-        response.on('end', () => {
-          try {
-            if (chunks.length > 0) {
-              const body = Buffer.concat(chunks).toString('utf8');
-              span.setAttribute('http.response.body', body);
-            }
-          } catch (e) {
-            hdx(`error in response.on('end'): ${e}`);
+      response.on('end', () => {
+        try {
+          if (chunks.length > 0) {
+            const body = Buffer.concat(chunks).toString('utf8');
+            span.setAttribute('http.response.body', body);
           }
-        });
+        } catch (e) {
+          hdx(`error in response.on('end'): ${e}`);
+        }
       });
     }
   },
