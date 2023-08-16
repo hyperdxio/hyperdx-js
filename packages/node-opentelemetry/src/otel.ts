@@ -9,6 +9,7 @@ import hdx, {
   HDX_DEBUG_MODE_ENABLED,
   LOG_PREFIX as _LOG_PREFIX,
 } from './debug';
+import HyperDXSpanProcessor, { hyperDXContext } from './spanProcessor';
 import HyperDXConsoleInstrumentation from './instrumentations/console';
 import { getHyperDXHTTPInstrumentationConfig } from './instrumentations/http';
 
@@ -21,6 +22,8 @@ type SDKConfig = {
   consoleCapture?: boolean;
   advancedNetworkCapture?: boolean;
 };
+
+export const setTraceAttributes = hyperDXContext.setTraceAttributes;
 
 export const initSDK = (config: SDKConfig) => {
   // enable otel debug mode if HDX_DEBUG_MODE_ENABLED is set
@@ -53,10 +56,12 @@ export const initSDK = (config: SDKConfig) => {
   });
 
   const sdk = new NodeSDK({
-    traceExporter: new OTLPTraceExporter({
-      timeoutMillis: 60000,
-    }),
     // metricReader: metricReader,
+    spanProcessor: new HyperDXSpanProcessor(
+      new OTLPTraceExporter({
+        timeoutMillis: 60000,
+      }),
+    ) as any,
     instrumentations: [
       getNodeAutoInstrumentations({
         '@opentelemetry/instrumentation-http': config.advancedNetworkCapture
