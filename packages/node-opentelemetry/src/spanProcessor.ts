@@ -54,6 +54,7 @@ class HyperDXContext {
     this.setTraceAttributesForAllSpans(traceId);
   };
 
+  // user facing API
   setTraceAttributes = (attributes: Attributes): void => {
     const currentActiveSpanTraceId = this._getActiveSpanTraceId();
     if (!currentActiveSpanTraceId) {
