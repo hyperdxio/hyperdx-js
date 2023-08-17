@@ -58,17 +58,17 @@ class HyperDXContext {
   };
 
   addTraceSpan = (traceId: string, span: Span): void => {
-    if (this._traceMap.size >= HDX_CONTEXT_MAX_TRACKED_TRACE_IDS) {
-      hdx(
-        `Exceeded max tracked trace ids: ${HDX_CONTEXT_MAX_TRACKED_TRACE_IDS}`,
-      );
-      return;
-    }
     // prevent downstream exporter calls from generating spans
     context.with(suppressTracing(context.active()), () => {
       hdx(`Adding traceId ${traceId} to _traceMap`);
       const traceData = this._traceMap.get(traceId);
       if (!traceData) {
+        if (this._traceMap.size >= HDX_CONTEXT_MAX_TRACKED_TRACE_IDS) {
+          hdx(
+            `Exceeded max tracked trace ids: ${HDX_CONTEXT_MAX_TRACKED_TRACE_IDS}`,
+          );
+          return;
+        }
         this._traceMap.set(traceId, {
           spans: [span],
           lastUpdateAt: Date.now(),
