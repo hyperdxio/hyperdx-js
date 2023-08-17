@@ -40,31 +40,7 @@ class HyperDXContext {
     return activeSpan.spanContext().traceId;
   };
 
-  addTraceSpan = (traceId: string, span: Span): void => {
-    const traceData = this._traceMap.get(traceId);
-    if (!traceData) {
-      this._traceMap.set(traceId, {
-        spans: [span],
-        lastUpdateAt: Date.now(),
-      });
-    } else {
-      traceData.spans.push(span);
-      traceData.lastUpdateAt = Date.now();
-    }
-    this.setTraceAttributesForAllSpans(traceId);
-  };
-
-  // user facing API
-  setTraceAttributes = (attributes: Attributes): void => {
-    const currentActiveSpanTraceId = this._getActiveSpanTraceId();
-    if (!currentActiveSpanTraceId) {
-      return;
-    }
-    this._traceAttributes.set(currentActiveSpanTraceId, attributes);
-    this.setTraceAttributesForAllSpans(currentActiveSpanTraceId);
-  };
-
-  setTraceAttributesForAllSpans = (traceId: string): void => {
+  _setTraceAttributesForAllSpans = (traceId: string): void => {
     const attributes = this._traceAttributes.get(traceId);
     if (!attributes) {
       return;
@@ -78,17 +54,44 @@ class HyperDXContext {
       }
     }
   };
+
+  addTraceSpan = (traceId: string, span: Span): void => {
+    // prevent downstream exporter calls from generating spans
+    context.with(suppressTracing(context.active()), () => {
+      hdx(`Adding traceId ${traceId} to _traceMap`);
+      const traceData = this._traceMap.get(traceId);
+      if (!traceData) {
+        this._traceMap.set(traceId, {
+          spans: [span],
+          lastUpdateAt: Date.now(),
+        });
+      } else {
+        traceData.spans.push(span);
+        traceData.lastUpdateAt = Date.now();
+      }
+      this._setTraceAttributesForAllSpans(traceId);
+    });
+  };
+
+  // user facing API
+  setTraceAttributes = (attributes: Attributes): void => {
+    // prevent downstream exporter calls from generating spans
+    context.with(suppressTracing(context.active()), () => {
+      const currentActiveSpanTraceId = this._getActiveSpanTraceId();
+      if (!currentActiveSpanTraceId) {
+        return;
+      }
+      this._traceAttributes.set(currentActiveSpanTraceId, attributes);
+      this._setTraceAttributesForAllSpans(currentActiveSpanTraceId);
+    });
+  };
 }
 
 export const hyperDXContext = new HyperDXContext();
 
 export default class HyperDXSpanProcessor extends BatchSpanProcessor {
   onStart(_span: Span, _parentContext: Context): void {
-    // prevent downstream exporter calls from generating spans
-    context.with(suppressTracing(context.active()), () => {
-      const traceId = _span.spanContext().traceId;
-      hdx(`Adding traceId ${traceId} to _traceMap`);
-      hyperDXContext.addTraceSpan(traceId, _span);
-    });
+    const traceId = _span.spanContext().traceId;
+    hyperDXContext.addTraceSpan(traceId, _span);
   }
 }

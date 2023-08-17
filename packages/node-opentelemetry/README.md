@@ -115,8 +115,9 @@ npx ts-node -r './instrument.ts' index.ts
 
 ### (Optional) Attach User Information or Metadata
 
-Attaching user information will allow you to search/filter events in HyperDX.
-This can be called in the custom middleware.
+Attaching user information will allow you to search/filter sessions and events in HyperDX.
+This can be called at any point in the middleware chain, but it is recommended to call it as early as possible.
+Every spans within a single request trace will be linked to the user's details.
 
 `userId`, `userEmail`, `userName`, and `teamName` will populate the sessions UI with the corresponding values, but can be omitted. Any other additional values can be specified and used to search for events.
 
