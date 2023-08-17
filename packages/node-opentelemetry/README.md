@@ -113,7 +113,30 @@ And run your application with the following command (example using `ts-node`):
 npx ts-node -r './instrument.ts' index.ts
 ```
 
-### Advanced Instrumentation Configuration (Optional)
+### (Optional) Attach User Information or Metadata
+
+To easily tag all events related to a given attribute or identifier (ex. user id or email), you can call the `setTraceAttributes` function which will tag every log/span associated with the current trace after the call with the declared attributes. It's recommended to call this function as early as possible within a given request/trace (ex. as early in an Express middleware stack as possible).
+
+This is a convenient way to ensure all logs/spans are automatically tagged with the right identifiers to be searched on later, instead of needing to manually tagging and propagating identifiers yourself.
+
+`userId`, `userEmail`, `userName`, and `teamName` will populate the sessions UI with the corresponding values, but can be omitted. Any other additional values can be specified and used to search for events.
+
+```ts
+import { setTraceAttributes } from '@hyperdx/node-opentelemetry';
+
+app.use((req, res, next) => {
+  // Get user information from the request...
+
+  // Attach user information to the current trace
+  setTraceAttributes({
+    userId,
+    userEmail,
+  });
+  next();
+});
+```
+
+### (Optional) Advanced Instrumentation Configuration
 
 #### Capture Console Logs
 

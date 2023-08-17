@@ -7,10 +7,13 @@ import type { LoggerOptions } from './logger';
 
 export type HyperDXWinstonOptions = LoggerOptions & {
   maxLevel?: string;
+  getCustomMeta?: () => Record<string, any>;
 };
 
 export default class HyperDXWinston extends Transport {
   private readonly logger: Logger;
+
+  private readonly getCustomMeta: () => Record<string, any>;
 
   constructor({
     apiKey,
@@ -20,9 +23,11 @@ export default class HyperDXWinston extends Transport {
     sendIntervalMs,
     service,
     timeout,
+    getCustomMeta,
   }: HyperDXWinstonOptions) {
     hdx('Initializing HyperDX winston transport...');
     super({ level: maxLevel ?? 'info' });
+    this.getCustomMeta = getCustomMeta;
     this.logger = new Logger({
       apiKey,
       baseUrl,
@@ -45,7 +50,10 @@ export default class HyperDXWinston extends Transport {
 
     const { level, message, meta } = parseWinstonLog(info);
     hdx('Sending log to HyperDX');
-    this.logger.postMessage(level, message, meta);
+    this.logger.postMessage(level, message, {
+      ...this.getCustomMeta?.(),
+      ...meta,
+    });
     hdx('Log sent to HyperDX');
     callback();
   }
