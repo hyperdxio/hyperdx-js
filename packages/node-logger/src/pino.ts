@@ -30,8 +30,8 @@ export default (opts: HyperDXPinoOptions) => {
           const { level, message, meta } = parsePinoLog(obj);
           hdx('Sending log to HyperDX');
           logger.postMessage(PINO_LEVELS[level], message, {
-            ...meta,
             ...opts.getCustomMeta?.(),
+            ...meta,
           });
           hdx('Log sent to HyperDX');
         }

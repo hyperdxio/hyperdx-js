@@ -51,8 +51,8 @@ export default class HyperDXWinston extends Transport {
     const { level, message, meta } = parseWinstonLog(info);
     hdx('Sending log to HyperDX');
     this.logger.postMessage(level, message, {
-      ...meta,
       ...this.getCustomMeta?.(),
+      ...meta,
     });
     hdx('Log sent to HyperDX');
     callback();
