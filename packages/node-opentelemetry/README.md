@@ -113,7 +113,29 @@ And run your application with the following command (example using `ts-node`):
 npx ts-node -r './instrument.ts' index.ts
 ```
 
-### Advanced Instrumentation Configuration (Optional)
+### (Optional) Attach User Information or Metadata
+
+Attaching user information will allow you to search/filter events in HyperDX.
+This can be called in the custom middleware.
+
+`userId`, `userEmail`, `userName`, and `teamName` will populate the sessions UI with the corresponding values, but can be omitted. Any other additional values can be specified and used to search for events.
+
+```ts
+import { setTraceAttributes } from '@hyperdx/node-opentelemetry';
+
+app.use((req, res, next) => {
+  // Get user information from the request...
+
+  // Attach user information to the current trace
+  setTraceAttributes({
+    userId,
+    userEmail,
+  });
+  next();
+});
+```
+
+### (Optional) Advanced Instrumentation Configuration
 
 #### Capture Console Logs
 

@@ -33,7 +33,7 @@ class HyperDXContext {
   }
 
   _getActiveSpanTraceId = (): string | undefined => {
-    const activeSpan = trace.getSpan(context.active());
+    const activeSpan = trace.getActiveSpan();
     if (!activeSpan) {
       return undefined;
     }
