@@ -41,7 +41,7 @@ class HyperDXContext {
   };
 
   private _setTraceAttributesForAllSpans = (traceId: string): void => {
-    const attributes = this._traceAttributes.get(traceId);
+    const attributes = this.getTraceAttributes(traceId);
     if (!attributes) {
       return;
     }
@@ -71,6 +71,10 @@ class HyperDXContext {
       }
       this._setTraceAttributesForAllSpans(traceId);
     });
+  };
+
+  getTraceAttributes = (traceId: string): Attributes | undefined => {
+    return this._traceAttributes.get(traceId);
   };
 
   // user facing API

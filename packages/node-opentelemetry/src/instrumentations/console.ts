@@ -8,6 +8,7 @@ import {
 } from '@hyperdx/node-logger/build/src/logger';
 
 import hdx from '../debug';
+import { hyperDXContext } from '../spanProcessor';
 
 export const _parseConsoleArgs = (args: any[]) => {
   const stringifiedArgs = [];
@@ -53,13 +54,19 @@ export default class HyperDXConsoleInstrumentation {
         level,
       });
 
-      const currentSpan = api.trace.getSpan(api.context.active());
+      const currentActiveSpan = api.trace.getActiveSpan();
+      const traceId = currentActiveSpan?.spanContext().traceId;
+      const attributes = traceId
+        ? hyperDXContext.getTraceAttributes(traceId)
+        : {};
 
       this._logger.postMessage(parsedLog.level, parsedLog.message, {
         ...parsedLog.meta,
+        // attach custom attributes
+        ...attributes,
         // attached traceId and spanId,
-        trace_id: currentSpan?.spanContext().traceId,
-        span_id: currentSpan?.spanContext().spanId,
+        trace_id: traceId,
+        span_id: currentActiveSpan?.spanContext().spanId,
       });
     } catch (e) {
       hdx(`error in _patchConsole: ${e}`);
