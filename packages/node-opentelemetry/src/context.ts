@@ -4,6 +4,8 @@ import { suppressTracing } from '@opentelemetry/core';
 
 import hdx from './debug';
 
+const HDX_CONTEXT_MAX_SPANS_PER_TRACE = 100;
+const HDX_CONTEXT_MAX_TRACKED_TRACE_IDS = 50000; // ~ 500 MB of memory (10 spans / trace, 1k per span)
 const HDX_CONTEXT_REFRESHER_INTERVAL = 10000;
 const HDX_CONTEXT_TRACE_ATTRIBUTES_EXPIRATION = 5 * 60 * 1000;
 
@@ -56,6 +58,12 @@ class HyperDXContext {
   };
 
   addTraceSpan = (traceId: string, span: Span): void => {
+    if (this._traceMap.size >= HDX_CONTEXT_MAX_TRACKED_TRACE_IDS) {
+      hdx(
+        `Exceeded max tracked trace ids: ${HDX_CONTEXT_MAX_TRACKED_TRACE_IDS}`,
+      );
+      return;
+    }
     // prevent downstream exporter calls from generating spans
     context.with(suppressTracing(context.active()), () => {
       hdx(`Adding traceId ${traceId} to _traceMap`);
@@ -66,6 +74,12 @@ class HyperDXContext {
           lastUpdateAt: Date.now(),
         });
       } else {
+        if (traceData.spans.length >= HDX_CONTEXT_MAX_SPANS_PER_TRACE) {
+          hdx(
+            `Exceeded max spans per trace: ${HDX_CONTEXT_MAX_SPANS_PER_TRACE}`,
+          );
+          return;
+        }
         traceData.spans.push(span);
         traceData.lastUpdateAt = Date.now();
       }
@@ -83,6 +97,12 @@ class HyperDXContext {
     context.with(suppressTracing(context.active()), () => {
       const currentActiveSpanTraceId = this._getActiveSpanTraceId();
       if (!currentActiveSpanTraceId) {
+        return;
+      }
+      if (this._traceAttributes.size >= HDX_CONTEXT_MAX_TRACKED_TRACE_IDS) {
+        hdx(
+          `Exceeded max tracked trace ids: ${HDX_CONTEXT_MAX_TRACKED_TRACE_IDS}`,
+        );
         return;
       }
       this._traceAttributes.set(currentActiveSpanTraceId, attributes);
