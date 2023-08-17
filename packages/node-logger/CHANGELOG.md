@@ -1,5 +1,11 @@
 # @hyperdx/node-logger
 
+## 0.2.7-next.0
+
+### Patch Changes
+
+- 366e5c3: feat: add getCustomMeta option (pino + winston)
+
 ## 0.2.6
 
 ### Patch Changes

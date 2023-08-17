@@ -1,5 +1,14 @@
 # @hyperdx/node-opentelemetry
 
+## 0.2.0-next.3
+
+### Patch Changes
+
+- 366e5c3: feat: setTraceAttributes user-facing API
+- 366e5c3: feat: add trace attributes to console + logger
+- Updated dependencies [366e5c3]
+  - @hyperdx/node-logger@0.2.7-next.0
+
 ## 0.2.0-next.2
 
 ### Patch Changes
