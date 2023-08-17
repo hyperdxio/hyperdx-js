@@ -9,9 +9,10 @@ import hdx, {
   HDX_DEBUG_MODE_ENABLED,
   LOG_PREFIX as _LOG_PREFIX,
 } from './debug';
-import HyperDXSpanProcessor, { hyperDXContext } from './spanProcessor';
 import HyperDXConsoleInstrumentation from './instrumentations/console';
+import HyperDXSpanProcessor from './spanProcessor';
 import { getHyperDXHTTPInstrumentationConfig } from './instrumentations/http';
+import { hyperDXGlobalContext } from './context';
 
 const LOG_PREFIX = `⚠️  ${_LOG_PREFIX}`;
 
@@ -23,7 +24,7 @@ type SDKConfig = {
   advancedNetworkCapture?: boolean;
 };
 
-export const setTraceAttributes = hyperDXContext.setTraceAttributes;
+export const setTraceAttributes = hyperDXGlobalContext.setTraceAttributes;
 
 export const initSDK = (config: SDKConfig) => {
   // enable otel debug mode if HDX_DEBUG_MODE_ENABLED is set

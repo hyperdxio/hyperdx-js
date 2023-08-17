@@ -8,7 +8,7 @@ import {
 } from '@hyperdx/node-logger/build/src/logger';
 
 import hdx from '../debug';
-import { hyperDXContext } from '../spanProcessor';
+import { hyperDXGlobalContext } from '../context';
 
 export const _parseConsoleArgs = (args: any[]) => {
   const stringifiedArgs = [];
@@ -57,7 +57,7 @@ export default class HyperDXConsoleInstrumentation {
       const currentActiveSpan = api.trace.getActiveSpan();
       const traceId = currentActiveSpan?.spanContext().traceId;
       const attributes = traceId
-        ? hyperDXContext.getTraceAttributes(traceId)
+        ? hyperDXGlobalContext.getTraceAttributes(traceId)
         : {};
 
       this._logger.postMessage(parsedLog.level, parsedLog.message, {
