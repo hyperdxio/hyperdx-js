@@ -1,7 +1,10 @@
+import opentelemetry from '@opentelemetry/api';
+
 // @ts-ignore
 import { HyperDXWinston } from '@hyperdx/node-logger';
 
 import hdx from './debug';
+import { hyperDXGlobalContext } from './context';
 
 const env = process.env;
 
@@ -19,6 +22,12 @@ type WinstonTransportOptions = {
 
 type PinotTransportOptions = WinstonTransportOptions;
 
+const getCustomMeta = () => {
+  const currentActiveSpan = opentelemetry.trace.getActiveSpan();
+  const traceId = currentActiveSpan?.spanContext().traceId;
+  return traceId ? hyperDXGlobalContext.getTraceAttributes(traceId) : {};
+};
+
 export const getWinsonTransport = (
   maxLevel = 'info',
   options: WinstonTransportOptions = {},
@@ -28,6 +37,7 @@ export const getWinsonTransport = (
     apiKey: HYPERDX_API_KEY,
     maxLevel,
     service: SERVICE_NAME,
+    getCustomMeta,
     ...options,
   });
 };
@@ -40,6 +50,7 @@ export const getPinoTransport = (
   options: {
     apiKey: HYPERDX_API_KEY,
     service: SERVICE_NAME,
+    getCustomMeta,
     ...options,
   },
   level: maxLevel,

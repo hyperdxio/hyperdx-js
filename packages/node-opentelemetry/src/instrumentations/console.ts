@@ -1,6 +1,6 @@
 import * as shimmer from 'shimmer';
 import _ from 'lodash';
-import api from '@opentelemetry/api';
+import opentelemetry from '@opentelemetry/api';
 import {
   Logger,
   LoggerOptions,
@@ -54,7 +54,7 @@ export default class HyperDXConsoleInstrumentation {
         level,
       });
 
-      const currentActiveSpan = api.trace.getActiveSpan();
+      const currentActiveSpan = opentelemetry.trace.getActiveSpan();
       const traceId = currentActiveSpan?.spanContext().traceId;
       const attributes = traceId
         ? hyperDXGlobalContext.getTraceAttributes(traceId)

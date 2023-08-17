@@ -15,7 +15,9 @@ const PINO_LEVELS = {
   60: 'fatal',
 };
 
-export type HyperDXPinoOptions = LoggerOptions;
+export type HyperDXPinoOptions = LoggerOptions & {
+  getCustomMeta?: () => Record<string, any>;
+};
 
 export default (opts: HyperDXPinoOptions) => {
   try {
@@ -27,7 +29,10 @@ export default (opts: HyperDXPinoOptions) => {
         for await (const obj of source) {
           const { level, message, meta } = parsePinoLog(obj);
           hdx('Sending log to HyperDX');
-          logger.postMessage(PINO_LEVELS[level], message, meta);
+          logger.postMessage(PINO_LEVELS[level], message, {
+            ...meta,
+            ...opts.getCustomMeta?.(),
+          });
           hdx('Log sent to HyperDX');
         }
       },
