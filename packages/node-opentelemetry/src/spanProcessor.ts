@@ -32,7 +32,7 @@ class HyperDXContext {
     }, HDX_CONTEXT_REFRESHER_INTERVAL);
   }
 
-  _getActiveSpanTraceId = (): string | undefined => {
+  private _getActiveSpanTraceId = (): string | undefined => {
     const activeSpan = trace.getActiveSpan();
     if (!activeSpan) {
       return undefined;
@@ -40,7 +40,7 @@ class HyperDXContext {
     return activeSpan.spanContext().traceId;
   };
 
-  _setTraceAttributesForAllSpans = (traceId: string): void => {
+  private _setTraceAttributesForAllSpans = (traceId: string): void => {
     const attributes = this._traceAttributes.get(traceId);
     if (!attributes) {
       return;
