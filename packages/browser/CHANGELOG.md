@@ -1,5 +1,11 @@
 # @hyperdx/browser
 
+## 0.18.2-next.1
+
+### Patch Changes
+
+- 77e23b0: chore: bump child otel web pkgs
+
 ## 0.18.2-next.0
 
 ### Patch Changes
