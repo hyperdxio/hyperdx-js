@@ -102,9 +102,7 @@ export const getHyperDXHTTPInstrumentationConfig = ({
         } catch (e) {
           hdx(`error in request.on('data'): ${e}`);
         }
-      });
-
-      pt.on('end', () => {
+      }).on('end', () => {
         try {
           if (chunks.length > 0) {
             const body = Buffer.concat(chunks).toString('utf8');
@@ -149,7 +147,12 @@ export const getHyperDXHTTPInstrumentationConfig = ({
             }
           }
           if (chunks.length > 0) {
-            const body = Buffer.concat(chunks).toString('utf8');
+            const buffers = Buffer.concat(chunks);
+            let body = buffers.toString('utf8');
+            const isGzip = response.getHeader('content-encoding') === 'gzip';
+            if (isGzip) {
+              body = zlib.gunzipSync(buffers).toString('utf8');
+            }
             span.setAttribute('http.response.body', body);
           }
         } catch (e) {
@@ -197,24 +200,23 @@ export const getHyperDXHTTPInstrumentationConfig = ({
         } catch (e) {
           hdx(`error in response.on('data'): ${e}`);
         }
-      });
-
-      pt.on('end', () => {
+      }).on('end', () => {
         try {
           if (chunks.length > 0) {
-            const body = Buffer.concat(chunks).toString('utf8');
+            const buffers = Buffer.concat(chunks);
+            let body = buffers.toString('utf8');
+            const isGzip = response.headers['content-encoding'] === 'gzip';
+            if (isGzip) {
+              body = zlib.gunzipSync(buffers).toString('utf8');
+            }
             span.setAttribute('http.response.body', body);
           }
         } catch (e) {
           hdx(`error in response.on('end'): ${e}`);
         }
       });
-      const isGzip = response.headers['content-encoding'] === 'gzip';
-      if (isGzip) {
-        response.pipe(zlib.createGunzip()).pipe(pt);
-      } else {
-        response.pipe(pt);
-      }
+      // FIXME: this might cause issues with some libraries (ex: clickhouse/client)
+      // response.pipe(pt);
     }
   },
 });

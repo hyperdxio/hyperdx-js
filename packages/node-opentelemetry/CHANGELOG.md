@@ -1,5 +1,11 @@
 # @hyperdx/node-opentelemetry
 
+## 0.2.0-next.5
+
+### Patch Changes
+
+- fix: disable outgoing response body capture for now
+
 ## 0.2.0-next.4
 
 ### Patch Changes
