@@ -114,12 +114,7 @@ export const getHyperDXHTTPInstrumentationConfig = ({
           hdx(`error in request.on('end'): ${e}`);
         }
       });
-      const isGzip = request.headers['content-encoding'] === 'gzip';
-      if (isGzip) {
-        request.pipe(zlib.createGunzip()).pipe(pt);
-      } else {
-        request.pipe(pt);
-      }
+      request.pipe(pt);
     }
   },
   responseHook: (
