@@ -50,6 +50,18 @@ class Browser {
       return;
     }
 
+    if (apiKey == null) {
+      console.warn('HyperDX: Missing apiKey, telemetry will not be saved.');
+    } else if (apiKey === '') {
+      console.warn(
+        'HyperDX: apiKey is empty string, telemetry will not be saved.',
+      );
+    } else if (typeof apiKey !== 'string') {
+      console.warn(
+        'HyperDX: apiKey must be a string, telemetry will not be saved.',
+      );
+    }
+
     const urlBase = url ?? URL_BASE;
 
     Rum.init({
