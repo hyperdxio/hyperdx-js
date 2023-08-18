@@ -1,17 +1,19 @@
+const axios = require('axios');
+const compression = require('compression');
 const express = require('express');
 const http = require('http');
-const axios = require('axios');
-const PORT = parseInt(process.env.PORT || '7777');
-const app = express();
-
 const pino = require('pino');
 const winston = require('winston');
+
 const {
   getWinsonTransport,
   getPinoTransport,
   init,
 } = require('./build/src/logger');
 const { setTraceAttributes } = require('./build/src');
+
+const PORT = parseInt(process.env.PORT || '7777');
+const app = express();
 
 const logger = winston.createLogger({
   level: 'info',
@@ -72,6 +74,8 @@ function generateRandomString(length) {
   return result;
 }
 
+app.use(compression());
+
 // set custom trace attributes
 app.use((req, res, next) => {
   setTraceAttributes({
@@ -108,7 +112,10 @@ app.get('/', async (req, res) => {
   console.log(await sendGetRequest());
   // console.log(await axios.get('https://hyperdx.free.beeceptor.com'));
 
-  res.send('Hello World');
+  res.json({
+    foo: 'bar',
+    random: generateRandomString(8),
+  });
 });
 
 app.listen(PORT, () => {

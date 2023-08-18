@@ -1,4 +1,6 @@
 import * as http from 'http';
+import zlib from 'zlib';
+import { PassThrough } from 'stream';
 
 import { Span } from '@opentelemetry/api';
 import { headerCapture } from '@opentelemetry/instrumentation-http';
@@ -89,7 +91,8 @@ export const getHyperDXHTTPInstrumentationConfig = ({
 
       /* Capture Body */
       const chunks = [];
-      request.on('data', (chunk) => {
+      const pt = new PassThrough();
+      pt.on('data', (chunk) => {
         try {
           if (typeof chunk === 'string') {
             chunks.push(Buffer.from(chunk));
@@ -101,7 +104,7 @@ export const getHyperDXHTTPInstrumentationConfig = ({
         }
       });
 
-      request.on('end', () => {
+      pt.on('end', () => {
         try {
           if (chunks.length > 0) {
             const body = Buffer.concat(chunks).toString('utf8');
@@ -111,6 +114,7 @@ export const getHyperDXHTTPInstrumentationConfig = ({
           hdx(`error in request.on('end'): ${e}`);
         }
       });
+      request.pipe(pt);
     }
   },
   responseHook: (
@@ -182,22 +186,20 @@ export const getHyperDXHTTPInstrumentationConfig = ({
 
       /* Capture Body */
       const chunks = [];
-      // HACK: register the listener on the next tick to avoid blocking issue
-      setImmediate(() => {
-        response.on('data', (chunk) => {
-          try {
-            if (typeof chunk === 'string') {
-              chunks.push(Buffer.from(chunk));
-            } else {
-              chunks.push(chunk);
-            }
-          } catch (e) {
-            hdx(`error in response.on('data'): ${e}`);
+      const pt = new PassThrough();
+      pt.on('data', (chunk) => {
+        try {
+          if (typeof chunk === 'string') {
+            chunks.push(Buffer.from(chunk));
+          } else {
+            chunks.push(chunk);
           }
-        });
+        } catch (e) {
+          hdx(`error in response.on('data'): ${e}`);
+        }
       });
 
-      response.on('end', () => {
+      pt.on('end', () => {
         try {
           if (chunks.length > 0) {
             const body = Buffer.concat(chunks).toString('utf8');
@@ -207,6 +209,12 @@ export const getHyperDXHTTPInstrumentationConfig = ({
           hdx(`error in response.on('end'): ${e}`);
         }
       });
+      const isGzip = response.headers['content-encoding'] === 'gzip';
+      if (isGzip) {
+        response.pipe(zlib.createGunzip()).pipe(pt);
+      } else {
+        response.pipe(pt);
+      }
     }
   },
 });
