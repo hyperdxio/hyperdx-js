@@ -1,5 +1,11 @@
 # @hyperdx/node-opentelemetry
 
+## 0.2.0-next.4
+
+### Patch Changes
+
+- 57748c5: feat + fix: handle gzip content encoding + readable streaming
+
 ## 0.2.0-next.3
 
 ### Patch Changes
