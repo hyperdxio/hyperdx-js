@@ -1,5 +1,11 @@
 # @hyperdx/browser
 
+## 0.18.2-next.2
+
+### Patch Changes
+
+- e5a9931: Warn when API key is missing
+
 ## 0.18.2-next.1
 
 ### Patch Changes
