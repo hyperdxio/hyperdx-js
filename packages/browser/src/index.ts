@@ -1,7 +1,12 @@
-import * as Sentry from '@sentry/browser';
 import Rum from '@hyperdx/otel-web';
 import SessionRecorder from '@hyperdx/otel-web-session-recorder';
 import opentelemetry, { Attributes } from '@opentelemetry/api';
+import {
+  getCurrentHub as getCurrentSentryHub,
+  init as initSentry,
+  setContext as setSentryContext,
+  setUser as setSentryUser,
+} from '@sentry/browser';
 
 import { resolveAsyncGlobal } from './utils';
 
@@ -37,7 +42,7 @@ function hasWindow() {
 }
 
 function isSentryInitialized() {
-  return Sentry.getCurrentHub()?.getClient() != null;
+  return getCurrentSentryHub()?.getClient() != null;
 }
 
 function buildSentryDsn(apiKey: string) {
@@ -89,10 +94,10 @@ class Browser {
           'HyperDX: Sentry is already initialized. Skipping initialization.',
         );
       } else {
-        Sentry.init({
+        initSentry({
           dsn: buildSentryDsn(apiKey),
         });
-        Sentry.setContext('hyperdx', {
+        setSentryContext('hyperdx', {
           serviceName: service,
         });
         this.isHyperDXSentryInitialized = true;
@@ -196,7 +201,7 @@ class Browser {
 
     if (this.isHyperDXSentryInitialized) {
       if (attributes.userId || attributes.userEmail || attributes.userName) {
-        Sentry.setUser({
+        setSentryUser({
           id: attributes.userId,
           email: attributes.userEmail,
           username: attributes.userName,
