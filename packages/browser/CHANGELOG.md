@@ -1,5 +1,11 @@
 # @hyperdx/browser
 
+## 0.18.2-next.3
+
+### Patch Changes
+
+- c5b5757: feat: advanced network capture + experimental exception capture
+
 ## 0.18.2-next.2
 
 ### Patch Changes
