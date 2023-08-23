@@ -1,11 +1,38 @@
 import Rum from '@hyperdx/otel-web';
 import SessionRecorder from '@hyperdx/otel-web-session-recorder';
 import opentelemetry, { Attributes } from '@opentelemetry/api';
+import {
+  getCurrentHub as getCurrentSentryHub,
+  init as initSentry,
+  setContext as setSentryContext,
+  setUser as setSentryUser,
+} from '@sentry/browser';
 
-import type { RumOtelWebConfig } from '@hyperdx/otel-web';
 import { resolveAsyncGlobal } from './utils';
 
+import type { RumOtelWebConfig } from '@hyperdx/otel-web';
+
 type Instrumentations = RumOtelWebConfig['instrumentations'];
+
+type BrowserSDKConfig = {
+  advancedNetworkCapture?: boolean;
+  apiKey: string;
+  blockClass?: string;
+  captureConsole?: boolean; // deprecated
+  consoleCapture?: boolean;
+  debug?: boolean;
+  disableIntercom?: boolean;
+  disableReplay?: boolean;
+  experimentalExceptionCapture?: boolean;
+  ignoreClass?: string;
+  instrumentations?: Instrumentations;
+  maskAllInputs?: boolean;
+  maskAllText?: boolean;
+  maskClass?: string;
+  service: string;
+  tracePropagationTargets?: (string | RegExp)[];
+  url?: string;
+};
 
 const URL_BASE = 'https://in-otel.hyperdx.io';
 const UI_BASE = 'https://www.hyperdx.io';
@@ -14,38 +41,36 @@ function hasWindow() {
   return typeof window !== 'undefined';
 }
 
+function isSentryInitialized() {
+  return getCurrentSentryHub()?.getClient() != null;
+}
+
+function buildSentryDsn(apiKey: string) {
+  return `https://${apiKey.split('-').join('')}@in.hyperdx.io/0`;
+}
+
 class Browser {
+  private isHyperDXSentryInitialized = false;
+
   init({
-    url,
+    advancedNetworkCapture = false,
     apiKey,
+    blockClass,
+    captureConsole, // deprecated
+    consoleCapture,
+    debug = false,
+    disableIntercom = false,
+    disableReplay = false,
+    experimentalExceptionCapture = false,
+    ignoreClass,
+    instrumentations = {},
+    maskAllInputs = true,
+    maskAllText = false,
+    maskClass,
     service,
     tracePropagationTargets,
-    maskAllText = false,
-    maskAllInputs = true,
-    instrumentations = {},
-    disableReplay = false,
-    disableIntercom = false,
-    captureConsole = false,
-    blockClass,
-    ignoreClass,
-    maskClass,
-    debug = false,
-  }: {
-    url?: string;
-    apiKey: string;
-    service: string;
-    tracePropagationTargets?: (string | RegExp)[];
-    maskAllText?: boolean;
-    maskAllInputs?: boolean;
-    instrumentations?: Instrumentations;
-    disableReplay?: boolean;
-    disableIntercom?: boolean;
-    captureConsole?: boolean;
-    blockClass?: string;
-    ignoreClass?: string;
-    maskClass?: string;
-    debug?: boolean;
-  }) {
+    url,
+  }: BrowserSDKConfig) {
     if (!hasWindow()) {
       return;
     }
@@ -62,6 +87,23 @@ class Browser {
       );
     }
 
+    // Sentry
+    if (experimentalExceptionCapture && apiKey != null) {
+      if (isSentryInitialized()) {
+        console.warn(
+          'HyperDX: Sentry is already initialized. Skipping initialization.',
+        );
+      } else {
+        initSentry({
+          dsn: buildSentryDsn(apiKey),
+        });
+        setSentryContext('hyperdx', {
+          serviceName: service,
+        });
+        this.isHyperDXSentryInitialized = true;
+      }
+    }
+
     const urlBase = url ?? URL_BASE;
 
     Rum.init({
@@ -72,13 +114,14 @@ class Browser {
       app: service,
       instrumentations: {
         visibility: true,
-        console: captureConsole,
+        console: captureConsole ?? consoleCapture ?? false,
         fetch: {
           ...(tracePropagationTargets != null
             ? {
                 propagateTraceHeaderCorsUrls: tracePropagationTargets,
               }
             : {}),
+          ...(advancedNetworkCapture ? { advancedNetworkCapture: true } : {}),
         },
         xhr: {
           ...(tracePropagationTargets != null
@@ -86,6 +129,7 @@ class Browser {
                 propagateTraceHeaderCorsUrls: tracePropagationTargets,
               }
             : {}),
+          ...(advancedNetworkCapture ? { advancedNetworkCapture: true } : {}),
         },
         ...instrumentations,
       },
@@ -145,7 +189,7 @@ class Browser {
 
   setGlobalAttributes(
     attributes: Record<
-      'userEmail' | 'userName' | 'teamName' | 'teamId' | string,
+      'userId' | 'userEmail' | 'userName' | 'teamName' | 'teamId' | string,
       string
     >,
   ) {
@@ -154,6 +198,16 @@ class Browser {
     }
 
     Rum.setGlobalAttributes(attributes);
+
+    if (this.isHyperDXSentryInitialized) {
+      if (attributes.userId || attributes.userEmail || attributes.userName) {
+        setSentryUser({
+          id: attributes.userId,
+          email: attributes.userEmail,
+          username: attributes.userName,
+        });
+      }
+    }
   }
 
   getSessionUrl(): string | undefined {
