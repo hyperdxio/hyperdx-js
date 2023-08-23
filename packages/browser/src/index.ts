@@ -18,7 +18,7 @@ type BrowserSDKConfig = {
   debug?: boolean;
   disableIntercom?: boolean;
   disableReplay?: boolean;
-  exceptionCapture?: boolean;
+  experimentalExceptionCapture?: boolean;
   ignoreClass?: string;
   instrumentations?: Instrumentations;
   maskAllInputs?: boolean;
@@ -36,7 +36,17 @@ function hasWindow() {
   return typeof window !== 'undefined';
 }
 
+function isSentryInitialized() {
+  return Sentry.getCurrentHub()?.getClient() != null;
+}
+
+function buildSentryDsn(apiKey: string) {
+  return `https://${apiKey.split('-').join('')}@in.hyperdx.io/0`;
+}
+
 class Browser {
+  private isHyperDXSentryInitialized = false;
+
   init({
     advancedNetworkCapture = false,
     apiKey,
@@ -46,6 +56,7 @@ class Browser {
     debug = false,
     disableIntercom = false,
     disableReplay = false,
+    experimentalExceptionCapture = false,
     ignoreClass,
     instrumentations = {},
     maskAllInputs = true,
@@ -69,6 +80,23 @@ class Browser {
       console.warn(
         'HyperDX: apiKey must be a string, telemetry will not be saved.',
       );
+    }
+
+    // Sentry
+    if (experimentalExceptionCapture && apiKey != null) {
+      if (isSentryInitialized()) {
+        console.warn(
+          'HyperDX: Sentry is already initialized. Skipping initialization.',
+        );
+      } else {
+        Sentry.init({
+          dsn: buildSentryDsn(apiKey),
+        });
+        Sentry.setContext('hyperdx', {
+          serviceName: service,
+        });
+        this.isHyperDXSentryInitialized = true;
+      }
     }
 
     const urlBase = url ?? URL_BASE;
@@ -156,7 +184,7 @@ class Browser {
 
   setGlobalAttributes(
     attributes: Record<
-      'userEmail' | 'userName' | 'teamName' | 'teamId' | string,
+      'userId' | 'userEmail' | 'userName' | 'teamName' | 'teamId' | string,
       string
     >,
   ) {
@@ -165,6 +193,16 @@ class Browser {
     }
 
     Rum.setGlobalAttributes(attributes);
+
+    if (this.isHyperDXSentryInitialized) {
+      if (attributes.userId || attributes.userEmail || attributes.userName) {
+        Sentry.setUser({
+          id: attributes.userId,
+          email: attributes.userEmail,
+          username: attributes.userName,
+        });
+      }
+    }
   }
 
   getSessionUrl(): string | undefined {
