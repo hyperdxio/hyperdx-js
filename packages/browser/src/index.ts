@@ -1,11 +1,33 @@
+import * as Sentry from '@sentry/browser';
 import Rum from '@hyperdx/otel-web';
 import SessionRecorder from '@hyperdx/otel-web-session-recorder';
 import opentelemetry, { Attributes } from '@opentelemetry/api';
 
-import type { RumOtelWebConfig } from '@hyperdx/otel-web';
 import { resolveAsyncGlobal } from './utils';
 
+import type { RumOtelWebConfig } from '@hyperdx/otel-web';
+
 type Instrumentations = RumOtelWebConfig['instrumentations'];
+
+type BrowserSDKConfig = {
+  advancedNetworkCapture?: boolean;
+  apiKey: string;
+  blockClass?: string;
+  captureConsole?: boolean; // deprecated
+  consoleCapture?: boolean;
+  debug?: boolean;
+  disableIntercom?: boolean;
+  disableReplay?: boolean;
+  exceptionCapture?: boolean;
+  ignoreClass?: string;
+  instrumentations?: Instrumentations;
+  maskAllInputs?: boolean;
+  maskAllText?: boolean;
+  maskClass?: string;
+  service: string;
+  tracePropagationTargets?: (string | RegExp)[];
+  url?: string;
+};
 
 const URL_BASE = 'https://in-otel.hyperdx.io';
 const UI_BASE = 'https://www.hyperdx.io';
@@ -16,36 +38,23 @@ function hasWindow() {
 
 class Browser {
   init({
-    url,
+    advancedNetworkCapture = false,
     apiKey,
+    blockClass,
+    captureConsole, // deprecated
+    consoleCapture,
+    debug = false,
+    disableIntercom = false,
+    disableReplay = false,
+    ignoreClass,
+    instrumentations = {},
+    maskAllInputs = true,
+    maskAllText = false,
+    maskClass,
     service,
     tracePropagationTargets,
-    maskAllText = false,
-    maskAllInputs = true,
-    instrumentations = {},
-    disableReplay = false,
-    disableIntercom = false,
-    captureConsole = false,
-    blockClass,
-    ignoreClass,
-    maskClass,
-    debug = false,
-  }: {
-    url?: string;
-    apiKey: string;
-    service: string;
-    tracePropagationTargets?: (string | RegExp)[];
-    maskAllText?: boolean;
-    maskAllInputs?: boolean;
-    instrumentations?: Instrumentations;
-    disableReplay?: boolean;
-    disableIntercom?: boolean;
-    captureConsole?: boolean;
-    blockClass?: string;
-    ignoreClass?: string;
-    maskClass?: string;
-    debug?: boolean;
-  }) {
+    url,
+  }: BrowserSDKConfig) {
     if (!hasWindow()) {
       return;
     }
@@ -72,13 +81,14 @@ class Browser {
       app: service,
       instrumentations: {
         visibility: true,
-        console: captureConsole,
+        console: captureConsole ?? consoleCapture ?? false,
         fetch: {
           ...(tracePropagationTargets != null
             ? {
                 propagateTraceHeaderCorsUrls: tracePropagationTargets,
               }
             : {}),
+          ...(advancedNetworkCapture ? { advancedNetworkCapture: true } : {}),
         },
         xhr: {
           ...(tracePropagationTargets != null
@@ -86,6 +96,7 @@ class Browser {
                 propagateTraceHeaderCorsUrls: tracePropagationTargets,
               }
             : {}),
+          ...(advancedNetworkCapture ? { advancedNetworkCapture: true } : {}),
         },
         ...instrumentations,
       },
