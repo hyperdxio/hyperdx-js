@@ -1,5 +1,11 @@
 # @hyperdx/browser
 
+## 0.18.2-next.7
+
+### Patch Changes
+
+- rollback: hdx otel dep to v0.16.2-5
+
 ## 0.18.2-next.6
 
 ### Patch Changes
