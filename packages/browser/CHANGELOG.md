@@ -1,5 +1,11 @@
 # @hyperdx/browser
 
+## 0.18.2-next.4
+
+### Patch Changes
+
+- 22b125a: chore: bump hdx otel pkg to 0.16.2-6
+
 ## 0.18.2-next.3
 
 ### Patch Changes
