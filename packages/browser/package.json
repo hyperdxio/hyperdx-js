@@ -1,12 +1,12 @@
 {
   "name": "@hyperdx/browser",
-  "version": "0.18.2-next.8",
+  "version": "0.18.2-next.9",
   "license": "Apache-2.0",
   "main": "build/index.js",
   "types": "build/index.d.ts",
   "dependencies": {
-    "@hyperdx/otel-web": "0.16.2-9",
-    "@hyperdx/otel-web-session-recorder": "0.16.2-9",
+    "@hyperdx/otel-web": "0.16.2-10",
+    "@hyperdx/otel-web-session-recorder": "0.16.2-10",
     "@sentry/browser": "^7.64.0"
   },
   "devDependencies": {
