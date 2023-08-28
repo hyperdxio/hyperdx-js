@@ -1,5 +1,20 @@
 # @hyperdx/browser
 
+## 0.18.2
+
+### Patch Changes
+
+- 1a15905: chore: bump hdx otel pkg to v0.16.2-7
+- 259d57e: Fix recursive console capture bug, add debug flag for verbose logging.
+- 77e23b0: chore: bump child otel web pkgs
+- 22e51b0: rollback: hdx otel dep to v0.16.2-5
+- c5b5757: feat: advanced network capture + experimental exception capture
+- 3ebd390: chore: bump hdx otel pkg to v0.16.2-9
+- 4c4054b: chore: bump hdx otel pkg to v0.16.2-8
+- 379f561: chore: bump hdx otel pkg
+- 22b125a: chore: bump hdx otel pkg to 0.16.2-6
+- e5a9931: Warn when API key is missing
+
 ## 0.18.2-next.9
 
 ### Patch Changes

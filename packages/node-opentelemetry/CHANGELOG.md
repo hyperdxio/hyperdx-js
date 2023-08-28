@@ -1,5 +1,25 @@
 # @hyperdx/node-opentelemetry
 
+## 0.2.0
+
+### Minor Changes
+
+- 425b0a8: chore: bump @opentelemetry deps versions
+- 425b0a8: feat: HyperDX console instrumentation (refactoring) + http instrumentation (advanced network capture)
+
+### Patch Changes
+
+- 57748c5: feat + fix: handle gzip content encoding + readable streaming
+- a9a1bdc: style: capture response headers in 'end' event
+- 366e5c3: feat: setTraceAttributes user-facing API
+- 425b0a8: fix: attach trace/span id to console logs
+- 56906da: fix: more try-catch in instrumentation codes
+- 6b4406b: fix: disable outgoing response body capture for now
+- a9a1bdc: fix: regiester stream data event listern in next iteration of event loop
+- 366e5c3: feat: add trace attributes to console + logger
+- Updated dependencies [366e5c3]
+  - @hyperdx/node-logger@0.2.7
+
 ## 0.2.0-next.5
 
 ### Patch Changes
