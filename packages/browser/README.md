@@ -48,3 +48,11 @@ HyperDX.addAction('Form-Completed', {
   formType: 'signup',
 });
 ```
+
+### (Optional) Enable Network Capture Dynamically
+
+To enable or disable network capture dynamically, simply invoke the `enableNetworkCapture` or `disableAdvancedNetworkCapture` function as needed.
+
+```js
+HyperDX.enableNetworkCapture();
+```
