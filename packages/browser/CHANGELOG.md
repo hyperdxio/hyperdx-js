@@ -1,5 +1,11 @@
 # @hyperdx/browser
 
+## 0.18.3
+
+### Patch Changes
+
+- 2c868f5: feat: enable network capture dynamically
+
 ## 0.18.2
 
 ### Patch Changes
