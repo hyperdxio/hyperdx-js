@@ -52,6 +52,8 @@ function buildSentryDsn(apiKey: string) {
 class Browser {
   private isHyperDXSentryInitialized = false;
 
+  private _advancedNetworkCapture = false;
+
   init({
     advancedNetworkCapture = false,
     apiKey,
@@ -106,6 +108,8 @@ class Browser {
 
     const urlBase = url ?? URL_BASE;
 
+    this._advancedNetworkCapture = advancedNetworkCapture;
+
     Rum.init({
       debug,
       url: `${urlBase}/v1/traces`,
@@ -121,7 +125,7 @@ class Browser {
                 propagateTraceHeaderCorsUrls: tracePropagationTargets,
               }
             : {}),
-          ...(advancedNetworkCapture ? { advancedNetworkCapture: true } : {}),
+          advancedNetworkCapture: () => this._advancedNetworkCapture,
         },
         xhr: {
           ...(tracePropagationTargets != null
@@ -129,7 +133,7 @@ class Browser {
                 propagateTraceHeaderCorsUrls: tracePropagationTargets,
               }
             : {}),
-          ...(advancedNetworkCapture ? { advancedNetworkCapture: true } : {}),
+          advancedNetworkCapture: () => this._advancedNetworkCapture,
         },
         ...instrumentations,
       },
@@ -179,7 +183,7 @@ class Browser {
     }
   }
 
-  addAction(name: string, attributes?: Attributes) {
+  addAction(name: string, attributes?: Attributes): void {
     if (!hasWindow()) {
       return;
     }
@@ -187,12 +191,20 @@ class Browser {
     Rum.addAction(name, attributes);
   }
 
+  enableAdvancedNetworkCapture(): void {
+    this._advancedNetworkCapture = true;
+  }
+
+  disableAdvancedNetworkCapture(): void {
+    this._advancedNetworkCapture = false;
+  }
+
   setGlobalAttributes(
     attributes: Record<
       'userId' | 'userEmail' | 'userName' | 'teamName' | 'teamId' | string,
       string
     >,
-  ) {
+  ): void {
     if (!hasWindow()) {
       return;
     }
