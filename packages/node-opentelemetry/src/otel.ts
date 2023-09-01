@@ -112,6 +112,8 @@ export const initSDK = (config: SDKConfig) => {
     }
     hdx('Starting opentelemetry SDK');
     sdk.start();
+
+    hyperDXGlobalContext.start();
   } else {
     console.warn(
       `${LOG_PREFIX} OTEL_EXPORTER_OTLP_ENDPOINT and OTEL_EXPORTER_OTLP_HEADERS are not set, tracing is disabled`,
