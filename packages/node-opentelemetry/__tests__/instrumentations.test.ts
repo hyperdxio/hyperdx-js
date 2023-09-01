@@ -1,6 +1,6 @@
 import { _parseConsoleArgs } from '../src/instrumentations/console';
 
-describe('patch', () => {
+describe('instrumentations', () => {
   it('should parse console args', () => {
     expect(_parseConsoleArgs([])).toEqual('');
     expect(_parseConsoleArgs(['foo'])).toEqual('foo');
