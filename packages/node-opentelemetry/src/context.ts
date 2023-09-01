@@ -19,9 +19,12 @@ class HyperDXContext {
     }
   >();
 
+  private started = false;
+
   private refreshInterval: NodeJS.Timer | undefined;
 
   start(): void {
+    this.started = true;
     // expires after 5 minutes
     this.refreshInterval = setInterval(() => {
       hdx(`Running _traceMap expiration check`);
@@ -37,6 +40,7 @@ class HyperDXContext {
   }
 
   shutdown(): void {
+    this.started = false;
     if (this.refreshInterval) {
       clearInterval(this.refreshInterval);
     }
@@ -68,6 +72,9 @@ class HyperDXContext {
   };
 
   addTraceSpan = (traceId: string, span: Span): void => {
+    if (!this.started) {
+      return;
+    }
     // prevent downstream exporter calls from generating spans
     context.with(suppressTracing(context.active()), () => {
       hdx(`Adding traceId ${traceId} to _traceMap`);
@@ -103,6 +110,10 @@ class HyperDXContext {
 
   // user facing API
   setTraceAttributes = (attributes: Attributes): void => {
+    if (!this.started) {
+      return;
+    }
+
     // prevent downstream exporter calls from generating spans
     context.with(suppressTracing(context.active()), () => {
       const currentActiveSpanTraceId = this._getActiveSpanTraceId();
