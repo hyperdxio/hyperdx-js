@@ -19,9 +19,10 @@ const LOG_PREFIX = `⚠️  ${_LOG_PREFIX}`;
 const env = process.env;
 
 type SDKConfig = {
-  instrumentations?: InstrumentationConfigMap;
-  consoleCapture?: boolean;
   advancedNetworkCapture?: boolean;
+  betaMode?: boolean;
+  consoleCapture?: boolean;
+  instrumentations?: InstrumentationConfigMap;
 };
 
 export const setTraceAttributes = hyperDXGlobalContext.setTraceAttributes;
@@ -113,7 +114,9 @@ export const initSDK = (config: SDKConfig) => {
     hdx('Starting opentelemetry SDK');
     sdk.start();
 
-    hyperDXGlobalContext.start();
+    if (config.betaMode) {
+      hyperDXGlobalContext.start();
+    }
   } else {
     console.warn(
       `${LOG_PREFIX} OTEL_EXPORTER_OTLP_ENDPOINT and OTEL_EXPORTER_OTLP_HEADERS are not set, tracing is disabled`,

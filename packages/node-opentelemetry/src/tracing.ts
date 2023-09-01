@@ -22,6 +22,7 @@ export const stringToBoolean = (stringValue: string | undefined) => {
 // TODO: Support more instrumentation configuration options
 
 initSDK({
+  betaMode: stringToBoolean(env.HDX_NODE_BETA_MODE),
   consoleCapture: stringToBoolean(env.HDX_NODE_CONSOLE_CAPTURE),
   advancedNetworkCapture: stringToBoolean(
     env.HDX_NODE_ADVANCED_NETWORK_CAPTURE,
