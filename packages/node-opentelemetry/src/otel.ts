@@ -128,6 +128,7 @@ export const initSDK = (config: SDKConfig) => {
   process.on('SIGTERM', () => {
     hdx('SIGTERM received, shutting down');
     hdxConsoleInstrumentation.disable();
+    hyperDXGlobalContext.shutdown();
     sdk
       .shutdown()
       .then(

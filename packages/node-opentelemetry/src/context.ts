@@ -19,9 +19,11 @@ class HyperDXContext {
     }
   >();
 
+  private refreshInterval: NodeJS.Timer | undefined;
+
   start(): void {
     // expires after 5 minutes
-    setInterval(() => {
+    this.refreshInterval = setInterval(() => {
       hdx(`Running _traceMap expiration check`);
       const now = Date.now();
       for (const [traceId, data] of this._traceMap.entries()) {
@@ -32,6 +34,14 @@ class HyperDXContext {
         }
       }
     }, HDX_CONTEXT_REFRESHER_INTERVAL);
+  }
+
+  shutdown(): void {
+    if (this.refreshInterval) {
+      clearInterval(this.refreshInterval);
+    }
+    this._traceAttributes.clear();
+    this._traceMap.clear();
   }
 
   private _getActiveSpanTraceId = (): string | undefined => {
