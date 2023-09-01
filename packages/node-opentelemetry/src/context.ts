@@ -20,7 +20,6 @@ class HyperDXContext {
   >();
 
   start(): void {
-    hdx(`Starting HyperDXContext`);
     // expires after 5 minutes
     setInterval(() => {
       hdx(`Running _traceMap expiration check`);

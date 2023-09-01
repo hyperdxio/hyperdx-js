@@ -115,6 +115,7 @@ export const initSDK = (config: SDKConfig) => {
     sdk.start();
 
     if (config.betaMode) {
+      hdx(`Beta mode enabled, starting global context`);
       hyperDXGlobalContext.start();
     }
   } else {
