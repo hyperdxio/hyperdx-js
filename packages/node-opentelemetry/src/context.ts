@@ -75,6 +75,7 @@ class HyperDXContext {
     if (!this.started) {
       return;
     }
+
     // prevent downstream exporter calls from generating spans
     context.with(suppressTracing(context.active()), () => {
       hdx(`Adding traceId ${traceId} to _traceMap`);
