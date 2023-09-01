@@ -1,5 +1,11 @@
 # @hyperdx/node-opentelemetry
 
+## 0.2.1
+
+### Patch Changes
+
+- 4b62517: fix: init global context after otel sdk
+
 ## 0.2.0
 
 ### Minor Changes
