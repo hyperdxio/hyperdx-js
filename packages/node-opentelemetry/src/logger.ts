@@ -50,7 +50,7 @@ export const getPinoTransport = (
   options: {
     apiKey: HYPERDX_API_KEY,
     service: SERVICE_NAME,
-    getCustomMeta,
+    // getCustomMeta, // FIXME: DOMException [DataCloneError]
     ...options,
   },
   level: maxLevel,

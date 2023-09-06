@@ -1,5 +1,11 @@
 # @hyperdx/node-opentelemetry
 
+## 0.2.2
+
+### Patch Changes
+
+- fix: disable custom attrs injection for pino transport
+
 ## 0.2.1
 
 ### Patch Changes
