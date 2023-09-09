@@ -141,6 +141,7 @@ class Browser {
 
     if (disableReplay !== true) {
       SessionRecorder.init({
+        debug,
         url: `${urlBase}/v1/logs`,
         apiKey,
         maskTextSelector: maskAllText ? '*' : undefined,
