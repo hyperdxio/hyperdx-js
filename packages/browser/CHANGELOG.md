@@ -1,5 +1,11 @@
 # @hyperdx/browser
 
+## 0.18.4-next.0
+
+### Patch Changes
+
+- 7bd07db: fix: Add rate limiting for spammy rrweb events
+
 ## 0.18.3
 
 ### Patch Changes
