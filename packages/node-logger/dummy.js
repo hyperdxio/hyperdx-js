@@ -7,8 +7,9 @@ const app = express();
 const { Logger } = require('./build/src/logger');
 const { HyperDXWinston } = require('./build/src');
 
-const HDX_API_KEY = 'b0451b4a-da1a-4a6e-8055-db224498be0b';
-const HDX_API_KEY2 = '1ae54d66-ef47-4300-b5f7-9a0644b1684a';
+// RANDOM API KEY
+const HDX_API_KEY = '<KEY1>';
+const HDX_API_KEY2 = '<KEY2>';
 const HDX_API_URL = 'http://localhost:8002';
 
 const logger = new Logger({
