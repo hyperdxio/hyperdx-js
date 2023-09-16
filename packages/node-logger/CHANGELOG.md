@@ -1,5 +1,11 @@
 # @hyperdx/node-logger
 
+## 0.2.8
+
+### Patch Changes
+
+- 07f0e71: fix: node-logger conflicts (init multiple times)
+
 ## 0.2.7
 
 ### Patch Changes

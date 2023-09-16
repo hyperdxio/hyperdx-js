@@ -1,5 +1,13 @@
 # @hyperdx/node-opentelemetry
 
+## 0.2.3
+
+### Patch Changes
+
+- 07f0e71: fix: node-logger conflicts (init multiple times)
+- Updated dependencies [07f0e71]
+  - @hyperdx/node-logger@0.2.8
+
 ## 0.2.2
 
 ### Patch Changes
