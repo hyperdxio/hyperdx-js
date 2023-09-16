@@ -7,7 +7,8 @@ const app = express();
 const { Logger } = require('./build/src/logger');
 const { HyperDXWinston } = require('./build/src');
 
-const HDX_API_KEY = 'b6d3a632-d0c8-41d4-86f7-6501b96c6a77';
+const HDX_API_KEY = 'b0451b4a-da1a-4a6e-8055-db224498be0b';
+const HDX_API_KEY2 = '1ae54d66-ef47-4300-b5f7-9a0644b1684a';
 const HDX_API_URL = 'http://localhost:8002';
 
 const logger = new Logger({
@@ -23,6 +24,20 @@ const winstonLogger = winston.createLogger({
     new winston.transports.Console(),
     new HyperDXWinston({
       apiKey: HDX_API_KEY,
+      maxLevel: 'info',
+      service: 'winston',
+      baseUrl: HDX_API_URL,
+    }),
+  ],
+});
+
+const winstonLogger2 = winston.createLogger({
+  level: 'info',
+  format: winston.format.json(),
+  transports: [
+    new winston.transports.Console(),
+    new HyperDXWinston({
+      apiKey: HDX_API_KEY2,
       maxLevel: 'info',
       service: 'winston',
       baseUrl: HDX_API_URL,
@@ -58,6 +73,7 @@ app.get('/', (req, res) => {
     message: 'BANG !!!',
     headers: req.headers,
   });
+  winstonLogger2.info('🤯🤯🤯');
   pinoLogger.info('🍕');
   res.send('Hello World');
 });
