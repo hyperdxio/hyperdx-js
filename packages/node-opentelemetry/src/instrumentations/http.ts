@@ -7,6 +7,7 @@ import { headerCapture } from '@opentelemetry/instrumentation-http';
 
 import hdx from '../debug';
 
+const SENSITIVE_DATA_SUBSTITUTE = '[Filtered]';
 // https://github.com/getsentry/sentry-python/blob/1.18.0/sentry_sdk/scrubber.py#L17
 const DEFAULT_DENYLIST = [
   // stolen from relay
@@ -126,6 +127,11 @@ export const getHyperDXHTTPInstrumentationConfig = ({
               const body = Buffer.concat(chunks).toString('utf8');
               if (shouldRecordBody(body)) {
                 span.setAttribute('http.request.body', body);
+              } else {
+                span.setAttribute(
+                  'http.request.body',
+                  SENSITIVE_DATA_SUBSTITUTE,
+                );
               }
             }
           } catch (e) {
@@ -167,6 +173,11 @@ export const getHyperDXHTTPInstrumentationConfig = ({
               const body = Buffer.concat(chunks).toString('utf8');
               if (shouldRecordBody(body)) {
                 span.setAttribute('http.request.body', body);
+              } else {
+                span.setAttribute(
+                  'http.request.body',
+                  SENSITIVE_DATA_SUBSTITUTE,
+                );
               }
             }
           } catch (e) {
@@ -216,6 +227,11 @@ export const getHyperDXHTTPInstrumentationConfig = ({
               }
               if (shouldRecordBody(body)) {
                 span.setAttribute('http.response.body', body);
+              } else {
+                span.setAttribute(
+                  'http.response.body',
+                  SENSITIVE_DATA_SUBSTITUTE,
+                );
               }
             }
           } catch (e) {
@@ -276,6 +292,11 @@ export const getHyperDXHTTPInstrumentationConfig = ({
               }
               if (shouldRecordBody(body)) {
                 span.setAttribute('http.response.body', body);
+              } else {
+                span.setAttribute(
+                  'http.response.body',
+                  SENSITIVE_DATA_SUBSTITUTE,
+                );
               }
             }
           } catch (e) {
