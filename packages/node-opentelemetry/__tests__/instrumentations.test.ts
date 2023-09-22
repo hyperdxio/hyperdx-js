@@ -43,7 +43,7 @@ describe('instrumentations', () => {
     it('getShouldRecordBody', () => {
       const defaultShouldRecordBody = getShouldRecordBody();
       expect(defaultShouldRecordBody('foo bar')).toEqual(true);
-      expect(defaultShouldRecordBody('password: abc')).toEqual(false);
+      expect(defaultShouldRecordBody('pasSwoRd: abc')).toEqual(false);
       expect(defaultShouldRecordBody('secret: abc')).toEqual(false);
 
       const customShouldRecordBody = getShouldRecordBody('foo,bar');

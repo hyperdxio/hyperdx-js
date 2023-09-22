@@ -52,12 +52,13 @@ export const splitCommaSeparatedStrings = (headers?: string) =>
 
 export const getShouldRecordBody =
   (defaultFilter?: string) => (body: string) => {
+    const lowerCaseBody = body.toLowerCase();
     const keywords =
       splitCommaSeparatedStrings(defaultFilter) ??
       DEFAULT_DENYLIST.map((keyword) => keyword.toLowerCase());
 
     // if body contains any of the keywords, drop it
-    if (keywords?.some((keyword) => body.includes(keyword.toLowerCase()))) {
+    if (keywords?.some((keyword) => lowerCaseBody.includes(keyword))) {
       return false;
     }
     return true;
