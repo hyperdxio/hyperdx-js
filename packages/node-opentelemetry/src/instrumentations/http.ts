@@ -7,11 +7,61 @@ import { headerCapture } from '@opentelemetry/instrumentation-http';
 
 import hdx from '../debug';
 
-const SENSITIVE_KEYWORDS = ['password', 'secret'];
+// https://github.com/getsentry/sentry-python/blob/1.18.0/sentry_sdk/scrubber.py#L17
+const DEFAULT_DENYLIST = [
+  // stolen from relay
+  'password',
+  'passwd',
+  'secret',
+  'api_key',
+  'apikey',
+  'auth',
+  'credentials',
+  'mysql_pwd',
+  'privatekey',
+  'private_key',
+  'token',
+  'session',
+  // django
+  'csrftoken',
+  'sessionid',
+  // wsgi
+  'x_csrftoken',
+  'set_cookie',
+  'cookie',
+  'authorization',
+  'x_api_key',
+  // other common names used in the wild
+  'aiohttp_session', // aiohttp
+  'connect.sid', // Express
+  'csrf_token', // Pyramid
+  'csrf', // (this is a cookie name used in accepted answers on stack overflow)
+  '_csrf', // Express
+  '_csrf_token', // Bottle
+  'PHPSESSID', // PHP
+  '_session', // Sanic
+  'symfony', // Symfony
+  'user_session', // Vue
+  '_xsrf', // Tornado
+  'XSRF-TOKEN', // Angular, Laravel
+];
 
 // used for env like OTEL_INSTRUMENTATION_HTTP_CAPTURE_HEADERS_SERVER_REQUEST
 export const splitCommaSeparatedStrings = (headers?: string) =>
   headers?.split(',').map((header) => header.trim());
+
+export const getShouldRecordBody =
+  (defaultFilter?: string) => (body: string) => {
+    const keywords =
+      splitCommaSeparatedStrings(defaultFilter) ??
+      DEFAULT_DENYLIST.map((keyword) => keyword.toLowerCase());
+
+    // if body contains any of the keywords, drop it
+    if (keywords?.some((keyword) => body.includes(keyword.toLowerCase()))) {
+      return false;
+    }
+    return true;
+  };
 
 export const getHyperDXHTTPInstrumentationConfig = ({
   httpCaptureBodyKeywordsFilter,
@@ -26,18 +76,7 @@ export const getHyperDXHTTPInstrumentationConfig = ({
   httpCaptureHeadersServerRequest?: string;
   httpCaptureHeadersServerResponse?: string;
 }) => {
-  const shouldRecordBody = (body: string) => {
-    const keywords =
-      splitCommaSeparatedStrings(httpCaptureBodyKeywordsFilter) ??
-      SENSITIVE_KEYWORDS;
-
-    // if body contains any of the keywords, drop it
-    if (keywords?.some((keyword) => body.includes(keyword))) {
-      return false;
-    }
-    return true;
-  };
-
+  const shouldRecordBody = getShouldRecordBody(httpCaptureBodyKeywordsFilter);
   return {
     requestHook: (
       span: Span,
