@@ -1,5 +1,12 @@
 # @hyperdx/node-opentelemetry
 
+## 0.3.0
+
+### Minor Changes
+
+- 115f0b9: perf: reduce network usage
+- 8cee56f: chore: bump @opentelemetry/auto-instrumentations-node + semantic-conventions
+
 ## 0.2.3
 
 ### Patch Changes
