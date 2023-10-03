@@ -1,5 +1,11 @@
 # @hyperdx/node-opentelemetry
 
+## 0.3.1
+
+### Patch Changes
+
+- 6aba0db: fix: install otel child deps
+
 ## 0.3.0
 
 ### Minor Changes
