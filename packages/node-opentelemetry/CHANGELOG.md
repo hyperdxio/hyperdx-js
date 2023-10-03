@@ -1,5 +1,11 @@
 # @hyperdx/node-opentelemetry
 
+## 0.3.2
+
+### Patch Changes
+
+- 79b89fd: chore: lock otel pkgs version
+
 ## 0.3.1
 
 ### Patch Changes
