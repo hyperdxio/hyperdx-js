@@ -1215,7 +1215,7 @@
     "@opentelemetry/semantic-conventions" "1.15.0"
     tslib "^2.3.1"
 
-"@opentelemetry/core@1.15.2", "@opentelemetry/core@^1.1.0":
+"@opentelemetry/core@1.15.2", "@opentelemetry/core@^1.1.0", "@opentelemetry/core@^1.15.2":
   version "1.15.2"
   resolved "https://registry.yarnpkg.com/@opentelemetry/core/-/core-1.15.2.tgz#5b170bf223a2333884bbc2d29d95812cdbda7c9f"
   integrity sha512-+gBv15ta96WqkHZaPpcDHiaz0utiiHZVfm2YOYSqFGrUaJpPkMoSuLBB58YFQGi6Rsb9EHos84X6X5+9JspmLw==
@@ -1956,7 +1956,7 @@
     "@opentelemetry/resources" "1.14.0"
     "@opentelemetry/semantic-conventions" "1.14.0"
 
-"@opentelemetry/sdk-trace-base@1.15.2":
+"@opentelemetry/sdk-trace-base@1.15.2", "@opentelemetry/sdk-trace-base@^1.15.2":
   version "1.15.2"
   resolved "https://registry.yarnpkg.com/@opentelemetry/sdk-trace-base/-/sdk-trace-base-1.15.2.tgz#4821f94033c55a6c8bbd35ae387b715b6108517a"
   integrity sha512-BEaxGZbWtvnSPchV98qqqqa96AOcb41pjgvhfzDij10tkBhIu9m0Jd6tZ1tJB5ZHfHbTffqYVYE0AOGobec/EQ==
