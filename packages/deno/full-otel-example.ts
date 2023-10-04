@@ -9,7 +9,7 @@ deno run --allow-net --allow-env --allow-read --allow-sys --allow-run full-otel-
 // Logging
 
 import * as log from 'https://deno.land/std@0.203.0/log/mod.ts';
-import { OpenTelemetryHandler } from './logger.ts';
+import { OpenTelemetryHandler } from './mod.ts';
 log.setup({
   handlers: {
     // console: new log.handlers.ConsoleHandler("DEBUG"),

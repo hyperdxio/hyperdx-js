@@ -10,8 +10,7 @@ Logging is supported by exporting a custom logger for the `std/log` module.
 
 ```typescript
 import * as log from 'https://deno.land/std@0.203.0/log/mod.ts';
-// TODO: Update Import to public package!!!!!!!! ⚠
-import { OpenTelemetryHandler } from './handler.ts';
+import { OpenTelemetryHandler } from 'npm:@hyperdx/deno';
 
 log.setup({
   handlers: {

@@ -7,12 +7,9 @@ import {
   LogLevels,
 } from 'https://deno.land/std@0.203.0/log/levels.ts';
 
-import { BufferConfig, LoggerProvider } from 'npm:@opentelemetry/sdk-logs';
-import { SeverityNumber, logs } from 'npm:@opentelemetry/api-logs';
-import {
-  BatchLogRecordProcessor,
-  ConsoleLogRecordExporter,
-} from 'npm:@opentelemetry/sdk-logs';
+import { SeverityNumber, logs } from 'npm:@opentelemetry/api-logs@0.43.0';
+import { OTLPLogExporter } from 'npm:@opentelemetry/exporter-logs-otlp-http@0.43.0';
+import { OTLPExporterNodeConfigBase } from 'npm:@opentelemetry/otlp-exporter-base@0.43.0';
 import {
   Resource,
   detectResourcesSync,
@@ -20,13 +17,16 @@ import {
   hostDetectorSync,
   osDetectorSync,
   processDetector,
-} from 'npm:@opentelemetry/resources';
+} from 'npm:@opentelemetry/resources@1.17.0';
+import {
+  BatchLogRecordProcessor,
+  ConsoleLogRecordExporter,
+  BufferConfig,
+  LoggerProvider,
+} from 'npm:@opentelemetry/sdk-logs@0.43.0';
 
-import { OTLPLogExporter } from 'npm:@opentelemetry/exporter-logs-otlp-http';
-
-import type { Logger } from 'npm:@opentelemetry/api-logs';
-import { OTLPExporterNodeConfigBase } from 'npm:@opentelemetry/otlp-exporter-base/0.43.0/build/src/index.js';
-import type { Attributes } from 'npm:@opentelemetry/api';
+import type { Logger } from 'npm:@opentelemetry/api-logs@0.43.0';
+import type { Attributes } from 'npm:@opentelemetry/api@1.6.0';
 
 // https://github.com/open-telemetry/opentelemetry-specification/blob/fc8289b8879f3a37e1eba5b4e445c94e74b20359/specification/logs/data-model.md#displaying-severity
 const OTEL_SEVERITY_NAME_MAP = {
@@ -115,7 +115,7 @@ export class OpenTelemetryHandler extends log.handlers.BaseHandler {
   }
 
   override setup() {
-    addEventListener('unload', this.#unloadCallback);
+    (addEventListener as any)('unload', this.#unloadCallback);
   }
 
   private toOtelSeverityNumber(level: number): SeverityNumber {
