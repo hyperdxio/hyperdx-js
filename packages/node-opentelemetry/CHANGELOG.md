@@ -1,5 +1,11 @@
 # @hyperdx/node-opentelemetry
 
+## 0.3.3-next.0
+
+### Patch Changes
+
+- f165973: rollback: downgrade otel auto-instrumentation pkg to v0.37.1
+
 ## 0.3.2
 
 ### Patch Changes
