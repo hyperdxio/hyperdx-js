@@ -1,0 +1,10 @@
+{
+  "mode": "pre",
+  "tag": "next",
+  "initialVersions": {
+    "@hyperdx/browser": "0.18.4",
+    "@hyperdx/node-logger": "0.2.8",
+    "@hyperdx/node-opentelemetry": "0.3.2"
+  },
+  "changesets": ["fuzzy-donkeys-mix", "slimy-dolls-arrive"]
+}

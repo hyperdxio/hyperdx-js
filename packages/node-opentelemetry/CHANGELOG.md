@@ -1,5 +1,29 @@
 # @hyperdx/node-opentelemetry
 
+## 0.3.3-next.1
+
+### Patch Changes
+
+- f7f3773: fix: rollback deps to tag v0.1.9 + disable hdx context features by default
+
+## 0.3.3-next.0
+
+### Patch Changes
+
+- f165973: rollback: downgrade otel auto-instrumentation pkg to v0.37.1
+
+## 0.3.2
+
+### Patch Changes
+
+- 79b89fd: chore: lock otel pkgs version
+
+## 0.3.1
+
+### Patch Changes
+
+- 6aba0db: fix: install otel child deps
+
 ## 0.3.0
 
 ### Minor Changes

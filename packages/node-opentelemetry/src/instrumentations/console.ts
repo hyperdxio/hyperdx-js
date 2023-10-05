@@ -41,6 +41,8 @@ export const _parseConsoleArgs = (args: any[]) => {
 };
 
 export default class HyperDXConsoleInstrumentation {
+  private readonly betaMode: boolean;
+
   private readonly _logger: Logger;
 
   private _patchConsole(type: string, ...args: any[]) {
@@ -54,20 +56,24 @@ export default class HyperDXConsoleInstrumentation {
         level,
       });
 
-      const currentActiveSpan = opentelemetry.trace.getActiveSpan();
-      const traceId = currentActiveSpan?.spanContext().traceId;
-      const attributes = traceId
-        ? hyperDXGlobalContext.getTraceAttributes(traceId)
-        : {};
+      let meta: Record<string, unknown> = parsedLog.meta;
 
-      this._logger.postMessage(parsedLog.level, parsedLog.message, {
-        ...parsedLog.meta,
-        // attach custom attributes
-        ...attributes,
-        // attached traceId and spanId,
-        trace_id: traceId,
-        span_id: currentActiveSpan?.spanContext().spanId,
-      });
+      if (this.betaMode) {
+        const currentActiveSpan = opentelemetry.trace.getActiveSpan();
+        const traceId = currentActiveSpan?.spanContext().traceId;
+        const attributes = traceId
+          ? hyperDXGlobalContext.getTraceAttributes(traceId)
+          : {};
+        meta = {
+          ...meta,
+          // attach custom attributes
+          ...attributes,
+          // attached traceId and spanId,
+          trace_id: traceId,
+          span_id: currentActiveSpan?.spanContext().spanId,
+        };
+      }
+      this._logger.postMessage(parsedLog.level, parsedLog.message, meta);
     } catch (e) {
       hdx(`error in _patchConsole: ${e}`);
     }
@@ -125,7 +131,8 @@ export default class HyperDXConsoleInstrumentation {
     shimmer.unwrap(moduleExports, 'error');
   }
 
-  constructor(config: LoggerOptions) {
+  constructor(config: LoggerOptions & { betaMode: boolean }) {
+    this.betaMode = config.betaMode;
     this._logger = new Logger(config);
   }
 
