@@ -115,7 +115,7 @@ export class OpenTelemetryHandler extends log.handlers.BaseHandler {
   }
 
   override setup() {
-    (addEventListener as any)('unload', this.#unloadCallback);
+    addEventListener('unload', this.#unloadCallback);
   }
 
   private toOtelSeverityNumber(level: number): SeverityNumber {
