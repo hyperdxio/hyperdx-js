@@ -28,9 +28,11 @@ import {
 import type { Logger } from 'npm:@opentelemetry/api-logs@0.43.0';
 import type { Attributes } from 'npm:@opentelemetry/api@1.6.0';
 
+const UNSPECIFIED_SEVERITY_TEXT = '';
+
 // https://github.com/open-telemetry/opentelemetry-specification/blob/fc8289b8879f3a37e1eba5b4e445c94e74b20359/specification/logs/data-model.md#displaying-severity
 const OTEL_SEVERITY_NAME_MAP = {
-  0: '', // XXX: This is not to spec
+  0: UNSPECIFIED_SEVERITY_TEXT, // XXX: This is not to spec
   1: 'TRACE',
   2: 'TRACE2',
   3: 'TRACE3',
@@ -142,7 +144,8 @@ export class OpenTelemetryHandler extends log.handlers.BaseHandler {
 
     this._logger?.emit({
       severityNumber: otelSeverityNumber,
-      severityText: OTEL_SEVERITY_NAME_MAP[otelSeverityNumber] ?? 'UNSPECIFIED',
+      severityText:
+        OTEL_SEVERITY_NAME_MAP[otelSeverityNumber] ?? UNSPECIFIED_SEVERITY_TEXT,
       body: logRecord.msg,
       attributes: {
         loggerName: logRecord.loggerName,
