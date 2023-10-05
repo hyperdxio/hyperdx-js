@@ -59,11 +59,19 @@ export const initSDK = (config: SDKConfig) => {
 
   const sdk = new NodeSDK({
     // metricReader: metricReader,
-    spanProcessor: new HyperDXSpanProcessor(
-      new OTLPTraceExporter({
-        timeoutMillis: 60000,
-      }),
-    ) as any,
+    ...(config.betaMode
+      ? {
+          spanProcessor: new HyperDXSpanProcessor(
+            new OTLPTraceExporter({
+              timeoutMillis: 60000,
+            }),
+          ) as any,
+        }
+      : {
+          traceExporter: new OTLPTraceExporter({
+            timeoutMillis: 60000,
+          }),
+        }),
     instrumentations: [
       getNodeAutoInstrumentations({
         '@opentelemetry/instrumentation-http': config.advancedNetworkCapture
