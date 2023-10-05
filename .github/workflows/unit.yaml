@@ -16,6 +16,9 @@ jobs:
         with:
           fetch-depth: 0
       - uses: nrwl/nx-set-shas@v3
+      - uses: denoland/setup-deno@v1
+        with:
+          deno-version: v1.x
       - name: Setup node
         uses: actions/setup-node@v3
         with:

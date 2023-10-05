@@ -1,0 +1,20 @@
+{
+  "name": "@hyperdx/deno",
+  "license": "MIT",
+  "version": "0.0.1",
+  "homepage": "https://www.hyperdx.io",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/hyperdxio/hyperdx-js.git"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "files": [
+    "build/*"
+  ],
+  "scripts": {
+    "build": "deno run -A build-npm.ts",
+    "ci:lint": "deno lint mod.ts"
+  }
+}
