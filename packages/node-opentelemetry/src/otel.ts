@@ -100,6 +100,9 @@ export const initSDK = (config: SDKConfig) => {
     console.warn(
       `${LOG_PREFIX} Tracing is enabled with configs (${JSON.stringify(
         {
+          advancedNetworkCapture: config.advancedNetworkCapture,
+          betaMode: config.betaMode,
+          consoleCapture: consoleInstrumentationEnabled,
           endpoint: env.OTEL_EXPORTER_OTLP_ENDPOINT,
           logLevel: env.OTEL_LOG_LEVEL,
           propagators: env.OTEL_PROPAGATORS,
@@ -108,8 +111,6 @@ export const initSDK = (config: SDKConfig) => {
           sampler: env.OTEL_TRACES_SAMPLER,
           samplerArg: env.OTEL_TRACES_SAMPLER_ARG,
           serviceName: env.OTEL_SERVICE_NAME,
-          consoleCapture: consoleInstrumentationEnabled,
-          advancedNetworkCapture: config.advancedNetworkCapture,
         },
         null,
         2,
