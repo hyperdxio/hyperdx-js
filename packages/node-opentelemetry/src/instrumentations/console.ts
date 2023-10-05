@@ -131,8 +131,8 @@ export default class HyperDXConsoleInstrumentation {
     shimmer.unwrap(moduleExports, 'error');
   }
 
-  constructor(config: LoggerOptions & { betaMode?: boolean }) {
-    this.betaMode = config.betaMode ?? false;
+  constructor(config: LoggerOptions & { betaMode: boolean }) {
+    this.betaMode = config.betaMode;
     this._logger = new Logger(config);
   }
 
