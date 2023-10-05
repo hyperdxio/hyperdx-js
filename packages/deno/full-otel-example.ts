@@ -17,7 +17,6 @@ log.setup({
       // exporterProtocol: 'console',
     }),
   },
-
   loggers: {
     'my-otel-logger': {
       level: 'DEBUG',
@@ -99,6 +98,10 @@ const handler = async (request: Request): Promise<Response> => {
 
   log.getLogger('my-otel-logger').info('👋 Hello from Deno!');
   log.getLogger('my-otel-logger').error('Oh no an error!!');
+  log.getLogger('my-otel-logger').info({
+    foo: 'bar',
+    baz: 'qux',
+  });
 
   return new Response(body, { status: 200 });
 };
