@@ -54,6 +54,7 @@ export const initSDK = (config: SDKConfig) => {
     env.HYPERDX_API_KEY ?? env.OTEL_EXPORTER_OTLP_HEADERS?.split('=')[1];
   const hdxConsoleInstrumentation = new HyperDXConsoleInstrumentation({
     apiKey,
+    betaMode: config.betaMode,
     service: env.OTEL_SERVICE_NAME,
   });
 
