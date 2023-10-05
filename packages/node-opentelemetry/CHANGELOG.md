@@ -1,5 +1,11 @@
 # @hyperdx/node-opentelemetry
 
+## 0.3.3-next.1
+
+### Patch Changes
+
+- f7f3773: fix: rollback deps to tag v0.1.9 + disable hdx context features by default
+
 ## 0.3.3-next.0
 
 ### Patch Changes
