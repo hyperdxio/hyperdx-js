@@ -5,6 +5,7 @@ import { HyperDXWinston } from '@hyperdx/node-logger';
 
 import hdx from './debug';
 import { hyperDXGlobalContext } from './context';
+import { stringToBoolean } from './utils';
 
 const env = process.env;
 
@@ -12,6 +13,8 @@ const HYPERDX_API_KEY = (env.HYPERDX_API_KEY ??
   env.OTEL_EXPORTER_OTLP_HEADERS?.split('=')[1]) as string;
 
 const SERVICE_NAME = env.OTEL_SERVICE_NAME as string;
+
+const BETA_MODE = stringToBoolean(env.HDX_NODE_BETA_MODE);
 
 type WinstonTransportOptions = {
   baseUrl?: string;
@@ -37,7 +40,7 @@ export const getWinsonTransport = (
     apiKey: HYPERDX_API_KEY,
     maxLevel,
     service: SERVICE_NAME,
-    getCustomMeta,
+    getCustomMeta: BETA_MODE ? getCustomMeta : () => ({}),
     ...options,
   });
 };
