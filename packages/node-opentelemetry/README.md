@@ -151,6 +151,12 @@ You can disable it by setting `HDX_NODE_CONSOLE_CAPTURE` environment variable to
 export HDX_NODE_CONSOLE_CAPTURE=0
 ```
 
+To attach trace id to console logs, you can set `HDX_NODE_BETA_MODE` environment variable to 1.
+
+```sh
+export HDX_NODE_BETA_MODE=1
+```
+
 #### Advanced Network Capture
 
 By enabling advanced network capture, the SDK will additionally capture full HTTP request/response headers
