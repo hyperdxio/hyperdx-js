@@ -1,5 +1,11 @@
 # @hyperdx/browser
 
+## 0.19.0
+
+### Minor Changes
+
+- 08d09db: perf: disable experimentalExceptionCapture functionality to reduce bundle size
+
 ## 0.18.4
 
 ### Patch Changes

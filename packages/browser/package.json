@@ -1,6 +1,6 @@
 {
   "name": "@hyperdx/browser",
-  "version": "0.18.4",
+  "version": "0.19.0",
   "license": "Apache-2.0",
   "main": "build/index.js",
   "types": "build/index.d.ts",
