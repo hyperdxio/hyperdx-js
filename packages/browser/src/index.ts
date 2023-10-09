@@ -23,7 +23,6 @@ type BrowserSDKConfig = {
   debug?: boolean;
   disableIntercom?: boolean;
   disableReplay?: boolean;
-  experimentalExceptionCapture?: boolean;
   ignoreClass?: string;
   instrumentations?: Instrumentations;
   maskAllInputs?: boolean;
@@ -32,6 +31,10 @@ type BrowserSDKConfig = {
   service: string;
   tracePropagationTargets?: (string | RegExp)[];
   url?: string;
+  /**
+   * Internally used only. Do not use.
+   */
+  experimentalExceptionCapture?: boolean;
 };
 
 const URL_BASE = 'https://in-otel.hyperdx.io';
