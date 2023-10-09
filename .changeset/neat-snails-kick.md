@@ -2,4 +2,4 @@
 '@hyperdx/browser': patch
 ---
 
-perf: uninstall sentry/browser pkg
+perf: disable experimentalExceptionCapture functionality to reduce bundle size

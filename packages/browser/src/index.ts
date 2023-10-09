@@ -23,7 +23,7 @@ type BrowserSDKConfig = {
   debug?: boolean;
   disableIntercom?: boolean;
   disableReplay?: boolean;
-  // experimentalExceptionCapture?: boolean;
+  experimentalExceptionCapture?: boolean;
   ignoreClass?: string;
   instrumentations?: Instrumentations;
   maskAllInputs?: boolean;
@@ -64,7 +64,7 @@ class Browser {
     debug = false,
     disableIntercom = false,
     disableReplay = false,
-    // experimentalExceptionCapture = false,
+    experimentalExceptionCapture = false,
     ignoreClass,
     instrumentations = {},
     maskAllInputs = true,
