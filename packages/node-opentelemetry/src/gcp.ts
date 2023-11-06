@@ -54,15 +54,13 @@ const _createSpan = (event) => {
 export const registerGCPCloudFunctionEventHandler = (
   handler: (event: any) => Promise<void>,
 ) => {
-  return (function () {
-    initSDK({
-      betaMode: false,
-      consoleCapture: true,
-    });
-    return async (event) => {
-      const span = _createSpan(event);
-      await handler(event);
-      span.end();
-    };
-  })();
+  initSDK({
+    betaMode: false,
+    consoleCapture: true,
+  });
+  return async (event) => {
+    const span = _createSpan(event);
+    await handler(event);
+    span.end();
+  };
 };
