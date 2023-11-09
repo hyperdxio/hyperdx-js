@@ -11,4 +11,6 @@ initSDK({
   advancedNetworkCapture: stringToBoolean(
     env.HDX_NODE_ADVANCED_NETWORK_CAPTURE,
   ),
+  stopOnTerminationSignals:
+    stringToBoolean(env.HDX_NODE_STOP_ON_TERMINATION_SIGNALS) ?? true,
 });

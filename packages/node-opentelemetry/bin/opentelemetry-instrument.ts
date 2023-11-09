@@ -30,7 +30,3 @@ start().catch((error) => {
   console.error(error);
   process.exit(1);
 });
-
-process.on('SIGTERM', () => {
-  process.exit(0);
-});
