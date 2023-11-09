@@ -117,6 +117,7 @@ export const initSDK = (config: SDKConfig) => {
           sampler: env.OTEL_TRACES_SAMPLER,
           samplerArg: env.OTEL_TRACES_SAMPLER_ARG,
           serviceName: env.OTEL_SERVICE_NAME,
+          stopOnTerminationSignals,
         },
         null,
         2,
