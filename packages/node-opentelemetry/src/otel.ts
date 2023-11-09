@@ -4,7 +4,6 @@ import {
   getNodeAutoInstrumentations,
   InstrumentationConfigMap,
 } from '@opentelemetry/auto-instrumentations-node';
-import { RemixInstrumentation } from 'opentelemetry-instrumentation-remix';
 
 import hdx, {
   HDX_DEBUG_MODE_ENABLED,
@@ -14,29 +13,18 @@ import HyperDXConsoleInstrumentation from './instrumentations/console';
 import HyperDXSpanProcessor from './spanProcessor';
 import { getHyperDXHTTPInstrumentationConfig } from './instrumentations/http';
 import { hyperDXGlobalContext } from './context';
+import { InstrumentationBase } from '@opentelemetry/instrumentation';
 
 const LOG_PREFIX = `⚠️  ${_LOG_PREFIX}`;
 
 const env = process.env;
-
-const customInstrumentationMap = {
-  '@opentelemetry/instrumentation-remix': RemixInstrumentation,
-};
-
-type ConfigArg<T> = T extends new (...args: infer U) => unknown ? U[0] : never;
-export type CustomInstrumentationConfigMap = {
-  [Name in keyof typeof customInstrumentationMap]?: ConfigArg<
-    (typeof customInstrumentationMap)[Name]
-  >;
-};
 
 type SDKConfig = {
   advancedNetworkCapture?: boolean;
   betaMode?: boolean;
   consoleCapture?: boolean;
   instrumentations?: InstrumentationConfigMap;
-  additionalInstrumentations?: CustomInstrumentationConfigMap[];
-  disableInstrumentations?: string[];
+  additionalInstrumentations?: InstrumentationBase[];
 };
 
 export const setTraceAttributes = hyperDXGlobalContext.setTraceAttributes;
@@ -72,33 +60,6 @@ export const initSDK = (config: SDKConfig) => {
     service: env.OTEL_SERVICE_NAME,
   });
 
-  const nodeAutoInstrumentationInputConfig = {
-    '@opentelemetry/instrumentation-http': config.advancedNetworkCapture
-      ? getHyperDXHTTPInstrumentationConfig({
-          httpCaptureHeadersClientRequest:
-            env.OTEL_INSTRUMENTATION_HTTP_CAPTURE_HEADERS_CLIENT_REQUEST,
-          httpCaptureHeadersClientResponse:
-            env.OTEL_INSTRUMENTATION_HTTP_CAPTURE_HEADERS_CLIENT_RESPONSE,
-          httpCaptureHeadersServerRequest:
-            env.OTEL_INSTRUMENTATION_HTTP_CAPTURE_HEADERS_SERVER_REQUEST,
-          httpCaptureHeadersServerResponse:
-            env.OTEL_INSTRUMENTATION_HTTP_CAPTURE_HEADERS_SERVER_RESPONSE,
-        })
-      : { enabled: true },
-    // FIXME: issue detected with fs instrumentation (infinite loop)
-    '@opentelemetry/instrumentation-fs': {
-      enabled: false,
-    },
-    ...config.instrumentations,
-    ...config.additionalInstrumentations,
-  };
-
-  if (config.disableInstrumentations) {
-    for (const instrumentation of config.disableInstrumentations) {
-      nodeAutoInstrumentationInputConfig[instrumentation] = { enabled: false };
-    }
-  }
-
   const sdk = new NodeSDK({
     // metricReader: metricReader,
     ...(config.betaMode
@@ -115,7 +76,26 @@ export const initSDK = (config: SDKConfig) => {
           }),
         }),
     instrumentations: [
-      getNodeAutoInstrumentations(nodeAutoInstrumentationInputConfig),
+      getNodeAutoInstrumentations({
+        '@opentelemetry/instrumentation-http': config.advancedNetworkCapture
+          ? getHyperDXHTTPInstrumentationConfig({
+              httpCaptureHeadersClientRequest:
+                env.OTEL_INSTRUMENTATION_HTTP_CAPTURE_HEADERS_CLIENT_REQUEST,
+              httpCaptureHeadersClientResponse:
+                env.OTEL_INSTRUMENTATION_HTTP_CAPTURE_HEADERS_CLIENT_RESPONSE,
+              httpCaptureHeadersServerRequest:
+                env.OTEL_INSTRUMENTATION_HTTP_CAPTURE_HEADERS_SERVER_REQUEST,
+              httpCaptureHeadersServerResponse:
+                env.OTEL_INSTRUMENTATION_HTTP_CAPTURE_HEADERS_SERVER_RESPONSE,
+            })
+          : { enabled: true },
+        // FIXME: issue detected with fs instrumentation (infinite loop)
+        '@opentelemetry/instrumentation-fs': {
+          enabled: false,
+        },
+        ...config.instrumentations,
+      }),
+      ...config.additionalInstrumentations,
     ],
   });
 
