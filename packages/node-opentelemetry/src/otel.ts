@@ -95,7 +95,9 @@ export const initSDK = (config: SDKConfig) => {
         },
         ...config.instrumentations,
       }),
-      ...config.additionalInstrumentations,
+      ...(config.additionalInstrumentations
+        ? config.additionalInstrumentations
+        : []),
     ],
   });
 
