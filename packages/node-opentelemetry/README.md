@@ -101,6 +101,7 @@ import { initSDK } from '@hyperdx/node-opentelemetry';
 initSDK({
   consoleCapture: true, // optional, default: true
   advancedNetworkCapture: true, // optional, default: false
+  additionalInstrumentations: [], // optional, default: []
 });
 
 // Other instrumentation code...
