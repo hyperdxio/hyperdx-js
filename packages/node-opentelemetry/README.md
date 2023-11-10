@@ -161,9 +161,9 @@ const { RemixInstrumentation } = require('opentelemetry-instrumentation-remix');
 
 
 initSDK({
-    consoleCapture: true, // optional, default: true
-    advancedNetworkCapture: true, // optional, default: false
-    additionalInstrumentations: [new RemixInstrumentation()]
+  consoleCapture: true, // optional, default: true
+  advancedNetworkCapture: true, // optional, default: false
+  additionalInstrumentations: [new RemixInstrumentation()]
 });
 
 // Example using opentelemetry-instrumentation-remix (https://www.npmjs.com/package/opentelemetry-instrumentation-remix)
