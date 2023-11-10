@@ -69,6 +69,8 @@ export HYPERDX_API_KEY=<YOUR_HYPERDX_API_KEY_HERE> \
 OTEL_SERVICE_NAME='<NAME_OF_YOUR_APP_OR_SERVICE>'
 ```
 
+_Self-hosted users will need to additionally specify the `OTEL_EXPORTER_OTLP_ENDPOINT` env var to point to their self-hosted endpoint (ex. `http://localhost:4318`)_
+
 ### Run the Application with HyperDX OpenTelemetry CLI
 
 #### Option 1 (Recommended)
@@ -113,6 +115,12 @@ And run your application with the following command (example using `ts-node`):
 ```sh
 npx ts-node -r './instrument.ts' index.ts
 ```
+
+### Troubleshooting
+
+If you are having trouble getting events to show up in HyperDX, you can enable verbose logging by setting the environment variable `DEBUG=hyperdx`. This will print out additional debug logging to isolate any issues.
+
+If you're pointing to a self-hosted collector, ensure the `OTEL_EXPORTER_OTLP_ENDPOINT` environment variable is set to the correct endpoint (ex. `http://localhost:4318`) and is reachable (ex. `curl http://localhost:4318/v1/traces` should return a HTTP 405).
 
 ### (Optional) Attach User Information or Metadata (BETA)
 
@@ -179,4 +187,21 @@ For example:
 
 ```sh
 export OTEL_INSTRUMENTATION_HTTP_CAPTURE_HEADERS_CLIENT_REQUEST=authorization,accept
+```
+
+### Custom Termination/Shutdown Handler
+
+If your application specifies its own shutdown procedure by capturing `SIGTERM` or `SIGINT` events, you'll want to disable the default shutdown handler by specifying `stopOnTerminationSignals` to false in the `initSDK` call or by setting `HDX_NODE_STOP_ON_TERMINATION_SIGNALS` to `false`.
+
+You can then import and call the `shutdown` async function to manually stop the SDK.
+
+```ts
+import { shutdown } from '@hyperdx/node-opentelemetry';
+
+process.on('SIGTERM', async () => {
+  // Your shutdown code here...
+
+  await shutdown();
+  process.exit();
+});
 ```
