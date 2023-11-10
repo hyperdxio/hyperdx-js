@@ -13,6 +13,7 @@ import HyperDXConsoleInstrumentation from './instrumentations/console';
 import HyperDXSpanProcessor from './spanProcessor';
 import { getHyperDXHTTPInstrumentationConfig } from './instrumentations/http';
 import { hyperDXGlobalContext } from './context';
+import { InstrumentationBase } from '@opentelemetry/instrumentation';
 
 const LOG_PREFIX = `⚠️  ${_LOG_PREFIX}`;
 
@@ -23,6 +24,7 @@ type SDKConfig = {
   betaMode?: boolean;
   consoleCapture?: boolean;
   instrumentations?: InstrumentationConfigMap;
+  additionalInstrumentations?: InstrumentationBase[];
 };
 
 export const setTraceAttributes = hyperDXGlobalContext.setTraceAttributes;
@@ -93,6 +95,9 @@ export const initSDK = (config: SDKConfig) => {
         },
         ...config.instrumentations,
       }),
+      ...(config.additionalInstrumentations
+        ? config.additionalInstrumentations
+        : []),
     ],
   });
 
