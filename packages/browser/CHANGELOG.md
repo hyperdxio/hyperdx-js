@@ -1,11 +1,5 @@
 # @hyperdx/browser
 
-## 0.19.1
-
-### Patch Changes
-
-- 45301c5: fix: protobufjs eval issue
-
 ## 0.19.1-next.0
 
 ### Patch Changes
