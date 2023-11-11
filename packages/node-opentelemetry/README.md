@@ -103,6 +103,7 @@ import { initSDK } from '@hyperdx/node-opentelemetry';
 initSDK({
   consoleCapture: true, // optional, default: true
   advancedNetworkCapture: true, // optional, default: false
+  additionalInstrumentations: [], // optional, default: []
 });
 
 // Other instrumentation code...
@@ -149,6 +150,24 @@ app.use((req, res, next) => {
 ```
 
 ### (Optional) Advanced Instrumentation Configuration
+
+#### Adding Additional 3rd-Party Instrumentation Packages
+
+When manually instrumenting the SDK, use the ```additionalInstrumentations``` key to create an array of additional 3rd-part instrumentations. Check [here](https://github.com/open-telemetry/opentelemetry-js-contrib/tree/main/metapackages/auto-instrumentations-node#supported-instrumentations) to see the current auto instrumentation packages.
+
+```ts
+const { initSDK } = require('@hyperdx/node-opentelemetry');
+const { RemixInstrumentation } = require('opentelemetry-instrumentation-remix');
+
+
+initSDK({
+  consoleCapture: true, // optional, default: true
+  advancedNetworkCapture: true, // optional, default: false
+  additionalInstrumentations: [new RemixInstrumentation()]
+});
+
+// Example using opentelemetry-instrumentation-remix (https://www.npmjs.com/package/opentelemetry-instrumentation-remix)
+```
 
 #### Capture Console Logs
 
