@@ -9,10 +9,15 @@ const _createSpan = (event) => {
   const tracer = trace.getTracer(PKG_NAME, PKG_VERSION);
   let parentSpanContext;
   let attributes;
+  let spanName = 'cloudFunctionEventHandler';
   // extract span context from cloud event
   if (
+    event.type === 'google.cloud.pubsub.topic.v1.messagePublished' &&
     event.data?.message?.attributes?.['googclient_OpenTelemetrySpanContext']
   ) {
+    if (event.data.subscription) {
+      spanName = `${event.data.subscription} process`;
+    }
     const message = event.data.message;
     const parentSpanValue =
       message.attributes['googclient_OpenTelemetrySpanContext'];
@@ -27,6 +32,7 @@ const _createSpan = (event) => {
       // based on https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/trace/semantic_conventions/messaging.md#topic-with-multiple-consumers
       [SemanticAttributes.MESSAGING_SYSTEM]: 'pubsub',
       [SemanticAttributes.MESSAGING_OPERATION]: 'process',
+      [SemanticAttributes.MESSAGING_DESTINATION]: event.data.subscription,
       [SemanticAttributes.MESSAGING_DESTINATION_KIND]: 'topic',
       [SemanticAttributes.MESSAGING_MESSAGE_ID]: message.id,
       [SemanticAttributes.MESSAGING_PROTOCOL]: 'pubsub',
@@ -40,7 +46,7 @@ const _createSpan = (event) => {
   }
 
   return tracer.startSpan(
-    'hyperdx-gcp-cloud-function-event-handler',
+    spanName,
     {
       kind: SpanKind.CONSUMER,
       ...(attributes ? { attributes } : {}),
@@ -60,7 +66,13 @@ export const registerGCPCloudFunctionEventHandler = (
   });
   return async (event) => {
     const span = _createSpan(event);
-    await handler(event);
-    span.end();
+    try {
+      await handler(event);
+    } catch (e) {
+      span.recordException(e as any);
+      throw e;
+    } finally {
+      span.end();
+    }
   };
 };
