@@ -13,6 +13,7 @@ import HyperDXConsoleInstrumentation from './instrumentations/console';
 import HyperDXSpanProcessor from './spanProcessor';
 import { getHyperDXHTTPInstrumentationConfig } from './instrumentations/http';
 import { hyperDXGlobalContext } from './context';
+import { InstrumentationBase } from '@opentelemetry/instrumentation';
 
 const LOG_PREFIX = `⚠️  ${_LOG_PREFIX}`;
 
@@ -23,9 +24,14 @@ type SDKConfig = {
   betaMode?: boolean;
   consoleCapture?: boolean;
   instrumentations?: InstrumentationConfigMap;
+  additionalInstrumentations?: InstrumentationBase[];
+  stopOnTerminationSignals?: boolean;
 };
 
 export const setTraceAttributes = hyperDXGlobalContext.setTraceAttributes;
+
+let sdk: NodeSDK;
+let hdxConsoleInstrumentation: HyperDXConsoleInstrumentation;
 
 export const initSDK = (config: SDKConfig) => {
   // enable otel debug mode if HDX_DEBUG_MODE_ENABLED is set
@@ -48,17 +54,19 @@ export const initSDK = (config: SDKConfig) => {
     console.warn(`${LOG_PREFIX} HYPERDX_API_KEY is not set`);
   }
 
-  hdx('Initializing opentelemetry SDK');
+  const stopOnTerminationSignals = config.stopOnTerminationSignals ?? true; // Stop by default
+
+  hdx('Initializing OpenTelemetry SDK');
   const consoleInstrumentationEnabled = config.consoleCapture ?? true;
   const apiKey =
     env.HYPERDX_API_KEY ?? env.OTEL_EXPORTER_OTLP_HEADERS?.split('=')[1];
-  const hdxConsoleInstrumentation = new HyperDXConsoleInstrumentation({
+  hdxConsoleInstrumentation = new HyperDXConsoleInstrumentation({
     apiKey,
     betaMode: config.betaMode,
     service: env.OTEL_SERVICE_NAME,
   });
 
-  const sdk = new NodeSDK({
+  sdk = new NodeSDK({
     // metricReader: metricReader,
     ...(config.betaMode
       ? {
@@ -93,6 +101,7 @@ export const initSDK = (config: SDKConfig) => {
         },
         ...config.instrumentations,
       }),
+      ...(config.additionalInstrumentations ?? [])
     ],
   });
 
@@ -111,6 +120,7 @@ export const initSDK = (config: SDKConfig) => {
           sampler: env.OTEL_TRACES_SAMPLER,
           samplerArg: env.OTEL_TRACES_SAMPLER_ARG,
           serviceName: env.OTEL_SERVICE_NAME,
+          stopOnTerminationSignals,
         },
         null,
         2,
@@ -134,17 +144,40 @@ export const initSDK = (config: SDKConfig) => {
     );
   }
 
+  hdx(
+    stopOnTerminationSignals
+      ? 'stopOnTerminationSignals enabled'
+      : 'stopOnTerminationSignals disabled (user is responsible for graceful shutdown on termination signals)',
+  );
+
+  function handleTerminationSignal(signal: string) {
+    hdx(`${signal} received, shutting down...`);
+    _shutdown().finally(() => process.exit());
+  }
+
   // Graceful shutdown
-  process.on('SIGTERM', () => {
-    hdx('SIGTERM received, shutting down');
-    hdxConsoleInstrumentation.disable();
-    hyperDXGlobalContext.shutdown();
-    sdk
-      .shutdown()
-      .then(
-        () => console.log(`${LOG_PREFIX} otel SDK shut down successfully`),
-        (err) => console.log(`${LOG_PREFIX} Error shutting down otel SDK`, err),
-      )
-      .finally(() => process.exit(0));
-  });
+  if (stopOnTerminationSignals) {
+    process.on('SIGTERM', () => {
+      handleTerminationSignal('SIGTERM');
+    });
+    process.on('SIGINT', () => {
+      handleTerminationSignal('SIGINT');
+    });
+  }
+};
+
+const _shutdown = () => {
+  hdxConsoleInstrumentation?.disable();
+  hyperDXGlobalContext?.shutdown();
+  return (
+    sdk?.shutdown()?.then(
+      () => console.log(`${LOG_PREFIX} otel SDK shut down successfully`),
+      (err) => console.log(`${LOG_PREFIX} Error shutting down otel SDK`, err),
+    ) ?? Promise.resolve() // in case SDK isn't init'd yet
+  );
+};
+
+export const shutdown = () => {
+  hdx('shutdown() called');
+  return _shutdown();
 };

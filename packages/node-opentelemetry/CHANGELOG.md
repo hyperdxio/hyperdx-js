@@ -1,5 +1,17 @@
 # @hyperdx/node-opentelemetry
 
+## 0.3.4-next.1
+
+### Patch Changes
+
+- b654d4e: Adding additional instrumentation logic
+
+## 0.3.4-next.0
+
+### Patch Changes
+
+- 12331f7: Add custom shutdown handler, capture SIGINT termination signal by default for graceful shutdown.
+
 ## 0.3.3
 
 ### Patch Changes

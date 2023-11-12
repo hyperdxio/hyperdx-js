@@ -1,0 +1,11 @@
+{
+  "mode": "pre",
+  "tag": "next",
+  "initialVersions": {
+    "@hyperdx/browser": "0.19.1",
+    "@hyperdx/deno": "0.0.2",
+    "@hyperdx/node-logger": "0.2.8",
+    "@hyperdx/node-opentelemetry": "0.3.3"
+  },
+  "changesets": ["empty-oranges-call", "twelve-peaches-suffer"]
+}

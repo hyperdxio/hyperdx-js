@@ -9,8 +9,14 @@ const {
   getWinsonTransport,
   getPinoTransport,
   init,
-} = require('./build/src/logger');
-const { setTraceAttributes } = require('./build/src');
+} = require('../build/src/logger');
+const { setTraceAttributes } = require('../build/src');
+// const { shutdown } = require('@hyperdx/node-opentelemetry');
+
+// process.on('SIGINT', async () => {
+//   await shutdown();
+//   process.exit(0);
+// });
 
 const PORT = parseInt(process.env.PORT || '7777');
 const app = express();
