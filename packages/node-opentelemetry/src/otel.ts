@@ -19,7 +19,7 @@ const LOG_PREFIX = `⚠️  ${_LOG_PREFIX}`;
 
 const env = process.env;
 
-type SDKConfig = {
+export type SDKConfig = {
   advancedNetworkCapture?: boolean;
   betaMode?: boolean;
   consoleCapture?: boolean;
@@ -101,7 +101,7 @@ export const initSDK = (config: SDKConfig) => {
         },
         ...config.instrumentations,
       }),
-      ...(config.additionalInstrumentations ?? [])
+      ...(config.additionalInstrumentations ?? []),
     ],
   });
 

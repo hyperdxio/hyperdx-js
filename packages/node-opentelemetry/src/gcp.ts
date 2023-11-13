@@ -1,16 +1,14 @@
 import { SemanticAttributes } from '@opentelemetry/semantic-conventions';
 import { SpanKind, context, trace } from '@opentelemetry/api';
 
-import { initSDK } from './otel';
+import { SDKConfig, initSDK } from './otel';
 import { name as PKG_NAME, version as PKG_VERSION } from '../package.json';
 
 export const registerGCPCloudFunctionEventHandler = (
   handler: (event: any) => Promise<void>,
+  sdkConfig: SDKConfig = {},
 ) => {
-  initSDK({
-    betaMode: false,
-    consoleCapture: true,
-  });
+  initSDK(sdkConfig);
   return async (event) => {
     const tracer = trace.getTracer(PKG_NAME, PKG_VERSION);
     let parentSpanContext;
