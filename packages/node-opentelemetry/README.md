@@ -238,3 +238,5 @@ functions.cloudEvent(
   }),
 );
 ```
+
+Currently the event handler will ensure traces gets propagated through PubSub as long as the publisher has `enableOpenTelemetryTracing: true` (see [example](https://github.com/googleapis/nodejs-pubsub/blob/730e9dc0ab20a5f02508a82310d58b0da1f54330/samples/openTelemetryTracing.js#L75)).
