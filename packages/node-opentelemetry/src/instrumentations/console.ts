@@ -56,11 +56,17 @@ export default class HyperDXConsoleInstrumentation {
         level,
       });
 
-      let meta: Record<string, unknown> = parsedLog.meta;
+      const currentActiveSpan = opentelemetry.trace.getActiveSpan();
+      const traceId = currentActiveSpan?.spanContext().traceId;
+
+      let meta: Record<string, unknown> = {
+        ...parsedLog.meta,
+        // attached traceId and spanId,
+        trace_id: traceId,
+        span_id: currentActiveSpan?.spanContext().spanId,
+      };
 
       if (this.betaMode) {
-        const currentActiveSpan = opentelemetry.trace.getActiveSpan();
-        const traceId = currentActiveSpan?.spanContext().traceId;
         const attributes = traceId
           ? hyperDXGlobalContext.getTraceAttributes(traceId)
           : {};
@@ -68,9 +74,6 @@ export default class HyperDXConsoleInstrumentation {
           ...meta,
           // attach custom attributes
           ...attributes,
-          // attached traceId and spanId,
-          trace_id: traceId,
-          span_id: currentActiveSpan?.spanContext().spanId,
         };
       }
       this._logger.postMessage(parsedLog.level, parsedLog.message, meta);

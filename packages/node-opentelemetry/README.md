@@ -153,17 +153,16 @@ app.use((req, res, next) => {
 
 #### Adding Additional 3rd-Party Instrumentation Packages
 
-When manually instrumenting the SDK, use the ```additionalInstrumentations``` key to create an array of additional 3rd-part instrumentations. Check [here](https://github.com/open-telemetry/opentelemetry-js-contrib/tree/main/metapackages/auto-instrumentations-node#supported-instrumentations) to see the current auto instrumentation packages.
+When manually instrumenting the SDK, use the `additionalInstrumentations` key to create an array of additional 3rd-part instrumentations. Check [here](https://github.com/open-telemetry/opentelemetry-js-contrib/tree/main/metapackages/auto-instrumentations-node#supported-instrumentations) to see the current auto instrumentation packages.
 
 ```ts
 const { initSDK } = require('@hyperdx/node-opentelemetry');
 const { RemixInstrumentation } = require('opentelemetry-instrumentation-remix');
 
-
 initSDK({
   consoleCapture: true, // optional, default: true
   advancedNetworkCapture: true, // optional, default: false
-  additionalInstrumentations: [new RemixInstrumentation()]
+  additionalInstrumentations: [new RemixInstrumentation()],
 });
 
 // Example using opentelemetry-instrumentation-remix (https://www.npmjs.com/package/opentelemetry-instrumentation-remix)
@@ -222,4 +221,21 @@ process.on('SIGTERM', async () => {
   await shutdown();
   process.exit();
 });
+```
+
+### GCP Cloud Function Event Handler
+
+If your application runs on GCP (Google Cloud Platform) Cloud Functions, you can use the `registerGCPCloudFunctionEventHandler` function to automatically instrument your function.
+Currently the event handler will ensure traces gets propagated through PubSub as long as the publisher has `enableOpenTelemetryTracing: true` (see [example](https://github.com/googleapis/nodejs-pubsub/blob/730e9dc0ab20a5f02508a82310d58b0da1f54330/samples/openTelemetryTracing.js#L86)).
+
+```ts
+import functions from '@google-cloud/functions-framework';
+import { registerGCPCloudFunctionEventHandler } from '@hyperdx/node-opentelemetry';
+
+functions.cloudEvent(
+  'helloCloudEvent',
+  registerGCPCloudFunctionEventHandler(async (event) => {
+    // Your code here...
+  }),
+);
 ```
