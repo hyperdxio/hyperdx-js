@@ -1,5 +1,11 @@
 # @hyperdx/node-opentelemetry
 
+## 0.4.0-next.2
+
+### Minor Changes
+
+- 3076d37: feat: attach trace id to console log + gcp cloud function event handler
+
 ## 0.3.4-next.1
 
 ### Patch Changes
