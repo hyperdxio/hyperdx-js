@@ -226,6 +226,7 @@ process.on('SIGTERM', async () => {
 ### GCP Cloud Function Event Handler
 
 If your application runs on GCP (Google Cloud Platform) Cloud Functions, you can use the `registerGCPCloudFunctionEventHandler` function to automatically instrument your function.
+Currently the event handler will ensure traces gets propagated through PubSub as long as the publisher has `enableOpenTelemetryTracing: true` (see [example](https://github.com/googleapis/nodejs-pubsub/blob/730e9dc0ab20a5f02508a82310d58b0da1f54330/samples/openTelemetryTracing.js#L86)).
 
 ```ts
 import functions from '@google-cloud/functions-framework';
@@ -238,5 +239,3 @@ functions.cloudEvent(
   }),
 );
 ```
-
-Currently the event handler will ensure traces gets propagated through PubSub as long as the publisher has `enableOpenTelemetryTracing: true` (see [example](https://github.com/googleapis/nodejs-pubsub/blob/730e9dc0ab20a5f02508a82310d58b0da1f54330/samples/openTelemetryTracing.js#L75)).
