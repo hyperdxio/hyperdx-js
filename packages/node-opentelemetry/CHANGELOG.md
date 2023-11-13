@@ -1,5 +1,11 @@
 # @hyperdx/node-opentelemetry
 
+## 0.4.0-next.3
+
+### Patch Changes
+
+- 6ce51f1: fix: export gcp modules
+
 ## 0.4.0-next.2
 
 ### Minor Changes
