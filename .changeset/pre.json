@@ -8,6 +8,7 @@
     "@hyperdx/node-opentelemetry": "0.3.3"
   },
   "changesets": [
+    "chatty-beers-rush",
     "empty-oranges-call",
     "flat-radios-wash",
     "fuzzy-numbers-report",
