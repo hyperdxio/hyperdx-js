@@ -682,24 +682,25 @@
   resolved "https://registry.yarnpkg.com/@humanwhocodes/object-schema/-/object-schema-1.2.1.tgz#b520529ec21d8e5945a1851dfd1c32e94e39ff45"
   integrity sha512-ZnQMnLV4e7hDlUvw8H+U8ASL02SS2Gn6+9Ac3wGGLIe7+je2AeAOxPY+izIPJDfFDb7eDjev0Us8MO1iFRN8hA==
 
-"@hyperdx/otel-web-session-recorder@0.16.2-14":
-  version "0.16.2-14"
-  resolved "https://registry.yarnpkg.com/@hyperdx/otel-web-session-recorder/-/otel-web-session-recorder-0.16.2-14.tgz#4f4b273b8589e9e3cb7db20571d1fdb85d42b096"
-  integrity sha512-G1+yLcJpF1Y1kHe+E2TKH2v4qCc2C8jS2E+NpJ2BhXnk9tFnSXQrIPTpjKSvP+gz+v/JcrDnjqCFTfGUV21Wsw==
+"@hyperdx/otel-web-session-recorder@0.16.2-15":
+  version "0.16.2-15"
+  resolved "https://registry.yarnpkg.com/@hyperdx/otel-web-session-recorder/-/otel-web-session-recorder-0.16.2-15.tgz#dfcfd876e1c6c8299416c18e102690e710bb7fef"
+  integrity sha512-LqhBjPYCJx1cYMD6G5jHrurxx7YQT1+frBn8Le3oHnQ/gpO8ft5KK1SP0Ygf1P9VPC+smcQob6JZM8lUHZnlNQ==
   dependencies:
     "@babel/runtime" "~7.18.3"
     "@opentelemetry/api" "^1.4.1"
     "@opentelemetry/core" "^1.14.0"
     "@opentelemetry/resources" "^1.14.0"
     fflate "^0.7.4"
+    long "^5.2.3"
     protobufjs "~6.11.2"
     rrweb "^1.1.3"
     type-fest "^3.7.2"
 
-"@hyperdx/otel-web@0.16.2-14":
-  version "0.16.2-14"
-  resolved "https://registry.yarnpkg.com/@hyperdx/otel-web/-/otel-web-0.16.2-14.tgz#5bac8a6ab7502fd056ebf0d59d1fba017802ed52"
-  integrity sha512-WO9qh8RKwIIoVFKWMDpwcMUIvOCy7VK7aBMVUi13aJ/RQ/vv+mgoB/GOZM8UD+QTRetGmldUzRx0UcKiYTxpVQ==
+"@hyperdx/otel-web@0.16.2-15":
+  version "0.16.2-15"
+  resolved "https://registry.yarnpkg.com/@hyperdx/otel-web/-/otel-web-0.16.2-15.tgz#f66ab5d241a55ff4cff8ac179a7705fc77377499"
+  integrity sha512-AAt9DUSJxGI0xgCA8psbJw+NxsNKRHI5f4vqsN7eovnvYHbcsVjq9xNiv8SkmiOwBGQblw+9mmpYVvON4DwozA==
   dependencies:
     "@babel/runtime" "^7.21.0"
     "@opentelemetry/api" "^1.4.1"
@@ -5877,7 +5878,7 @@ long@^4.0.0:
   resolved "https://registry.yarnpkg.com/long/-/long-4.0.0.tgz#9a7b71cfb7d361a194ea555241c92f7468d5bf28"
   integrity sha512-XsP+KhQif4bjX1kbuSiySJFNAehNxgLb6hPRGJ9QsUr8ajHkuXGdrHmFUTUUXhDwVX2R5bY4JNZEwbUiMhV+MA==
 
-long@^5.0.0:
+long@^5.0.0, long@^5.2.3:
   version "5.2.3"
   resolved "https://registry.yarnpkg.com/long/-/long-5.2.3.tgz#a3ba97f3877cf1d778eccbcb048525ebb77499e1"
   integrity sha512-lcHwpNoggQTObv5apGNCTdJrO69eHOZMi4BNC+rTLER8iHAqGrUVeLh/irVIM7zTw2bOXA8T6uNPeujwOLg/2Q==
