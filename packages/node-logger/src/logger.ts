@@ -16,7 +16,7 @@ export type HdxLog = {
   sn?: number;
   st: string; // level in text
   sv: string; // service name
-  ts: Date; // timestamp
+  ts: number; // timestamp
 };
 
 export type PinoLogLine = {
@@ -140,7 +140,7 @@ export class Logger {
       sn: 0, // TODO: set up the correct number
       st: stripAnsi(level),
       sv: stripAnsi(this.service),
-      ts: meta.time ?? new Date(), // set to current time if not provided (time -> pino)
+      ts: meta.time ?? Date.now(), // set to current time if not provided (time -> pino)
     };
   }
 
