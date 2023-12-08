@@ -1,5 +1,17 @@
 # @hyperdx/node-opentelemetry
 
+## 0.4.0
+
+### Minor Changes
+
+- 3076d37: feat: attach trace id to console log + gcp cloud function event handler
+
+### Patch Changes
+
+- 12331f7: Add custom shutdown handler, capture SIGINT termination signal by default for graceful shutdown.
+- 6ce51f1: fix: export gcp modules
+- b654d4e: Adding additional instrumentation logic
+
 ## 0.4.0-next.3
 
 ### Patch Changes
