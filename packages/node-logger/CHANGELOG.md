@@ -1,5 +1,11 @@
 # @hyperdx/node-logger
 
+## 0.2.9-next.1
+
+### Patch Changes
+
+- f7d004d: fix: hdx log ts in Date string format
+
 ## 0.2.9-next.0
 
 ### Patch Changes

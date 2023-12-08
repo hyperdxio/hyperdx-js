@@ -1,5 +1,13 @@
 # @hyperdx/node-opentelemetry
 
+## 0.4.1-next.1
+
+### Patch Changes
+
+- f7d004d: fix: hdx log ts in Date string format
+- Updated dependencies [f7d004d]
+  - @hyperdx/node-logger@0.2.9-next.1
+
 ## 0.4.1-next.0
 
 ### Patch Changes
