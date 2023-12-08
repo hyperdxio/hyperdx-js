@@ -1,5 +1,13 @@
 # @hyperdx/node-opentelemetry
 
+## 0.4.1-next.0
+
+### Patch Changes
+
+- af4dccb: fix: logger timestamp bug
+- Updated dependencies [af4dccb]
+  - @hyperdx/node-logger@0.2.9-next.0
+
 ## 0.4.0
 
 ### Minor Changes

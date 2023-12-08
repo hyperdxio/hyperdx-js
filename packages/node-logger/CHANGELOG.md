@@ -1,5 +1,11 @@
 # @hyperdx/node-logger
 
+## 0.2.9-next.0
+
+### Patch Changes
+
+- af4dccb: fix: pino logger timestamp bug
+
 ## 0.2.8
 
 ### Patch Changes
