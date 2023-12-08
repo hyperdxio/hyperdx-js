@@ -1,5 +1,12 @@
 # @hyperdx/node-logger
 
+## 0.2.9
+
+### Patch Changes
+
+- f7d004d: fix: hdx log ts in Date string format
+- af4dccb: fix: pino logger timestamp bug
+
 ## 0.2.9-next.1
 
 ### Patch Changes
