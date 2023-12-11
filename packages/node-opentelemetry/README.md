@@ -153,20 +153,27 @@ app.use((req, res, next) => {
 
 #### Adding Additional 3rd-Party Instrumentation Packages
 
-When manually instrumenting the SDK, use the `additionalInstrumentations` key to create an array of additional 3rd-part instrumentations. Check [here](https://github.com/open-telemetry/opentelemetry-js-contrib/tree/main/metapackages/auto-instrumentations-node#supported-instrumentations) to see the current auto instrumentation packages.
+When manually instrumenting the SDK, use the `additionalInstrumentations` key to create an array of additional 3rd-party instrumentations. Check [here](https://github.com/open-telemetry/opentelemetry-js-contrib/tree/main/metapackages/auto-instrumentations-node#supported-instrumentations) to see the current automatically instrumented packages.
 
-```ts
+```js
+// In your instrument.js/ts file...
 const { initSDK } = require('@hyperdx/node-opentelemetry');
 const { RemixInstrumentation } = require('opentelemetry-instrumentation-remix');
 
 initSDK({
   consoleCapture: true, // optional, default: true
   advancedNetworkCapture: true, // optional, default: false
-  additionalInstrumentations: [new RemixInstrumentation()],
+  additionalInstrumentations: [new RemixInstrumentation()], // your custom instrumentations here
 });
-
-// Example using opentelemetry-instrumentation-remix (https://www.npmjs.com/package/opentelemetry-instrumentation-remix)
 ```
+
+You can then use the instrumentation file above by requiring it when starting your application:
+
+```sh
+node -r './instrument.js' index.js
+```
+
+or see [manual instrumentation steps](#option-3) for more options.
 
 #### Capture Console Logs
 
