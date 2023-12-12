@@ -1,0 +1,15 @@
+{
+  "mode": "pre",
+  "tag": "next",
+  "initialVersions": {
+    "@hyperdx/browser": "0.19.2",
+    "@hyperdx/deno": "0.0.2",
+    "@hyperdx/node-logger": "0.2.9",
+    "@hyperdx/node-opentelemetry": "0.4.1"
+  },
+  "changesets": [
+    "curly-parrots-walk",
+    "gentle-trains-itch",
+    "tasty-snakes-camp"
+  ]
+}

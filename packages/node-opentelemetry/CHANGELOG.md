@@ -1,5 +1,14 @@
 # @hyperdx/node-opentelemetry
 
+## 0.4.2-next.0
+
+### Patch Changes
+
+- ebc8da6: chore: bump node-logger
+- Updated dependencies [ebc8da6]
+- Updated dependencies [ebc8da6]
+  - @hyperdx/node-logger@0.3.0-next.0
+
 ## 0.4.1
 
 ### Patch Changes
