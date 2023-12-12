@@ -44,7 +44,7 @@ export const initSDK = (config: SDKConfig) => {
   env.OTEL_EXPORTER_OTLP_ENDPOINT =
     env.OTEL_EXPORTER_OTLP_ENDPOINT ?? 'https://in-otel.hyperdx.io';
   env.OTEL_NODE_RESOURCE_DETECTORS = env.OTEL_NODE_RESOURCE_DETECTORS ?? 'all';
-  env.OTEL_LOG_LEVEL = env.OTEL_LOG_LEVEL ?? 'info';
+  env.OTEL_LOG_LEVEL = env.OTEL_LOG_LEVEL ?? 'error';
   env.OTEL_TRACES_SAMPLER = env.OTEL_TRACES_SAMPLER ?? 'parentbased_always_on';
   env.OTEL_TRACES_SAMPLER_ARG = env.OTEL_TRACES_SAMPLER_ARG ?? '1';
 
