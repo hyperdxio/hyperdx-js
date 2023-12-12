@@ -1,5 +1,11 @@
 # @hyperdx/node-opentelemetry
 
+## 0.4.2-next.1
+
+### Patch Changes
+
+- 4b74d88: fix: bump @opentelemetry/instrumentation-net pkg + silence otel logs by default
+
 ## 0.4.2-next.0
 
 ### Patch Changes
