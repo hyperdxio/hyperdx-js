@@ -1,3 +1,4 @@
+import { NetInstrumentation } from '@opentelemetry/instrumentation-net';
 import { NodeSDK } from '@opentelemetry/sdk-node';
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-proto';
 import {
@@ -43,7 +44,7 @@ export const initSDK = (config: SDKConfig) => {
   env.OTEL_EXPORTER_OTLP_ENDPOINT =
     env.OTEL_EXPORTER_OTLP_ENDPOINT ?? 'https://in-otel.hyperdx.io';
   env.OTEL_NODE_RESOURCE_DETECTORS = env.OTEL_NODE_RESOURCE_DETECTORS ?? 'all';
-  env.OTEL_LOG_LEVEL = env.OTEL_LOG_LEVEL ?? 'info';
+  env.OTEL_LOG_LEVEL = env.OTEL_LOG_LEVEL ?? 'none'; // silence by default
   env.OTEL_TRACES_SAMPLER = env.OTEL_TRACES_SAMPLER ?? 'parentbased_always_on';
   env.OTEL_TRACES_SAMPLER_ARG = env.OTEL_TRACES_SAMPLER_ARG ?? '1';
 
@@ -99,8 +100,14 @@ export const initSDK = (config: SDKConfig) => {
         '@opentelemetry/instrumentation-fs': {
           enabled: false,
         },
+        // FIXME: enable this once auto instrumentation is upgraded to v0.40.2
+        '@opentelemetry/instrumentation-net': {
+          enabled: false,
+        },
         ...config.instrumentations,
       }),
+      // for fix: https://github.com/open-telemetry/opentelemetry-js-contrib/releases/tag/instrumentation-net-v0.32.4
+      new NetInstrumentation(),
       ...(config.additionalInstrumentations ?? []),
     ],
   });
