@@ -340,6 +340,12 @@ class HyperdxLogger {
       })
       .then((finalBody) => {
         this._tryToSend(finalBody, bulk);
+      })
+      .catch((err) => {
+        this._debug(`Error while compressing message body. err = ${err}`);
+        this.callback(
+          new Error(`Failed to compress message body. err = ${err}`),
+        );
       });
   }
 
