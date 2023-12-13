@@ -1,5 +1,11 @@
 # @hyperdx/browser
 
+## 0.19.3-next.0
+
+### Patch Changes
+
+- 0fc0cb2: fix: unmet otel deps issue
+
 ## 0.19.2
 
 ### Patch Changes
