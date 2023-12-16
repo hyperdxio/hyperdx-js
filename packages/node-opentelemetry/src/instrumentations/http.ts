@@ -65,6 +65,248 @@ export const getShouldRecordBody =
     return true;
   };
 
+export const interceptReadableStream = (
+  stream: NodeJS.ReadableStream,
+  pt: PassThrough,
+) => {
+  const oldOn = stream.on.bind(stream);
+  let isPiped = false;
+  stream.on = (event: string, listener: (...args: any[]) => void) => {
+    oldOn(event, listener);
+    // WARNING: only pipe the stream if the user has registered a listener for the 'data' or 'readable' event
+    if ((event === 'readable' || event === 'data') && !isPiped) {
+      isPiped = true;
+      stream.pipe(pt);
+    }
+    return stream;
+  };
+  return stream;
+};
+
+export const _handleHttpOutgoingClientRequest = (
+  request: http.ClientRequest,
+  span: Span,
+  shouldRecordBody: (body: string) => boolean,
+  httpCaptureHeadersClientRequest?: string,
+) => {
+  /* Capture Headers */
+  try {
+    const headers =
+      splitCommaSeparatedStrings(httpCaptureHeadersClientRequest) ??
+      request.getRawHeaderNames();
+    headerCapture('request', headers)(span, (header) =>
+      request.getHeader(header),
+    );
+  } catch (e) {
+    hdx(`error parsing outgoing-request headers in requestHook: ${e}`);
+  }
+
+  /* Capture Body */
+  const chunks = [];
+  const oldWrite = request.write.bind(request);
+  request.write = (data: any) => {
+    try {
+      if (typeof data === 'string') {
+        chunks.push(Buffer.from(data));
+      } else {
+        chunks.push(data);
+      }
+    } catch (e) {
+      hdx(`error in request.write: ${e}`);
+    }
+    return oldWrite(data);
+  };
+  const oldEnd = request.end.bind(request);
+  request.end = (data: any) => {
+    try {
+      if (data) {
+        if (typeof data === 'string') {
+          chunks.push(Buffer.from(data));
+        } else {
+          chunks.push(data);
+        }
+      }
+      if (chunks.length > 0) {
+        const body = Buffer.concat(chunks).toString('utf8');
+        if (shouldRecordBody(body)) {
+          span.setAttribute('http.request.body', body);
+        } else {
+          span.setAttribute('http.request.body', SENSITIVE_DATA_SUBSTITUTE);
+        }
+      }
+    } catch (e) {
+      hdx(`error in request.end: ${e}`);
+    }
+    return oldEnd(data);
+  };
+};
+
+export const _handleHttpIncomingServerRequest = (
+  request: http.IncomingMessage,
+  span: Span,
+  shouldRecordBody: (body: string) => boolean,
+  httpCaptureHeadersServerRequest?: string,
+) => {
+  /* Capture Headers */
+  try {
+    const headers =
+      splitCommaSeparatedStrings(httpCaptureHeadersServerRequest) ??
+      request.headers;
+    headerCapture('request', Object.keys(headers))(
+      span,
+      (header) => headers[header],
+    );
+  } catch (e) {
+    hdx(`error parsing incoming-request headers in requestHook: ${e}`);
+  }
+
+  /* Capture Body */
+  const chunks = [];
+  const pt = new PassThrough();
+  pt.on('data', (chunk) => {
+    try {
+      if (typeof chunk === 'string') {
+        chunks.push(Buffer.from(chunk));
+      } else {
+        chunks.push(chunk);
+      }
+    } catch (e) {
+      hdx(`error in request.on('data'): ${e}`);
+    }
+  }).on('end', () => {
+    try {
+      if (chunks.length > 0) {
+        const body = Buffer.concat(chunks).toString('utf8');
+        if (shouldRecordBody(body)) {
+          span.setAttribute('http.request.body', body);
+        } else {
+          span.setAttribute('http.request.body', SENSITIVE_DATA_SUBSTITUTE);
+        }
+      }
+    } catch (e) {
+      hdx(`error in request.on('end'): ${e}`);
+    }
+  });
+  interceptReadableStream(request, pt);
+};
+
+export const _handleHttpIncomingServerResponse = (
+  response: http.ServerResponse,
+  span: Span,
+  shouldRecordBody: (body: string) => boolean,
+  httpCaptureHeadersServerResponse?: string,
+) => {
+  /* Capture Body */
+  const chunks = [];
+  const oldWrite = response.write.bind(response);
+  response.write = (data: any) => {
+    try {
+      if (typeof data === 'string') {
+        chunks.push(Buffer.from(data));
+      } else {
+        chunks.push(data);
+      }
+    } catch (e) {
+      hdx(`error in response.write: ${e}`);
+    }
+    return oldWrite(data);
+  };
+  const oldEnd = response.end.bind(response);
+  response.end = (data: any) => {
+    try {
+      if (data) {
+        if (typeof data === 'string') {
+          chunks.push(Buffer.from(data));
+        } else {
+          chunks.push(data);
+        }
+      }
+      if (chunks.length > 0) {
+        const buffers = Buffer.concat(chunks);
+        let body = buffers.toString('utf8');
+        const isGzip = response.getHeader('content-encoding') === 'gzip';
+        if (isGzip) {
+          body = zlib.gunzipSync(buffers).toString('utf8');
+        }
+        if (shouldRecordBody(body)) {
+          span.setAttribute('http.response.body', body);
+        } else {
+          span.setAttribute('http.response.body', SENSITIVE_DATA_SUBSTITUTE);
+        }
+      }
+    } catch (e) {
+      hdx(`error in response.end: ${e}`);
+    }
+
+    /* Capture Headers */
+    try {
+      const headers =
+        splitCommaSeparatedStrings(httpCaptureHeadersServerResponse) ??
+        response.getHeaderNames();
+      headerCapture('response', headers)(span, (header) =>
+        response.getHeader(header),
+      );
+    } catch (e) {
+      hdx(`error parsing incoming-response headers in responseHook: ${e}`);
+    }
+    return oldEnd(data);
+  };
+};
+
+export const _handleHttpOutgoingClientResponse = (
+  response: http.IncomingMessage,
+  span: Span,
+  shouldRecordBody: (body: string) => boolean,
+  httpCaptureHeadersClientResponse?: string,
+) => {
+  /* Capture Headers */
+  try {
+    const headers =
+      splitCommaSeparatedStrings(httpCaptureHeadersClientResponse) ??
+      response.headers;
+    headerCapture('response', Object.keys(headers))(
+      span,
+      (header) => headers[header],
+    );
+  } catch (e) {
+    hdx(`error parsing outgoing-response headers in responseHook: ${e}`);
+  }
+
+  /* Capture Body */
+  const chunks = [];
+  const pt = new PassThrough();
+  pt.on('data', (chunk) => {
+    try {
+      if (typeof chunk === 'string') {
+        chunks.push(Buffer.from(chunk));
+      } else {
+        chunks.push(chunk);
+      }
+    } catch (e) {
+      hdx(`error in response.on('data'): ${e}`);
+    }
+  }).on('end', () => {
+    try {
+      if (chunks.length > 0) {
+        const buffers = Buffer.concat(chunks);
+        let body = buffers.toString('utf8');
+        const isGzip = response.headers['content-encoding'] === 'gzip';
+        if (isGzip) {
+          body = zlib.gunzipSync(buffers).toString('utf8');
+        }
+        if (shouldRecordBody(body)) {
+          span.setAttribute('http.response.body', body);
+        } else {
+          span.setAttribute('http.response.body', SENSITIVE_DATA_SUBSTITUTE);
+        }
+      }
+    } catch (e) {
+      hdx(`error in response.on('end'): ${e}`);
+    }
+  });
+  interceptReadableStream(response, pt);
+};
+
 export const getHyperDXHTTPInstrumentationConfig = ({
   httpCaptureBodyKeywordsFilter,
   httpCaptureHeadersClientRequest,
@@ -86,105 +328,20 @@ export const getHyperDXHTTPInstrumentationConfig = ({
     ) => {
       if (request instanceof http.ClientRequest) {
         // outgoing request (client)
-        /* Capture Headers */
-        try {
-          const headers =
-            splitCommaSeparatedStrings(httpCaptureHeadersClientRequest) ??
-            request.getRawHeaderNames();
-          headerCapture('request', headers)(span, (header) =>
-            request.getHeader(header),
-          );
-        } catch (e) {
-          hdx(`error parsing outgoing-request headers in requestHook: ${e}`);
-        }
-
-        /* Capture Body */
-        const chunks = [];
-        const oldWrite = request.write.bind(request);
-        request.write = (data: any) => {
-          try {
-            if (typeof data === 'string') {
-              chunks.push(Buffer.from(data));
-            } else {
-              chunks.push(data);
-            }
-          } catch (e) {
-            hdx(`error in request.write: ${e}`);
-          }
-          return oldWrite(data);
-        };
-        const oldEnd = request.end.bind(request);
-        request.end = (data: any) => {
-          try {
-            if (data) {
-              if (typeof data === 'string') {
-                chunks.push(Buffer.from(data));
-              } else {
-                chunks.push(data);
-              }
-            }
-            if (chunks.length > 0) {
-              const body = Buffer.concat(chunks).toString('utf8');
-              if (shouldRecordBody(body)) {
-                span.setAttribute('http.request.body', body);
-              } else {
-                span.setAttribute(
-                  'http.request.body',
-                  SENSITIVE_DATA_SUBSTITUTE,
-                );
-              }
-            }
-          } catch (e) {
-            hdx(`error in request.end: ${e}`);
-          }
-          return oldEnd(data);
-        };
+        _handleHttpOutgoingClientRequest(
+          request,
+          span,
+          shouldRecordBody,
+          httpCaptureHeadersClientRequest,
+        );
       } else {
         // incoming request (server)
-        /* Capture Headers */
-        try {
-          const headers =
-            splitCommaSeparatedStrings(httpCaptureHeadersServerRequest) ??
-            request.headers;
-          headerCapture('request', Object.keys(headers))(
-            span,
-            (header) => headers[header],
-          );
-        } catch (e) {
-          hdx(`error parsing incoming-request headers in requestHook: ${e}`);
-        }
-
-        /* Capture Body */
-        const chunks = [];
-        const pt = new PassThrough();
-        pt.on('data', (chunk) => {
-          try {
-            if (typeof chunk === 'string') {
-              chunks.push(Buffer.from(chunk));
-            } else {
-              chunks.push(chunk);
-            }
-          } catch (e) {
-            hdx(`error in request.on('data'): ${e}`);
-          }
-        }).on('end', () => {
-          try {
-            if (chunks.length > 0) {
-              const body = Buffer.concat(chunks).toString('utf8');
-              if (shouldRecordBody(body)) {
-                span.setAttribute('http.request.body', body);
-              } else {
-                span.setAttribute(
-                  'http.request.body',
-                  SENSITIVE_DATA_SUBSTITUTE,
-                );
-              }
-            }
-          } catch (e) {
-            hdx(`error in request.on('end'): ${e}`);
-          }
-        });
-        request.pipe(pt);
+        _handleHttpIncomingServerRequest(
+          request,
+          span,
+          shouldRecordBody,
+          httpCaptureHeadersServerRequest,
+        );
       }
     },
     responseHook: (
@@ -193,118 +350,20 @@ export const getHyperDXHTTPInstrumentationConfig = ({
     ) => {
       if (response instanceof http.ServerResponse) {
         // incoming response (server)
-        /* Capture Body */
-        const chunks = [];
-        const oldWrite = response.write.bind(response);
-        response.write = (data: any) => {
-          try {
-            if (typeof data === 'string') {
-              chunks.push(Buffer.from(data));
-            } else {
-              chunks.push(data);
-            }
-          } catch (e) {
-            hdx(`error in response.write: ${e}`);
-          }
-          return oldWrite(data);
-        };
-        const oldEnd = response.end.bind(response);
-        response.end = (data: any) => {
-          try {
-            if (data) {
-              if (typeof data === 'string') {
-                chunks.push(Buffer.from(data));
-              } else {
-                chunks.push(data);
-              }
-            }
-            if (chunks.length > 0) {
-              const buffers = Buffer.concat(chunks);
-              let body = buffers.toString('utf8');
-              const isGzip = response.getHeader('content-encoding') === 'gzip';
-              if (isGzip) {
-                body = zlib.gunzipSync(buffers).toString('utf8');
-              }
-              if (shouldRecordBody(body)) {
-                span.setAttribute('http.response.body', body);
-              } else {
-                span.setAttribute(
-                  'http.response.body',
-                  SENSITIVE_DATA_SUBSTITUTE,
-                );
-              }
-            }
-          } catch (e) {
-            hdx(`error in response.end: ${e}`);
-          }
-
-          /* Capture Headers */
-          try {
-            const headers =
-              splitCommaSeparatedStrings(httpCaptureHeadersServerResponse) ??
-              response.getHeaderNames();
-            headerCapture('response', headers)(span, (header) =>
-              response.getHeader(header),
-            );
-          } catch (e) {
-            hdx(
-              `error parsing incoming-response headers in responseHook: ${e}`,
-            );
-          }
-          return oldEnd(data);
-        };
+        _handleHttpIncomingServerResponse(
+          response,
+          span,
+          shouldRecordBody,
+          httpCaptureHeadersServerResponse,
+        );
       } else {
-        // outgoing request (client)
-        /* Capture Headers */
-        try {
-          const headers =
-            splitCommaSeparatedStrings(httpCaptureHeadersClientResponse) ??
-            response.headers;
-          headerCapture('response', Object.keys(headers))(
-            span,
-            (header) => headers[header],
-          );
-        } catch (e) {
-          hdx(`error parsing outgoing-response headers in responseHook: ${e}`);
-        }
-
-        /* Capture Body */
-        const chunks = [];
-        const pt = new PassThrough();
-        pt.on('data', (chunk) => {
-          try {
-            if (typeof chunk === 'string') {
-              chunks.push(Buffer.from(chunk));
-            } else {
-              chunks.push(chunk);
-            }
-          } catch (e) {
-            hdx(`error in response.on('data'): ${e}`);
-          }
-        }).on('end', () => {
-          try {
-            if (chunks.length > 0) {
-              const buffers = Buffer.concat(chunks);
-              let body = buffers.toString('utf8');
-              const isGzip = response.headers['content-encoding'] === 'gzip';
-              if (isGzip) {
-                body = zlib.gunzipSync(buffers).toString('utf8');
-              }
-              if (shouldRecordBody(body)) {
-                span.setAttribute('http.response.body', body);
-              } else {
-                span.setAttribute(
-                  'http.response.body',
-                  SENSITIVE_DATA_SUBSTITUTE,
-                );
-              }
-            }
-          } catch (e) {
-            hdx(`error in response.on('end'): ${e}`);
-          }
-        });
-        // FIXME: this might cause issues with some libraries (ex: clickhouse/client)
-        // response.pipe(pt);
+        // outgoing response (client)
+        _handleHttpOutgoingClientResponse(
+          response,
+          span,
+          shouldRecordBody,
+          httpCaptureHeadersClientResponse,
+        );
       }
     },
   };
