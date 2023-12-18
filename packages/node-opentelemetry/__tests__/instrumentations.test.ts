@@ -64,58 +64,170 @@ describe('instrumentations', () => {
       expect(customShouldRecordBody('hello world')).toEqual(true);
     });
 
-    it('interceptReadableStream', async () => {
-      let i = 0;
-      const mockEventStream = new Readable({
-        objectMode: true,
-        read() {
-          if (i < 3) {
-            i++;
-            return this.push(
-              JSON.stringify({
-                message: `foo ${i}`,
-              }),
-            );
-          } else {
-            return this.push(null);
+    describe('interceptReadableStream', () => {
+      it('on "data" event should stream data', async () => {
+        let i = 0;
+        const mockEventStream = new Readable({
+          objectMode: true,
+          read() {
+            if (i < 3) {
+              i++;
+              return this.push(
+                JSON.stringify({
+                  message: `foo ${i}`,
+                }),
+              );
+            } else {
+              return this.push(null);
+            }
+          },
+        });
+
+        const pt = new PassThrough();
+
+        // interceptor should not affect the original stream
+        const dataFromPT = [];
+        pt.on('data', (data) => {
+          dataFromPT.push(data.toString());
+        });
+
+        interceptReadableStream(mockEventStream, pt);
+
+        const dataFromDownSreamReader = [];
+        setTimeout(() => {
+          mockEventStream.on('data', (data) => {
+            dataFromDownSreamReader.push(data);
+          });
+        }, 10);
+
+        // wait for the stream to end
+        await new Promise((resolve) => {
+          mockEventStream.on('end', () => {
+            resolve(null);
+          });
+        });
+
+        expect(dataFromPT).toEqual([
+          '{"message":"foo 1"}',
+          '{"message":"foo 2"}',
+          '{"message":"foo 3"}',
+        ]);
+        expect(dataFromDownSreamReader).toEqual([
+          '{"message":"foo 1"}',
+          '{"message":"foo 2"}',
+          '{"message":"foo 3"}',
+        ]);
+      });
+
+      it('async iterator should stream data', async () => {
+        let i = 0;
+        const mockEventStream = new Readable({
+          objectMode: true,
+          read() {
+            if (i < 3) {
+              i++;
+              return this.push(
+                JSON.stringify({
+                  message: `foo ${i}`,
+                }),
+              );
+            } else {
+              return this.push(null);
+            }
+          },
+        });
+
+        const pt = new PassThrough();
+
+        // interceptor should not affect the original stream
+        const dataFromPT = [];
+        pt.on('data', (data) => {
+          dataFromPT.push(data.toString());
+        });
+
+        interceptReadableStream(mockEventStream, pt);
+
+        const dataFromDownSreamReader = [];
+        setTimeout(async () => {
+          for await (const data of mockEventStream) {
+            dataFromDownSreamReader.push(data);
           }
-        },
-      });
+        }, 10);
 
-      const pt = new PassThrough();
-
-      // interceptor should not affect the original stream
-      const dataFromPT = [];
-      pt.on('data', (data) => {
-        dataFromPT.push(data.toString());
-      });
-
-      interceptReadableStream(mockEventStream, pt);
-
-      const dataFromDownSreamReader = [];
-      setTimeout(() => {
-        mockEventStream.on('data', (data) => {
-          dataFromDownSreamReader.push(data);
+        // wait for the stream to end
+        await new Promise((resolve) => {
+          mockEventStream.on('end', () => {
+            resolve(null);
+          });
         });
-      }, 10);
 
-      await new Promise((resolve) => {
-        mockEventStream.on('end', () => {
-          console.log('end');
-          resolve(null);
-        });
+        expect(dataFromPT).toEqual([
+          '{"message":"foo 1"}',
+          '{"message":"foo 2"}',
+          '{"message":"foo 3"}',
+        ]);
+        expect(dataFromDownSreamReader).toEqual([
+          '{"message":"foo 1"}',
+          '{"message":"foo 2"}',
+          '{"message":"foo 3"}',
+        ]);
       });
 
-      expect(dataFromPT).toEqual([
-        '{"message":"foo 1"}',
-        '{"message":"foo 2"}',
-        '{"message":"foo 3"}',
-      ]);
-      expect(dataFromDownSreamReader).toEqual([
-        '{"message":"foo 1"}',
-        '{"message":"foo 2"}',
-        '{"message":"foo 3"}',
-      ]);
+      it('pause stream, attach passthrough and resume afterward', async () => {
+        let i = 0;
+        const mockEventStream = new Readable({
+          objectMode: true,
+          read() {
+            if (i < 3) {
+              i++;
+              return this.push(
+                JSON.stringify({
+                  message: `foo ${i}`,
+                }),
+              );
+            } else {
+              return this.push(null);
+            }
+          },
+        });
+        mockEventStream.pause();
+
+        const pt = new PassThrough();
+
+        // interceptor should not affect the original stream
+        const dataFromPT = [];
+        pt.on('data', (data) => {
+          dataFromPT.push(data.toString());
+        });
+
+        interceptReadableStream(mockEventStream, pt);
+
+        const dataFromDownSreamReader = [];
+        setTimeout(async () => {
+          mockEventStream.resume();
+          for await (const data of mockEventStream) {
+            dataFromDownSreamReader.push(data);
+          }
+        }, 10);
+
+        // wait for the stream to end
+        await new Promise((resolve) => {
+          mockEventStream.on('end', () => {
+            resolve(null);
+          });
+        });
+
+        expect(dataFromPT).toEqual([
+          '{"message":"foo 1"}',
+          '{"message":"foo 2"}',
+          '{"message":"foo 3"}',
+        ]);
+        expect(dataFromDownSreamReader).toEqual([
+          '{"message":"foo 1"}',
+          '{"message":"foo 2"}',
+          '{"message":"foo 3"}',
+        ]);
+      });
     });
   });
 });

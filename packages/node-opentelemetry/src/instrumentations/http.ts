@@ -69,17 +69,9 @@ export const interceptReadableStream = (
   stream: NodeJS.ReadableStream,
   pt: PassThrough,
 ) => {
-  const oldOn = stream.on.bind(stream);
-  let isPiped = false;
-  stream.on = (event: string, listener: (...args: any[]) => void) => {
-    oldOn(event, listener);
-    // WARNING: only pipe the stream if the user has registered a listener for the 'data' or 'readable' event
-    if ((event === 'readable' || event === 'data') && !isPiped) {
-      isPiped = true;
-      stream.pipe(pt);
-    }
-    return stream;
-  };
+  stream.pipe(pt);
+  // hack: so the pipe doesn't start flowing
+  (stream as any).readableFlowing = null;
   return stream;
 };
 
