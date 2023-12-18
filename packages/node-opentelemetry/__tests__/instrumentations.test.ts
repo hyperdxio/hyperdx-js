@@ -202,8 +202,15 @@ describe('instrumentations', () => {
 
         interceptReadableStream(mockEventStream, pt);
 
+        const dataFromCustomPT = [];
         const dataFromDownSreamReader = [];
+        // pipe another passThrough
+        const customPT = new PassThrough();
+        customPT.on('data', (data) => {
+          dataFromCustomPT.push(data.toString());
+        });
         setTimeout(async () => {
+          mockEventStream.pipe(customPT);
           mockEventStream.resume();
           for await (const data of mockEventStream) {
             dataFromDownSreamReader.push(data);
@@ -218,6 +225,11 @@ describe('instrumentations', () => {
         });
 
         expect(dataFromPT).toEqual([
+          '{"message":"foo 1"}',
+          '{"message":"foo 2"}',
+          '{"message":"foo 3"}',
+        ]);
+        expect(dataFromCustomPT).toEqual([
           '{"message":"foo 1"}',
           '{"message":"foo 2"}',
           '{"message":"foo 3"}',
