@@ -7,8 +7,6 @@ import {
   splitCommaSeparatedStrings,
 } from '../src/instrumentations/http';
 
-const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
-
 describe('instrumentations', () => {
   describe('console', () => {
     it('should parse console args', () => {
