@@ -26,9 +26,8 @@
     "build:watch": "tsc -w -p tsconfig.json",
     "lint": "eslint . --ext .ts --ext .mts",
     "ci:lint": "yarn lint && yarn tsc --noEmit",
-    "test": "jest --coverage",
-    "prettier": "prettier --config .prettierrc --write .",
-    "test:watch": "jest --watch"
+    "dev:unit": "jest --watch",
+    "prettier": "prettier --config .prettierrc --write ."
   },
   "dependencies": {
     "@nestjs/common": "^9.4.2",

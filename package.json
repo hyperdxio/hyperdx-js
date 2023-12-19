@@ -11,7 +11,7 @@
   ],
   "scripts": {
     "ci:build": "npx nx run-many --target=build",
-    "ci:test": "npx nx run-many --target=test",
+    "ci:unit": "npx nx run-many --target=ci:unit",
     "ci:lint": "npx nx run-many --target=ci:lint",
     "release": "npx nx run-many --target=build && yarn changeset publish && git push --follow-tags",
     "prepare": "husky install"

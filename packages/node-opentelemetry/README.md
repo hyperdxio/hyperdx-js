@@ -102,7 +102,6 @@ import { initSDK } from '@hyperdx/node-opentelemetry';
 
 initSDK({
   consoleCapture: true, // optional, default: true
-  advancedNetworkCapture: true, // optional, default: false
   additionalInstrumentations: [], // optional, default: []
 });
 
@@ -162,7 +161,6 @@ const { RemixInstrumentation } = require('opentelemetry-instrumentation-remix');
 
 initSDK({
   consoleCapture: true, // optional, default: true
-  advancedNetworkCapture: true, // optional, default: false
   additionalInstrumentations: [new RemixInstrumentation()], // your custom instrumentations here
 });
 ```
@@ -190,7 +188,7 @@ To attach trace id to console logs, you can set `HDX_NODE_BETA_MODE` environment
 export HDX_NODE_BETA_MODE=1
 ```
 
-#### Advanced Network Capture
+#### Advanced Network Capture (BETA)
 
 By enabling advanced network capture, the SDK will additionally capture full HTTP request/response headers
 and bodies for all inbound/outbound HTTP requests, to help with more in-depth request debugging.

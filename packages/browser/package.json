@@ -35,7 +35,7 @@
     "build:watch": "rollup --config rollup.config.ts --configPlugin typescript -w",
     "lint": "eslint . --ext .ts --ext .mts",
     "ci:lint": "yarn lint && yarn tsc --noEmit",
-    "test": "jest --coverage",
+    "ci:unit": "jest --coverage --ci",
     "prettier": "prettier --config .prettierrc --write .",
     "test:watch": "jest --watch"
   }

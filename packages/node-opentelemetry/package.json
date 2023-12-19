@@ -27,8 +27,8 @@
     "build:watch": "tsc -w -p tsconfig.json",
     "lint": "eslint . --ext .ts --ext .mts",
     "ci:lint": "yarn lint && yarn tsc --noEmit",
-    "test": "jest --coverage",
-    "dev:test": "jest --watchAll",
+    "dev:unit": "jest --watchAll",
+    "ci:unit": "jest --coverage --ci",
     "prettier": "prettier --config .prettierrc --write ."
   },
   "dependencies": {
