@@ -1,5 +1,11 @@
 # @hyperdx/node-opentelemetry
 
+## 0.4.2-next.2
+
+### Patch Changes
+
+- 610e003: fix: pipe readable stream bug (advanced network capture)
+
 ## 0.4.2-next.1
 
 ### Patch Changes
