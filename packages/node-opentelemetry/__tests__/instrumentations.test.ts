@@ -224,6 +224,7 @@ describe('instrumentations', () => {
           });
         }, 10);
 
+        // wait for the listener to be attached
         await new Promise((r) => setTimeout(r, 100));
 
         // the stream should not start flowing (since the readableFlowing is false)
@@ -233,6 +234,61 @@ describe('instrumentations', () => {
         mockEventStream.resume();
 
         // wait for the stream to end
+        await new Promise((resolve) => {
+          mockEventStream.on('end', () => {
+            resolve(null);
+          });
+        });
+
+        expect(dataFromPT).toEqual([
+          '{"message":"foo 1"}',
+          '{"message":"foo 2"}',
+          '{"message":"foo 3"}',
+        ]);
+        expect(dataFromDownSreamReader).toEqual([
+          '{"message":"foo 1"}',
+          '{"message":"foo 2"}',
+          '{"message":"foo 3"}',
+        ]);
+      });
+
+      it('should work readable', async () => {
+        let i = 0;
+        const mockEventStream = new Readable({
+          objectMode: true,
+          read() {
+            if (i < 3) {
+              i++;
+              return this.push(
+                JSON.stringify({
+                  message: `foo ${i}`,
+                }),
+              );
+            } else {
+              return this.push(null);
+            }
+          },
+        });
+
+        const pt = new PassThrough();
+
+        // interceptor should not affect the original stream
+        const dataFromPT = [];
+        pt.on('data', (data) => {
+          dataFromPT.push(data.toString());
+        });
+
+        interceptReadableStream(mockEventStream, pt);
+
+        const dataFromDownSreamReader = [];
+        setTimeout(() => {
+          mockEventStream.on('readable', function () {
+            let data;
+            while ((data = this.read()) !== null) {
+              dataFromDownSreamReader.push(data);
+            }
+          });
+        }, 10);
         await new Promise((resolve) => {
           mockEventStream.on('end', () => {
             resolve(null);
