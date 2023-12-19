@@ -217,29 +217,34 @@ describe('instrumentations', () => {
 
         interceptReadableStream(mockEventStream, pt);
 
-        const customPT = new PassThrough();
-        const dataFromCustomPT = [];
-        customPT.on('data', (data) => {
-          dataFromCustomPT.push(data.toString());
-        });
-
+        const dataFromDownSreamReader = [];
         setTimeout(() => {
-          mockEventStream.pipe(customPT);
+          mockEventStream.on('data', (data) => {
+            dataFromDownSreamReader.push(data);
+          });
         }, 10);
 
-        // the stream should not start flowing
-        expect(dataFromPT.length).toEqual(0);
-        expect(dataFromCustomPT.length).toEqual(0);
+        await new Promise((r) => setTimeout(r, 100));
 
-        // wait for the customPT to be piped
-        await new Promise((r) => setTimeout(r, 1000));
+        // the stream should not start flowing (since the readableFlowing is false)
+        expect(dataFromPT.length).toEqual(0);
+        expect(dataFromDownSreamReader.length).toEqual(0);
+
+        mockEventStream.resume();
+
+        // wait for the stream to end
+        await new Promise((resolve) => {
+          mockEventStream.on('end', () => {
+            resolve(null);
+          });
+        });
 
         expect(dataFromPT).toEqual([
           '{"message":"foo 1"}',
           '{"message":"foo 2"}',
           '{"message":"foo 3"}',
         ]);
-        expect(dataFromCustomPT).toEqual([
+        expect(dataFromDownSreamReader).toEqual([
           '{"message":"foo 1"}',
           '{"message":"foo 2"}',
           '{"message":"foo 3"}',
