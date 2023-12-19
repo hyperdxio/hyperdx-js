@@ -68,7 +68,9 @@ export const getShouldRecordBody =
 export const interceptReadableStream = (stream: Readable, pt: PassThrough) => {
   const originalState = stream.readableFlowing;
   stream.pipe(pt);
-  // hack: so the pipe doesn't start flowing
+  // FIXME: this might not work properly for 'readable' event handler
+  // bacause the state is becoming 'true' after detaching the handler
+  // and the pipe would stream the data and cause data loss
   // @ts-ignore (readonly)
   stream.readableFlowing = originalState;
   return stream;
