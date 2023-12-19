@@ -1,6 +1,6 @@
 import * as http from 'http';
 import zlib from 'zlib';
-import { PassThrough } from 'stream';
+import { PassThrough, Readable } from 'stream';
 
 import { Span } from '@opentelemetry/api';
 import { headerCapture } from '@opentelemetry/instrumentation-http';
@@ -65,13 +65,12 @@ export const getShouldRecordBody =
     return true;
   };
 
-export const interceptReadableStream = (
-  stream: NodeJS.ReadableStream,
-  pt: PassThrough,
-) => {
+export const interceptReadableStream = (stream: Readable, pt: PassThrough) => {
+  const originalState = stream.readableFlowing;
   stream.pipe(pt);
   // hack: so the pipe doesn't start flowing
-  (stream as any).readableFlowing = null;
+  // @ts-ignore (readonly)
+  stream.readableFlowing = originalState;
   return stream;
 };
 

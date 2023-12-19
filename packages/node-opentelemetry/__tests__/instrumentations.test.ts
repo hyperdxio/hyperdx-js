@@ -7,6 +7,8 @@ import {
   splitCommaSeparatedStrings,
 } from '../src/instrumentations/http';
 
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
 describe('instrumentations', () => {
   describe('console', () => {
     it('should parse console args', () => {
@@ -65,6 +67,22 @@ describe('instrumentations', () => {
     });
 
     describe('interceptReadableStream', () => {
+      it('should not affect the original stream state', () => {
+        const mockEventStream = new Readable({
+          read() {
+            return this.push(null);
+          },
+        });
+        interceptReadableStream(mockEventStream, new PassThrough());
+        expect(mockEventStream.readableFlowing).toEqual(null);
+        mockEventStream.pause();
+        interceptReadableStream(mockEventStream, new PassThrough());
+        expect(mockEventStream.readableFlowing).toEqual(false);
+        mockEventStream.resume();
+        interceptReadableStream(mockEventStream, new PassThrough());
+        expect(mockEventStream.readableFlowing).toEqual(true);
+      });
+
       it('on "data" event should stream data', async () => {
         let i = 0;
         const mockEventStream = new Readable({
@@ -193,7 +211,6 @@ describe('instrumentations', () => {
         mockEventStream.pause();
 
         const pt = new PassThrough();
-
         // interceptor should not affect the original stream
         const dataFromPT = [];
         pt.on('data', (data) => {
@@ -202,20 +219,16 @@ describe('instrumentations', () => {
 
         interceptReadableStream(mockEventStream, pt);
 
-        const dataFromCustomPT = [];
         const dataFromDownSreamReader = [];
-        // pipe another passThrough
-        const customPT = new PassThrough();
-        customPT.on('data', (data) => {
-          dataFromCustomPT.push(data.toString());
+        mockEventStream.on('data', (data) => {
+          dataFromDownSreamReader.push(data);
         });
-        setTimeout(async () => {
-          mockEventStream.pipe(customPT);
-          mockEventStream.resume();
-          for await (const data of mockEventStream) {
-            dataFromDownSreamReader.push(data);
-          }
-        }, 10);
+
+        // the stream should not start flowing
+        expect(dataFromPT.length).toEqual(0);
+        expect(dataFromDownSreamReader.length).toEqual(0);
+
+        mockEventStream.resume();
 
         // wait for the stream to end
         await new Promise((resolve) => {
@@ -225,11 +238,6 @@ describe('instrumentations', () => {
         });
 
         expect(dataFromPT).toEqual([
-          '{"message":"foo 1"}',
-          '{"message":"foo 2"}',
-          '{"message":"foo 3"}',
-        ]);
-        expect(dataFromCustomPT).toEqual([
           '{"message":"foo 1"}',
           '{"message":"foo 2"}',
           '{"message":"foo 3"}',
