@@ -1,5 +1,15 @@
 # @hyperdx/node-logger
 
+## 0.3.0
+
+### Minor Changes
+
+- ebc8da6: chore: bump axios to v1.6.2
+
+### Patch Changes
+
+- ebc8da6: fix: capture zlib exception
+
 ## 0.3.0-next.0
 
 ### Minor Changes
