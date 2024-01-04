@@ -1,5 +1,11 @@
 # @hyperdx/node-logger
 
+## 0.3.1
+
+### Patch Changes
+
+- 2a69810: Export HyperDXLogger class to allow for custom loggers
+
 ## 0.3.0
 
 ### Minor Changes
