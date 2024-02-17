@@ -35,3 +35,9 @@ build/
 !.yarn/releases
 !.yarn/sdks
 !.yarn/versions
+
+# test stuff
+junit.xml
+smoke-tests/collector/data.json
+smoke-tests/collector/data-results/*.json
+smoke-tests/report.xml
