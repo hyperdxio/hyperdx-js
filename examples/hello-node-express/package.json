@@ -5,7 +5,7 @@
   "author": "HyperDX <support@hyperdx.io> (https://www.hyperdx.io/)",
   "license": "Apache-2.0",
   "scripts": {
-    "setup": "npm install && cd ../.. && yarn install && yarn ci:build --exclude='@hyperdx/deno' && cd ./packages/node-opentelemetry && yarn link && cd ../../examples/hello-node-express && yarn link @hyperdx/node-opentelemetry",
+    "setup": "yarn install && cd ../.. && yarn install && yarn ci:build --exclude='@hyperdx/deno' && cd ./packages/node-opentelemetry && yarn link && cd ../../examples/hello-node-express && yarn link @hyperdx/node-opentelemetry",
     "start": "node ./index.js"
   },
   "dependencies": {
