@@ -1,0 +1,15 @@
+{
+  "name": "hello-node",
+  "version": "0.0.1",
+  "description": "HyperDX OpenTelemetry Distro for JavaScript",
+  "author": "HyperDX <support@hyperdx.io> (https://www.hyperdx.io/)",
+  "license": "Apache-2.0",
+  "scripts": {
+    "setup": "yarn install && cd ../.. && yarn install && yarn ci:build --exclude='@hyperdx/deno' && npx nx build @hyperdx/node-opentelemetry && cd ./packages/node-opentelemetry && yarn link && cd ../../examples/hello-node && yarn link @hyperdx/node-opentelemetry",
+    "start": "node ./index.js"
+  },
+  "dependencies": {
+    "@opentelemetry/api": "^1.7.0",
+    "@opentelemetry/instrumentation-http": "~0.46.0"
+  }
+}

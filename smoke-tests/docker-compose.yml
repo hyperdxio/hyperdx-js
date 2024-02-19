@@ -1,0 +1,85 @@
+version: '3.0'
+
+x-env-base: &env_base
+  OTEL_EXPORTER_OTLP_ENDPOINT: http://collector:4318
+  HYPERDX_API_KEY: bogus_key
+  HYPERDX_DATASET: bogus_dataset
+  HYPERDX_METRICS_DATASET: bogus_dataset
+  OTEL_METRIC_EXPORT_INTERVAL: 5000
+  OTEL_METRIC_EXPORT_TIMEOUT: 4000
+  OTEL_SERVICE_NAME: 'hello-node-express'
+  DEBUG: 'true'
+
+x-app-base: &app_base
+  build:
+    context: ../
+    dockerfile: ./examples/hello-node-express/Dockerfile
+  image: hyperdx/hello-node-express
+  depends_on:
+    - collector
+
+x-app-base-ts: &app_base_ts
+  build:
+    context: ../
+    dockerfile: ./examples/hello-node-express-ts/Dockerfile
+  image: hyperdx/hello-node-express-ts
+  depends_on:
+    - collector
+
+services:
+  collector:
+    image: otel/opentelemetry-collector:0.52.0
+    command: ['--config=/etc/otel-collector-config.yaml']
+    volumes:
+      - './collector/otel-collector-config.yaml:/etc/otel-collector-config.yaml'
+      - './collector:/var/lib'
+
+  app-hellonode:
+    <<: *app_base
+    environment:
+      <<: *env_base
+    ports:
+      - '127.0.0.1:3000:3000'
+
+  app-hellonode-ts:
+    <<: *app_base_ts
+    environment:
+      <<: *env_base
+    ports:
+      - '127.0.0.1:3000:3000'
+
+  app-sdk-http:
+    <<: *app_base
+    environment:
+      <<: *env_base
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://collector:4318
+      OTEL_EXPORTER_OTLP_PROTOCOL: http/protobuf
+    ports:
+      - '127.0.0.1:3000:3000'
+
+  app-sdk-http-ts:
+    <<: *app_base_ts
+    environment:
+      <<: *env_base
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://collector:4318
+      OTEL_EXPORTER_OTLP_PROTOCOL: http/protobuf
+    ports:
+      - '127.0.0.1:3000:3000'
+
+  app-sdk-grpc:
+    <<: *app_base
+    environment:
+      <<: *env_base
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://collector:4317
+      OTEL_EXPORTER_OTLP_PROTOCOL: grpc
+    ports:
+      - '127.0.0.1:3000:3000'
+
+  app-sdk-grpc-ts:
+    <<: *app_base_ts
+    environment:
+      <<: *env_base
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://collector:4317
+      OTEL_EXPORTER_OTLP_PROTOCOL: grpc
+    ports:
+      - '127.0.0.1:3000:3000'
