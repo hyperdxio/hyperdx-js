@@ -46,10 +46,10 @@ teardown_file() {
 	assert_equal "$result" '"100"'
 }
 
-# @test "BaggageSpanProcessor: key-values added to baggage appear on child spans" {
-# 	result=$(span_attributes_for ${TRACER_NAME} | jq "select(.key == \"for_the_children\").value.stringValue")
-# 	assert_equal "$result" '"another important value"'
-# }
+@test "BaggageSpanProcessor: key-values added to baggage appear on child spans" {
+	result=$(span_attributes_for ${TRACER_NAME} | jq "select(.key == \"for_the_children\").value.stringValue")
+	assert_equal "$result" '"another important value"'
+}
 
 # @test "Manual instrumentation produces metrics" {
 #     result=$(metric_names_for ${METER_NAME})
