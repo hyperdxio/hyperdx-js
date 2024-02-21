@@ -1,5 +1,15 @@
 # @hyperdx/node-opentelemetry
 
+## 0.5.0-next.0
+
+### Minor Changes
+
+- f2b039c: chore: bump otel deps
+
+### Patch Changes
+
+- f2b039c: fix: manual instrumentation trace propagation bug
+
 ## 0.4.2
 
 ### Patch Changes
