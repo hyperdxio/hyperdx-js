@@ -1,5 +1,11 @@
 # @hyperdx/browser
 
+## 0.20.0
+
+### Minor Changes
+
+- b0ab3d8: chore: bump @hyperdx/otel-web + @hyperdx/otel-web-session-recorder versions
+
 ## 0.19.3
 
 ### Patch Changes
