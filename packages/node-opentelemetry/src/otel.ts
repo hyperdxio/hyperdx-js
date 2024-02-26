@@ -1,3 +1,4 @@
+import { InstrumentationBase } from '@opentelemetry/instrumentation';
 import { NodeSDK } from '@opentelemetry/sdk-node';
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-proto';
 import { Resource } from '@opentelemetry/resources';
@@ -6,16 +7,15 @@ import {
   InstrumentationConfigMap,
 } from '@opentelemetry/auto-instrumentations-node';
 
-import { version as PKG_VERSION } from '../package.json';
+import HyperDXConsoleInstrumentation from './instrumentations/console';
+import HyperDXSpanProcessor from './spanProcessor';
 import hdx, {
   HDX_DEBUG_MODE_ENABLED,
   LOG_PREFIX as _LOG_PREFIX,
 } from './debug';
-import HyperDXConsoleInstrumentation from './instrumentations/console';
-import HyperDXSpanProcessor from './spanProcessor';
 import { getHyperDXHTTPInstrumentationConfig } from './instrumentations/http';
 import { hyperDXGlobalContext } from './context';
-import { InstrumentationBase } from '@opentelemetry/instrumentation';
+import { version as PKG_VERSION } from '../package.json';
 
 const LOG_PREFIX = `⚠️  ${_LOG_PREFIX}`;
 
