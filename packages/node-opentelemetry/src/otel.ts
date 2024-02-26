@@ -1,11 +1,13 @@
 import { NetInstrumentation } from '@opentelemetry/instrumentation-net';
 import { NodeSDK } from '@opentelemetry/sdk-node';
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-proto';
+import { Resource } from '@opentelemetry/resources';
 import {
   getNodeAutoInstrumentations,
   InstrumentationConfigMap,
 } from '@opentelemetry/auto-instrumentations-node';
 
+import { version as PKG_VERSION } from '../package.json';
 import hdx, {
   HDX_DEBUG_MODE_ENABLED,
   LOG_PREFIX as _LOG_PREFIX,
@@ -68,6 +70,9 @@ export const initSDK = (config: SDKConfig) => {
   });
 
   sdk = new NodeSDK({
+    resource: new Resource({
+      'hyperdx.distro.version': PKG_VERSION,
+    }),
     // metricReader: metricReader,
     ...(config.betaMode
       ? {
