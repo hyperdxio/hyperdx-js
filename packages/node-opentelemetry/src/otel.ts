@@ -72,6 +72,7 @@ export const initSDK = (config: SDKConfig) => {
   sdk = new NodeSDK({
     resource: new Resource({
       'hyperdx.distro.version': PKG_VERSION,
+      'hyperdx.distro.runtime_version': process.versions.node,
     }),
     // metricReader: metricReader,
     ...(config.betaMode
