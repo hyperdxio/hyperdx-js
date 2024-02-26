@@ -1,20 +1,21 @@
-import { NetInstrumentation } from '@opentelemetry/instrumentation-net';
+import { InstrumentationBase } from '@opentelemetry/instrumentation';
 import { NodeSDK } from '@opentelemetry/sdk-node';
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-proto';
+import { Resource } from '@opentelemetry/resources';
 import {
   getNodeAutoInstrumentations,
   InstrumentationConfigMap,
 } from '@opentelemetry/auto-instrumentations-node';
 
+import HyperDXConsoleInstrumentation from './instrumentations/console';
+import HyperDXSpanProcessor from './spanProcessor';
 import hdx, {
   HDX_DEBUG_MODE_ENABLED,
   LOG_PREFIX as _LOG_PREFIX,
 } from './debug';
-import HyperDXConsoleInstrumentation from './instrumentations/console';
-import HyperDXSpanProcessor from './spanProcessor';
 import { getHyperDXHTTPInstrumentationConfig } from './instrumentations/http';
 import { hyperDXGlobalContext } from './context';
-import { InstrumentationBase } from '@opentelemetry/instrumentation';
+import { version as PKG_VERSION } from '../package.json';
 
 const LOG_PREFIX = `⚠️  ${_LOG_PREFIX}`;
 
@@ -68,6 +69,10 @@ export const initSDK = (config: SDKConfig) => {
   });
 
   sdk = new NodeSDK({
+    resource: new Resource({
+      'hyperdx.distro.version': PKG_VERSION,
+      'hyperdx.distro.runtime_version': process.versions.node,
+    }),
     // metricReader: metricReader,
     ...(config.betaMode
       ? {
@@ -100,14 +105,8 @@ export const initSDK = (config: SDKConfig) => {
         '@opentelemetry/instrumentation-fs': {
           enabled: false,
         },
-        // FIXME: enable this once auto instrumentation is upgraded to v0.40.2
-        '@opentelemetry/instrumentation-net': {
-          enabled: false,
-        },
         ...config.instrumentations,
       }),
-      // for fix: https://github.com/open-telemetry/opentelemetry-js-contrib/releases/tag/instrumentation-net-v0.32.4
-      new NetInstrumentation(),
       ...(config.additionalInstrumentations ?? []),
     ],
   });

@@ -1,0 +1,11 @@
+{
+  "mode": "pre",
+  "tag": "next",
+  "initialVersions": {
+    "@hyperdx/browser": "0.20.0",
+    "@hyperdx/deno": "0.0.2",
+    "@hyperdx/node-logger": "0.3.1",
+    "@hyperdx/node-opentelemetry": "0.5.0"
+  },
+  "changesets": ["gorgeous-sheep-accept", "serious-phones-hide"]
+}
