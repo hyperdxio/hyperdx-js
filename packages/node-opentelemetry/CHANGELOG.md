@@ -1,5 +1,15 @@
 # @hyperdx/node-opentelemetry
 
+## 0.6.0
+
+### Minor Changes
+
+- 80f1646: chore: bump @opentelemetry/auto-instrumentations-node to v0.41.1
+
+### Patch Changes
+
+- c8df2e5: feat: add pkg + runtime version to resource
+
 ## 0.6.0-next.0
 
 ### Minor Changes
