@@ -1,13 +1,16 @@
 import winston from 'winston';
 
-import { getWinsonTransport } from '../src/logger';
+import { getWinstonTransport } from '../src/logger';
 
 const MAX_LEVEL = 'info';
 
 const winstonLogger = winston.createLogger({
   level: MAX_LEVEL,
   format: winston.format.json(),
-  transports: [new winston.transports.Console(), getWinsonTransport(MAX_LEVEL)],
+  transports: [
+    new winston.transports.Console(),
+    getWinstonTransport(MAX_LEVEL),
+  ],
 });
 
 describe('logger', () => {
