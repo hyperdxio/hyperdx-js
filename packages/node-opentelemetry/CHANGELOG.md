@@ -1,5 +1,11 @@
 # @hyperdx/node-opentelemetry
 
+## 0.6.1
+
+### Patch Changes
+
+- ed6ac60: fix: rename getWinsonTransport to getWinstonTransport
+
 ## 0.6.0
 
 ### Minor Changes
