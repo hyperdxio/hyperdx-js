@@ -25,7 +25,7 @@ configure your logging module.
 
 ```ts
 import winston from 'winston';
-import { getWinsonTransport } from '@hyperdx/node-opentelemetry';
+import { getWinstonTransport } from '@hyperdx/node-opentelemetry';
 
 const MAX_LEVEL = 'info';
 
@@ -34,7 +34,7 @@ const logger = winston.createLogger({
   format: winston.format.json(),
   transports: [
     new winston.transports.Console(),
-    getWinsonTransport(MAX_LEVEL), // append this to the existing transports
+    getWinstonTransport(MAX_LEVEL), // append this to the existing transports
   ],
 });
 

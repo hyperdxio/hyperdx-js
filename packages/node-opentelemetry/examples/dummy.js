@@ -6,8 +6,8 @@ const pino = require('pino');
 const winston = require('winston');
 
 const {
-  getWinsonTransport,
   getPinoTransport,
+  getWinstonTransport,
   init,
 } = require('../build/src/logger');
 const { setTraceAttributes } = require('../build/src');
@@ -25,7 +25,7 @@ const logger = winston.createLogger({
   level: 'info',
   format: winston.format.json(),
   transports: [
-    getWinsonTransport('info'), // append this to the existing transports
+    getWinstonTransport('info'), // append this to the existing transports
   ],
 });
 

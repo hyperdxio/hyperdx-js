@@ -31,7 +31,7 @@ const getCustomMeta = () => {
   return traceId ? hyperDXGlobalContext.getTraceAttributes(traceId) : {};
 };
 
-export const getWinsonTransport = (
+export const getWinstonTransport = (
   maxLevel = 'info',
   options: WinstonTransportOptions = {},
 ) => {
@@ -44,6 +44,9 @@ export const getWinsonTransport = (
     ...options,
   });
 };
+
+// TODO: WILL BE DEPRECATED
+export const getWinsonTransport = getWinstonTransport;
 
 export const getPinoTransport = (
   maxLevel = 'info',
