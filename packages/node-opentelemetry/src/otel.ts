@@ -74,7 +74,7 @@ export const initSDK = (config: SDKConfig) => {
   if (config.advancedNetworkCapture) {
     if (comparePackageVersions(PKG_VERSION, '==', '0.6.1')) {
       console.warn(
-        `${LOG_PREFIX} Warning: The "advancedNetworkCapture" flag is available in version 0.0.1 but will be removed in future versions. Please consider using "networkHeadersCapture" and "networkBodyCapture" instead.`,
+        `${LOG_PREFIX} Warning: The "advancedNetworkCapture" flag is available in version 0.6.1 but will be removed in future versions. Please consider using "networkHeadersCapture" and "networkBodyCapture" instead.`,
       );
     } else if (comparePackageVersions(PKG_VERSION, '>', '0.6.1')) {
       throw new Error(
