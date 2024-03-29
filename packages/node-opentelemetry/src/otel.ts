@@ -16,6 +16,7 @@ import hdx, {
 import { getHyperDXHTTPInstrumentationConfig } from './instrumentations/http';
 import { hyperDXGlobalContext } from './context';
 import { version as PKG_VERSION } from '../package.json';
+import { comparePackageVersions } from '../utils/comparison';
 
 const LOG_PREFIX = `⚠️  ${_LOG_PREFIX}`;
 
@@ -23,6 +24,8 @@ const env = process.env;
 
 export type SDKConfig = {
   advancedNetworkCapture?: boolean;
+  networkHeadersCapture?: boolean;
+  networkBodyCapture?: boolean;
   betaMode?: boolean;
   consoleCapture?: boolean;
   instrumentations?: InstrumentationConfigMap;
@@ -68,6 +71,17 @@ export const initSDK = (config: SDKConfig) => {
     service: env.OTEL_SERVICE_NAME,
   });
 
+  if (config.advancedNetworkCapture) {
+    if (comparePackageVersions(PKG_VERSION, '==', '0.6.1')) {
+      console.warn(
+        `${LOG_PREFIX} Warning: The "advancedNetworkCapture" flag is available in version 0.0.1 but will be removed in future versions. Please consider using "networkHeadersCapture" and "networkBodyCapture" instead.`,
+      );
+    } else if (comparePackageVersions(PKG_VERSION, '>', '0.6.1')) {
+      throw new Error(
+        `${LOG_PREFIX} The "advancedNetworkCapture" flag is no longer available. Please use "networkHeadersCapture" and "networkBodyCapture" instead.`,
+      );
+    }
+  }
   sdk = new NodeSDK({
     resource: new Resource({
       'hyperdx.distro.version': PKG_VERSION,
@@ -89,18 +103,23 @@ export const initSDK = (config: SDKConfig) => {
         }),
     instrumentations: [
       getNodeAutoInstrumentations({
-        '@opentelemetry/instrumentation-http': config.advancedNetworkCapture
-          ? getHyperDXHTTPInstrumentationConfig({
-              httpCaptureHeadersClientRequest:
-                env.OTEL_INSTRUMENTATION_HTTP_CAPTURE_HEADERS_CLIENT_REQUEST,
-              httpCaptureHeadersClientResponse:
-                env.OTEL_INSTRUMENTATION_HTTP_CAPTURE_HEADERS_CLIENT_RESPONSE,
-              httpCaptureHeadersServerRequest:
-                env.OTEL_INSTRUMENTATION_HTTP_CAPTURE_HEADERS_SERVER_REQUEST,
-              httpCaptureHeadersServerResponse:
-                env.OTEL_INSTRUMENTATION_HTTP_CAPTURE_HEADERS_SERVER_RESPONSE,
-            })
-          : { enabled: true },
+        '@opentelemetry/instrumentation-http':
+          config.networkBodyCapture ||
+          config.networkHeadersCapture ||
+          config.advancedNetworkCapture
+            ? getHyperDXHTTPInstrumentationConfig({
+                networkHeadersCapture: config.networkHeadersCapture,
+                networkBodyCapture: config.networkBodyCapture,
+                httpCaptureHeadersClientRequest:
+                  env.OTEL_INSTRUMENTATION_HTTP_CAPTURE_HEADERS_CLIENT_REQUEST,
+                httpCaptureHeadersClientResponse:
+                  env.OTEL_INSTRUMENTATION_HTTP_CAPTURE_HEADERS_CLIENT_RESPONSE,
+                httpCaptureHeadersServerRequest:
+                  env.OTEL_INSTRUMENTATION_HTTP_CAPTURE_HEADERS_SERVER_REQUEST,
+                httpCaptureHeadersServerResponse:
+                  env.OTEL_INSTRUMENTATION_HTTP_CAPTURE_HEADERS_SERVER_RESPONSE,
+              })
+            : { enabled: true },
         // FIXME: issue detected with fs instrumentation (infinite loop)
         '@opentelemetry/instrumentation-fs': {
           enabled: false,
@@ -116,6 +135,8 @@ export const initSDK = (config: SDKConfig) => {
       `${LOG_PREFIX} Tracing is enabled with configs (${JSON.stringify(
         {
           advancedNetworkCapture: config.advancedNetworkCapture,
+          networkHeadersCapture: config.networkHeadersCapture,
+          networkBodyCapture: config.networkBodyCapture,
           betaMode: config.betaMode,
           consoleCapture: consoleInstrumentationEnabled,
           endpoint: env.OTEL_EXPORTER_OTLP_ENDPOINT,

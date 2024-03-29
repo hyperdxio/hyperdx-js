@@ -3,6 +3,8 @@ const { context, metrics, propagation, trace } = require('@opentelemetry/api');
 
 initSDK({
   // advancedNetworkCapture: true,
+  networkBodyCapture: false,
+  networkHeadersCapture: false,
   // betaMode: true,
   // consoleCapture: true,
 });
