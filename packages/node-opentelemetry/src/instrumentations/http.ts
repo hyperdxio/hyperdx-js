@@ -341,8 +341,9 @@ export const getHyperDXHTTPInstrumentationConfig = ({
   httpCaptureHeadersServerRequest?: string;
   httpCaptureHeadersServerResponse?: string;
 }) => {
-  const shouldRecordBody =
-    networkBodyCapture && getShouldRecordBody(httpCaptureBodyKeywordsFilter);
+  const shouldRecordBody = networkBodyCapture
+    ? getShouldRecordBody(httpCaptureBodyKeywordsFilter)
+    : (body: string) => false;
   return {
     requestHook: (
       span: Span,

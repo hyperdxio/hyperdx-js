@@ -198,6 +198,13 @@ This can be accomplished by setting `HDX_NODE_ADVANCED_NETWORK_CAPTURE` environm
 export HDX_NODE_ADVANCED_NETWORK_CAPTURE=1
 ```
 
+If you only want to capture the header or body, we also provide two separate flags for you.
+
+```sh
+export HDX_NODE_NETWORK_HEADERS_CAPTURE=1
+export HDX_NODE_NETWORK_BODY_CAPTURE=1
+```
+
 By default, all request/response headers will be captured. You can specify a custom list of headers to capture
 by setting `OTEL_INSTRUMENTATION_HTTP_CAPTURE_HEADERS_CLIENT_REQUEST`,
 `OTEL_INSTRUMENTATION_HTTP_CAPTURE_HEADERS_CLIENT_RESPONSE`,
