@@ -16,6 +16,8 @@ import hdx, {
 import { getHyperDXHTTPInstrumentationConfig } from './instrumentations/http';
 import { hyperDXGlobalContext } from './context';
 import { version as PKG_VERSION } from '../package.json';
+import FilterSpanExporter from './FilterSpanExporter';
+import { BatchSpanProcessor } from '@opentelemetry/sdk-trace-base';
 
 const LOG_PREFIX = `⚠️  ${_LOG_PREFIX}`;
 
@@ -68,6 +70,17 @@ export const initSDK = (config: SDKConfig) => {
     service: env.OTEL_SERVICE_NAME,
   });
 
+  /**
+   * The FilterSpanExporter is primarily used to hide the error from internal tools.
+   */
+  const filterSpanExporter = new FilterSpanExporter(
+    new OTLPTraceExporter({
+      timeoutMillis: 60000,
+    }),
+  );
+
+  const spanProcessor = new BatchSpanProcessor(filterSpanExporter);
+
   sdk = new NodeSDK({
     resource: new Resource({
       'hyperdx.distro.version': PKG_VERSION,
@@ -76,11 +89,7 @@ export const initSDK = (config: SDKConfig) => {
     // metricReader: metricReader,
     ...(config.betaMode
       ? {
-          spanProcessor: new HyperDXSpanProcessor(
-            new OTLPTraceExporter({
-              timeoutMillis: 60000,
-            }),
-          ) as any,
+          spanProcessor: spanProcessor,
         }
       : {
           traceExporter: new OTLPTraceExporter({
