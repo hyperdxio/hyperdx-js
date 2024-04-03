@@ -192,13 +192,7 @@ export HDX_NODE_BETA_MODE=1
 
 By enabling advanced network capture, the SDK will additionally capture full HTTP request/response headers
 and bodies for all inbound/outbound HTTP requests, to help with more in-depth request debugging.
-This can be accomplished by setting `HDX_NODE_ADVANCED_NETWORK_CAPTURE` environment variable to 1.
-
-```sh
-export HDX_NODE_ADVANCED_NETWORK_CAPTURE=1
-```
-
-If you only want to capture the header or body, we also provide two separate flags for you.
+This can be accomplished by setting `HDX_NODE_NETWORK_HEADERS_CAPTURE` and `HDX_NODE_NETWORK_BODY_CAPTURE` environment variables to 1.
 
 ```sh
 export HDX_NODE_NETWORK_HEADERS_CAPTURE=1
