@@ -1,7 +1,6 @@
 import opentelemetry from '@opentelemetry/api';
 
-// @ts-ignore
-import { HyperDXWinston } from '@hyperdx/node-logger';
+import HyperDXWinston from '@hyperdx/node-logger/build/src/winston';
 
 import hdx from './debug';
 import { hyperDXGlobalContext } from './context';
