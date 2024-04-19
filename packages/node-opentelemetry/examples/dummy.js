@@ -18,7 +18,7 @@ const { setTraceAttributes } = require('../build/src');
 //   process.exit(0);
 // });
 
-const PORT = parseInt(process.env.PORT || '7777');
+const PORT = parseInt(process.env.PORT || '7788');
 const app = express();
 
 const logger = winston.createLogger({
@@ -99,7 +99,6 @@ app.post('/dump', (req, res) => {
 });
 
 app.get('/', async (req, res) => {
-  console.info('@@@@@@@@@@@@');
   console.debug({
     headers: req.headers,
     method: req.method,
@@ -107,13 +106,14 @@ app.get('/', async (req, res) => {
     query: req.query,
   });
   console.error('BANG !!!');
+  console.log('Console 🍕');
   logger.info({
-    message: '🍕',
+    message: 'Winston 🍕',
     headers: req.headers,
     method: req.method,
     url: req.url,
   });
-  pinoLogger.info('🍕');
+  pinoLogger.info('Pino 🍕');
 
   console.log(await sendGetRequest());
   // console.log(await axios.get('https://hyperdx.free.beeceptor.com'));
