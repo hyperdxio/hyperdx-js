@@ -2,7 +2,7 @@
   "name": "@hyperdx/node-logger",
   "author": "Warren <warren@users.noreply.github.com>",
   "license": "MIT",
-  "version": "0.3.2-next.0",
+  "version": "0.3.2",
   "description": "",
   "homepage": "https://www.hyperdx.io",
   "repository": {

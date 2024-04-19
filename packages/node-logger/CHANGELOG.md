@@ -1,5 +1,11 @@
 # @hyperdx/node-logger
 
+## 0.3.2
+
+### Patch Changes
+
+- 50fc7ac: chore: bump axios to v1.6.8
+
 ## 0.3.2-next.0
 
 ### Patch Changes
