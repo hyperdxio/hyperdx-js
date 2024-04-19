@@ -1,5 +1,13 @@
 # @hyperdx/node-opentelemetry
 
+## 0.6.2-next.0
+
+### Patch Changes
+
+- 517dccf: fix: nested winston import
+- Updated dependencies [50fc7ac]
+  - @hyperdx/node-logger@0.3.2-next.0
+
 ## 0.6.1
 
 ### Patch Changes
