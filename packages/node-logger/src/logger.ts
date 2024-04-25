@@ -1,15 +1,11 @@
-import {
-  Attributes,
-  DiagConsoleLogger,
-  DiagLogLevel,
-  diag,
-} from '@opentelemetry/api';
+import { isPlainObject, isString } from 'lodash';
+import { Attributes } from '@opentelemetry/api';
 import {
   BatchLogRecordProcessor,
   BufferConfig,
   LoggerProvider,
 } from '@opentelemetry/sdk-logs';
-import { isPlainObject, isString } from 'lodash';
+import { OTLPLogExporter } from '@opentelemetry/exporter-logs-otlp-http';
 import {
   logs,
   SeverityNumber,
@@ -23,10 +19,11 @@ import {
   osDetectorSync,
   processDetector,
 } from '@opentelemetry/resources';
-import { OTLPLogExporter } from '@opentelemetry/exporter-logs-otlp-http';
+import { SEMRESATTRS_SERVICE_NAME } from '@opentelemetry/semantic-conventions';
 
-import { jsonToString } from './_logger';
 import { LOG_PREFIX as _LOG_PREFIX } from './debug';
+import { jsonToString } from './_logger';
+import { version as PKG_VERSION } from '../package.json';
 
 const DEFAULT_EXPORTER_BATCH_SIZE = 512;
 const DEFAULT_EXPORTER_TIMEOUT_MS = 30000;
@@ -150,6 +147,9 @@ export class Logger {
 
     const exporter = new OTLPLogExporter({
       url: _url,
+      headers: {
+        Authorization: apiKey,
+      },
     });
     this.processor = new BatchLogRecordProcessor(exporter, {
       maxExportBatchSize: bufferSize ?? DEFAULT_EXPORTER_BATCH_SIZE,
@@ -160,7 +160,9 @@ export class Logger {
     const loggerProvider = new LoggerProvider({
       resource: detectedResource.merge(
         new Resource({
-          'service.name': service ?? DEFAULT_SERVICE_NAME,
+          'hyperdx.distro.version': PKG_VERSION,
+          'hyperdx.distro.runtime_version': process.versions.node,
+          [SEMRESATTRS_SERVICE_NAME]: service ?? DEFAULT_SERVICE_NAME,
           ...resourceAttributes,
         }),
       ),
