@@ -39,16 +39,8 @@ export default (opts: HyperDXPinoOptions) => {
       {
         async close(err) {
           hdx('Sending and closing HyperDX pino transport...');
-          await new Promise<void>((resolve, reject) =>
-            logger.sendAndClose((_err) => {
-              if (_err) {
-                reject(_err);
-                return;
-              }
-              hdx('HyperDX pino transport closed!');
-              resolve();
-            }),
-          );
+          await logger.shutdown();
+          hdx('HyperDX pino transport closed!');
         },
       },
     );

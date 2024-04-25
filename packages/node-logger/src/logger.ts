@@ -1,11 +1,39 @@
-import os from 'os';
-import { URL } from 'url';
-
-import stripAnsi from 'strip-ansi';
+import {
+  Attributes,
+  DiagConsoleLogger,
+  DiagLogLevel,
+  diag,
+} from '@opentelemetry/api';
+import {
+  BatchLogRecordProcessor,
+  BufferConfig,
+  LoggerProvider,
+} from '@opentelemetry/sdk-logs';
 import { isPlainObject, isString } from 'lodash';
+import {
+  logs,
+  SeverityNumber,
+  Logger as OtelLogger,
+} from '@opentelemetry/api-logs';
+import {
+  Resource,
+  detectResourcesSync,
+  envDetectorSync,
+  hostDetectorSync,
+  osDetectorSync,
+  processDetector,
+} from '@opentelemetry/resources';
+import { OTLPLogExporter } from '@opentelemetry/exporter-logs-otlp-http';
 
-import { ILogger, createLogger, jsonToString } from './_logger';
+import { jsonToString } from './_logger';
 import { LOG_PREFIX as _LOG_PREFIX } from './debug';
+
+const DEFAULT_EXPORTER_BATCH_SIZE = 512;
+const DEFAULT_EXPORTER_TIMEOUT_MS = 30000;
+const DEFAULT_MAX_QUEUE_SIZE = 2048;
+const DEFAULT_OTEL_LOGS_EXPORTER_URL = 'https://in-otel.hyperdx.io/v1/logs';
+const DEFAULT_SEND_INTERVAL_MS = 5000;
+const DEFAULT_SERVICE_NAME = 'default app';
 
 const LOG_PREFIX = `⚠️  ${_LOG_PREFIX}`;
 
@@ -38,7 +66,7 @@ export const parsePinoLog = (log: PinoLogLine) => {
 };
 
 export const parseWinstonLog = (log: {
-  message: string | Record<string, any>;
+  message: string | Attributes;
   level: string;
 }) => {
   const level = log.level;
@@ -46,10 +74,7 @@ export const parseWinstonLog = (log: {
     ? log.message
     : jsonToString(log.message);
 
-  const meta = {
-    ...log,
-    ...(isPlainObject(log.message) && (log.message as Record<string, unknown>)), // spread the message if its object type
-  };
+  const meta = (isPlainObject(log.message) ? log.message : {}) as Attributes;
 
   return {
     level,
@@ -58,12 +83,12 @@ export const parseWinstonLog = (log: {
   };
 };
 
-const DEFAULT_TIMEOUT = 30000;
-
 export type LoggerOptions = {
   apiKey: string;
   baseUrl?: string;
   bufferSize?: number;
+  detectResources?: boolean;
+  queueSize?: number;
   sendIntervalMs?: number;
   service?: string;
   timeout?: number; // The read/write/connection timeout in milliseconds
@@ -72,12 +97,17 @@ export type LoggerOptions = {
 export class Logger {
   private readonly service: string;
 
-  private readonly client: ILogger | null;
+  private readonly logger: OtelLogger | undefined;
+
+  private readonly processor: BatchLogRecordProcessor;
 
   constructor({
     apiKey,
     baseUrl,
     bufferSize,
+    detectResources,
+    queueSize,
+    resourceAttributes,
     sendIntervalMs,
     service,
     timeout,
@@ -85,6 +115,9 @@ export class Logger {
     apiKey: string;
     baseUrl?: string;
     bufferSize?: number;
+    detectResources?: boolean;
+    queueSize?: number;
+    resourceAttributes?: Attributes;
     sendIntervalMs?: number;
     service?: string;
     timeout?: number;
@@ -93,34 +126,50 @@ export class Logger {
       console.error(`${LOG_PREFIX} API key not found`);
     }
     if (!service) {
-      console.warn(`${LOG_PREFIX} Service name not found. Use "default app"`);
-    }
-    this.service = service ?? 'default app';
-    let protocol;
-    let host;
-    let port;
-    if (baseUrl) {
-      const url = new URL(baseUrl);
-      protocol = url.protocol.replace(':', '');
-      host = url.hostname;
-      port = url.port;
       console.warn(
-        `${LOG_PREFIX} Sending logs to ${protocol}://${host}:${port} `,
+        `${LOG_PREFIX} Service name not found. Use "${DEFAULT_SERVICE_NAME}"`,
       );
     }
 
-    this.client = apiKey
-      ? createLogger({
-          bufferSize,
-          host,
-          port,
-          protocol,
-          sendIntervalMs,
-          timeout: timeout ?? DEFAULT_TIMEOUT,
-          token: apiKey,
-        })
-      : null;
-    if (this.client) {
+    const detectedResource = detectResourcesSync({
+      detectors:
+        // This will require a few extra deno permissions
+        detectResources === false
+          ? []
+          : [
+              envDetectorSync,
+              hostDetectorSync,
+              osDetectorSync,
+              processDetector,
+            ],
+    });
+
+    const _url = baseUrl ?? DEFAULT_OTEL_LOGS_EXPORTER_URL;
+
+    console.warn(`${LOG_PREFIX} Sending logs to ${_url}`);
+
+    const exporter = new OTLPLogExporter({
+      url: _url,
+    });
+    this.processor = new BatchLogRecordProcessor(exporter, {
+      maxExportBatchSize: bufferSize ?? DEFAULT_EXPORTER_BATCH_SIZE,
+      scheduledDelayMillis: sendIntervalMs ?? DEFAULT_SEND_INTERVAL_MS,
+      exportTimeoutMillis: timeout ?? DEFAULT_EXPORTER_TIMEOUT_MS,
+      maxQueueSize: queueSize ?? DEFAULT_MAX_QUEUE_SIZE,
+    });
+    const loggerProvider = new LoggerProvider({
+      resource: detectedResource.merge(
+        new Resource({
+          'service.name': service ?? DEFAULT_SERVICE_NAME,
+          ...resourceAttributes,
+        }),
+      ),
+    });
+    loggerProvider.addLogRecordProcessor(this.processor);
+    logs.setGlobalLoggerProvider(loggerProvider);
+
+    if (apiKey) {
+      this.logger = logs.getLogger('node-logger');
       console.log(`${LOG_PREFIX} started!`);
     } else {
       console.error(
@@ -138,33 +187,22 @@ export class Logger {
     return new Date();
   }
 
-  private buildHdxLog(
-    level: string,
-    body: string,
-    meta: Record<string, any>,
-  ): HdxLog {
-    return {
-      b: stripAnsi(body),
-      h: os.hostname(),
-      sn: 0, // TODO: set up the correct number
-      st: stripAnsi(level),
-      sv: stripAnsi(this.service),
-      ts: this.parseTimestamp(meta),
-    };
+  shutdown() {
+    return this.processor.shutdown();
   }
 
-  sendAndClose(callback?: (error: Error, bulk: object) => void): void {
-    this.client?.sendAndClose(callback);
+  forceFlush() {
+    return this.processor.forceFlush();
   }
 
-  postMessage(
-    level: string,
-    body: string,
-    meta: Record<string, any> = {},
-  ): void {
-    this.client?.log({
-      ...meta,
-      __hdx: this.buildHdxLog(level, body, meta),
+  postMessage(level: string, body: string, attributes: Attributes = {}): void {
+    this.logger?.emit({
+      severityNumber: 0,
+      // TODO: set up the mapping between different downstream log levels
+      severityText: level,
+      body,
+      attributes,
+      timestamp: this.parseTimestamp(attributes),
     });
   }
 }
