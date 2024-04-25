@@ -130,6 +130,16 @@ export class Logger {
       );
     }
 
+    // sanity check bufferSize and queueSize
+    const maxExportBatchSize = bufferSize ?? DEFAULT_EXPORTER_BATCH_SIZE;
+    let maxQueueSize = queueSize ?? DEFAULT_MAX_QUEUE_SIZE;
+    if (maxExportBatchSize > maxQueueSize) {
+      console.error(
+        `${LOG_PREFIX} bufferSize must be smaller or equal to queueSize. Setting queueSize to ${maxExportBatchSize}`,
+      );
+      maxQueueSize = maxExportBatchSize;
+    }
+
     const detectedResource = detectResourcesSync({
       detectors: detectResources
         ? [envDetectorSync, hostDetectorSync, osDetectorSync, processDetector]
@@ -147,10 +157,12 @@ export class Logger {
       },
     });
     this.processor = new BatchLogRecordProcessor(exporter, {
-      maxExportBatchSize: bufferSize ?? DEFAULT_EXPORTER_BATCH_SIZE,
+      /** The maximum batch size of every export. It must be smaller or equal to
+       * maxQueueSize. The default value is 512. */
+      maxExportBatchSize,
       scheduledDelayMillis: sendIntervalMs ?? DEFAULT_SEND_INTERVAL_MS,
       exportTimeoutMillis: timeout ?? DEFAULT_EXPORTER_TIMEOUT_MS,
-      maxQueueSize: queueSize ?? DEFAULT_MAX_QUEUE_SIZE,
+      maxQueueSize,
     });
     const loggerProvider = new LoggerProvider({
       resource: detectedResource.merge(
