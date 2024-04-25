@@ -1,4 +1,5 @@
 import build from 'pino-abstract-transport';
+import { Attributes } from '@opentelemetry/api';
 
 import hdx from './debug';
 import { Logger, parsePinoLog } from './logger';
@@ -16,7 +17,7 @@ const PINO_LEVELS = {
 };
 
 export type HyperDXPinoOptions = LoggerOptions & {
-  getCustomMeta?: () => Record<string, any>;
+  getCustomMeta?: () => Attributes;
 };
 
 export default (opts: HyperDXPinoOptions) => {

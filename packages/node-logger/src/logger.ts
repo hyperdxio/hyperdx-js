@@ -6,11 +6,7 @@ import {
   LoggerProvider,
 } from '@opentelemetry/sdk-logs';
 import { OTLPLogExporter } from '@opentelemetry/exporter-logs-otlp-http';
-import {
-  logs,
-  SeverityNumber,
-  Logger as OtelLogger,
-} from '@opentelemetry/api-logs';
+import { Logger as OtelLogger, SeverityNumber } from '@opentelemetry/api-logs';
 import {
   Resource,
   detectResourcesSync,
@@ -58,20 +54,28 @@ export const parsePinoLog = (log: PinoLogLine) => {
   return {
     level,
     message: bodyMsg,
-    meta: log,
+    meta,
   };
 };
 
-export const parseWinstonLog = (log: {
-  message: string | Attributes;
-  level: string;
-}) => {
-  const level = log.level;
-  const bodyMsg = isString(log.message)
-    ? log.message
-    : jsonToString(log.message);
+export const parseWinstonLog = (
+  log: {
+    message: string | Attributes;
+    level: string;
+  } & Attributes,
+) => {
+  const { level, message, ...attributes } = log;
+  const bodyMsg = isString(message) ? message : jsonToString(message);
 
-  const meta = (isPlainObject(log.message) ? log.message : {}) as Attributes;
+  let meta = attributes;
+
+  if (isPlainObject(message)) {
+    // FIXME: attributes conflict ??
+    meta = {
+      ...attributes,
+      ...(message as Attributes),
+    };
+  }
 
   return {
     level,
@@ -92,8 +96,6 @@ export type LoggerOptions = {
 };
 
 export class Logger {
-  private readonly service: string;
-
   private readonly logger: OtelLogger | undefined;
 
   private readonly processor: BatchLogRecordProcessor;
@@ -161,10 +163,9 @@ export class Logger {
       ),
     });
     loggerProvider.addLogRecordProcessor(this.processor);
-    logs.setGlobalLoggerProvider(loggerProvider);
 
     if (apiKey) {
-      this.logger = logs.getLogger('node-logger');
+      this.logger = loggerProvider.getLogger('node-logger');
       console.log(`${LOG_PREFIX} started!`);
     } else {
       console.error(
@@ -173,10 +174,10 @@ export class Logger {
     }
   }
 
-  private parseTimestamp(meta: Record<string, any>): Date {
+  private parseTimestamp(meta: Attributes): Date {
     // pino
-    if (meta.time) {
-      return new Date(meta.time);
+    if (Number.isInteger(meta.time)) {
+      return new Date(meta.time as number);
     }
     // set to current time if not provided
     return new Date();

@@ -1,4 +1,5 @@
 import Transport from 'winston-transport';
+import { Attributes } from '@opentelemetry/api';
 
 import hdx from './debug';
 import { Logger, parseWinstonLog } from './logger';
@@ -7,13 +8,13 @@ import type { LoggerOptions } from './logger';
 
 export type HyperDXWinstonOptions = LoggerOptions & {
   maxLevel?: string;
-  getCustomMeta?: () => Record<string, any>;
+  getCustomMeta?: () => Attributes;
 };
 
 export default class HyperDXWinston extends Transport {
   private readonly logger: Logger;
 
-  private readonly getCustomMeta: () => Record<string, any>;
+  private readonly getCustomMeta: () => Attributes;
 
   constructor({ maxLevel, getCustomMeta, ...options }: HyperDXWinstonOptions) {
     hdx('Initializing HyperDX winston transport...');
@@ -24,7 +25,7 @@ export default class HyperDXWinston extends Transport {
   }
 
   log(
-    info: { message: string | Record<string, any>; level: string },
+    info: { message: string | Attributes; level: string } & Attributes,
     callback: () => void,
   ) {
     hdx('Received log from winston');
