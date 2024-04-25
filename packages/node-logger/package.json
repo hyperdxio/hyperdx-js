@@ -46,7 +46,7 @@
     "rxjs": "^7.8.1",
     "tslib": "^2.5.3",
     "winston": "^3.9.0",
-    "winston-transport": "^4.5.0"
+    "winston-transport": "^4.7.0"
   },
   "devDependencies": {
     "pino": "^8.14.1"
