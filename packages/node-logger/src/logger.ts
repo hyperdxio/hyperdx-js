@@ -21,7 +21,7 @@ import {
 } from '@opentelemetry/resources';
 import { SEMRESATTRS_SERVICE_NAME } from '@opentelemetry/semantic-conventions';
 
-import { LOG_PREFIX as _LOG_PREFIX } from './debug';
+import hdx, { LOG_PREFIX as _LOG_PREFIX } from './debug';
 import { jsonToString } from './_logger';
 import { version as PKG_VERSION } from '../package.json';
 
@@ -129,16 +129,9 @@ export class Logger {
     }
 
     const detectedResource = detectResourcesSync({
-      detectors:
-        // This will require a few extra deno permissions
-        detectResources === false
-          ? []
-          : [
-              envDetectorSync,
-              hostDetectorSync,
-              osDetectorSync,
-              processDetector,
-            ],
+      detectors: detectResources
+        ? [envDetectorSync, hostDetectorSync, osDetectorSync, processDetector]
+        : [],
     });
 
     const _url = baseUrl ?? DEFAULT_OTEL_LOGS_EXPORTER_URL;
@@ -190,14 +183,17 @@ export class Logger {
   }
 
   shutdown() {
+    hdx('Shutting down HyperDX node logger...');
     return this.processor.shutdown();
   }
 
   forceFlush() {
+    hdx('Forcing flush of HyperDX node logger...');
     return this.processor.forceFlush();
   }
 
   postMessage(level: string, body: string, attributes: Attributes = {}): void {
+    hdx('Emittiing log from HyperDX node logger...');
     this.logger?.emit({
       severityNumber: 0,
       // TODO: set up the mapping between different downstream log levels
