@@ -1,6 +1,6 @@
 import * as shimmer from 'shimmer';
 import _ from 'lodash';
-import opentelemetry from '@opentelemetry/api';
+import opentelemetry, { Attributes } from '@opentelemetry/api';
 import {
   Logger,
   LoggerOptions,
@@ -59,7 +59,7 @@ export default class HyperDXConsoleInstrumentation {
       const currentActiveSpan = opentelemetry.trace.getActiveSpan();
       const traceId = currentActiveSpan?.spanContext().traceId;
 
-      let meta: Record<string, unknown> = {
+      let meta: Attributes = {
         ...parsedLog.meta,
         // attached traceId and spanId,
         trace_id: traceId,
