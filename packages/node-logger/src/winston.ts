@@ -33,9 +33,6 @@ export default class HyperDXWinston extends Transport {
     });
 
     hdx('Received log from winston');
-    setImmediate(() => {
-      this.emit('logged', info);
-    });
 
     const { level, message, meta } = parseWinstonLog(info);
     hdx('Sending log to HyperDX');
