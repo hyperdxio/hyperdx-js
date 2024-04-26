@@ -46,11 +46,19 @@ export type PinoLogLine = {
   pid: number;
   hostname: string;
   msg: string;
-};
+} & Attributes;
 
 export const parsePinoLog = (log: PinoLogLine) => {
-  const { level, msg, ...meta } = log;
-  const bodyMsg = isString(msg) ? msg : jsonToString(log);
+  const { level, msg, message, ...meta } = log;
+  const targetMessage = msg || message;
+  let bodyMsg = '';
+  if (targetMessage) {
+    bodyMsg = isString(targetMessage)
+      ? targetMessage
+      : jsonToString(targetMessage);
+  } else {
+    bodyMsg = jsonToString(log);
+  }
   return {
     level,
     message: bodyMsg,
