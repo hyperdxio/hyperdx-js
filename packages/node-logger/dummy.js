@@ -14,7 +14,9 @@ const HDX_API_URL = 'http://localhost:4318/v1/logs';
 const DETECT_RESOURCES = false;
 
 const logger = new Logger({
-  apiKey: HDX_API_KEY,
+  headers: {
+    Authorization: HDX_API_KEY,
+  },
   baseUrl: HDX_API_URL,
   service: 'native',
   bufferSize: 100,
@@ -73,20 +75,33 @@ app.get('/', (req, res) => {
     headers: req.headers,
     method: req.method,
     url: req.url,
-    query: req.query,
+    query: {
+      foo: {
+        bar: {
+          baz: 'qux',
+        },
+      },
+    },
   });
-  // winstonLogger.info('🍕');
-  // winstonLogger.error({
-  //   message: 'BANG !!!',
-  //   headers: req.headers,
-  // });
-  // winstonLogger2.info('🤯🤯🤯');
-  pinoLogger.info('🍕');
-  pinoLogger.error({
+  winstonLogger.info('🍕', {
     message: 'BANG !!!',
-    headers: req.headers,
+    foo: 'bar',
   });
-  pinoLogger.warn({
+  winstonLogger.info('🍕', {
+    foo: 'bar',
+  });
+  winstonLogger.info(
+    {
+      foo: 'bar',
+    },
+    {
+      foo1: 'bar1',
+    },
+  );
+  pinoLogger.error('🍕');
+  pinoLogger.error({
+    pizza: '🍕',
+    message: 'BANG !!!',
     foo: 'bar',
   });
   res.send('Hello World');
