@@ -36,7 +36,6 @@
     "@opentelemetry/resources": "^1.24.0",
     "@opentelemetry/sdk-logs": "^0.51.0",
     "@opentelemetry/semantic-conventions": "^1.24.0",
-    "axios": "^1.6.8",
     "debug": "^4.3.4",
     "json-stringify-safe": "^5.0.1",
     "lodash": "^4.17.21",
@@ -48,9 +47,7 @@
     "winston": "^3.9.0",
     "winston-transport": "^4.7.0"
   },
-  "devDependencies": {
-    "pino": "^8.14.1"
-  },
+  "devDependencies": {},
   "peerDependencies": {},
   "keywords": [
     "winston",

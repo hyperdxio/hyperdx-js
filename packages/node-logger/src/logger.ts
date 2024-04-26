@@ -1,4 +1,5 @@
 import { isPlainObject, isString } from 'lodash';
+import stringifySafe from 'json-stringify-safe';
 import { Attributes } from '@opentelemetry/api';
 import {
   BatchLogRecordProcessor,
@@ -18,7 +19,6 @@ import {
 import { SEMRESATTRS_SERVICE_NAME } from '@opentelemetry/semantic-conventions';
 
 import hdx, { LOG_PREFIX as _LOG_PREFIX } from './debug';
-import { jsonToString } from './_logger';
 import { version as PKG_VERSION } from '../package.json';
 
 const DEFAULT_EXPORTER_BATCH_SIZE = 512;
@@ -30,16 +30,6 @@ const DEFAULT_SERVICE_NAME = 'default app';
 
 const LOG_PREFIX = `⚠️  ${_LOG_PREFIX}`;
 
-// internal types
-export type HdxLog = {
-  b: string; // message body
-  h: string; // hostname
-  sn?: number;
-  st: string; // level in text
-  sv: string; // service name
-  ts: Date; // timestamp
-};
-
 export type PinoLogLine = {
   level: number;
   time: number;
@@ -47,6 +37,15 @@ export type PinoLogLine = {
   hostname: string;
   msg: string;
 } & Attributes;
+
+const jsonToString = (json) => {
+  try {
+    return JSON.stringify(json);
+  } catch (ex) {
+    hdx(`Failed to stringify json. e = ${ex}`);
+    return stringifySafe(json);
+  }
+};
 
 export const parsePinoLog = (log: PinoLogLine) => {
   const { level, msg, message, ...meta } = log;
