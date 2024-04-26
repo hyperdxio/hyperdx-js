@@ -1,6 +1,7 @@
 import Transport from 'winston-transport';
+import isPlainObject from 'lodash.isplainobject';
+import isString from 'lodash.isstring';
 import { Attributes } from '@opentelemetry/api';
-import { isPlainObject, isString } from 'lodash';
 
 import hdx from './debug';
 import { Logger, jsonToString } from './logger';

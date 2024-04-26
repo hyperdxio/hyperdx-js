@@ -1,5 +1,6 @@
 import * as shimmer from 'shimmer';
-import _ from 'lodash';
+import isObject from 'lodash.isobject';
+import isPlainObject from 'lodash.isplainobject';
 import opentelemetry, { Attributes } from '@opentelemetry/api';
 import { Logger, LoggerOptions } from '@hyperdx/node-logger/build/src/logger';
 import { parseWinstonLog } from '@hyperdx/node-logger/build/src/winston';
@@ -11,8 +12,8 @@ export const _parseConsoleArgs = (args: any[]) => {
   const stringifiedArgs = [];
   let firstJson;
   for (const arg of args) {
-    if (_.isObject(arg)) {
-      if (firstJson == null && _.isPlainObject(arg)) {
+    if (isObject(arg)) {
+      if (firstJson == null && isPlainObject(arg)) {
         firstJson = arg;
       }
       try {

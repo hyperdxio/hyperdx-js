@@ -1,6 +1,6 @@
 import build from 'pino-abstract-transport';
+import isString from 'lodash.isstring';
 import { Attributes } from '@opentelemetry/api';
-import { isString } from 'lodash';
 
 import hdx from './debug';
 import { Logger, jsonToString } from './logger';
