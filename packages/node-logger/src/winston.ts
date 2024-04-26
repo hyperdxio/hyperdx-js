@@ -47,6 +47,15 @@ export default class HyperDXWinston extends Transport {
 
   close() {
     hdx('Closing HyperDX winston transport...');
-    this.logger.shutdown();
+    this.logger
+      .shutdown()
+      .then(() => {
+        hdx('HyperDX winston transport closed!');
+        this.emit('finish');
+        this.emit('close');
+      })
+      .catch((err) => {
+        console.error('Error closing HyperDX winston transport:', err);
+      });
   }
 }
