@@ -10,6 +10,7 @@ import { OTLPLogExporter } from '@opentelemetry/exporter-logs-otlp-http';
 import { Logger as OtelLogger, SeverityNumber } from '@opentelemetry/api-logs';
 import {
   Resource,
+  defaultServiceName,
   detectResourcesSync,
   envDetectorSync,
   hostDetectorSync,
@@ -24,9 +25,13 @@ import { version as PKG_VERSION } from '../package.json';
 const DEFAULT_EXPORTER_BATCH_SIZE = 512;
 const DEFAULT_EXPORTER_TIMEOUT_MS = 30000;
 const DEFAULT_MAX_QUEUE_SIZE = 2048;
-const DEFAULT_OTEL_LOGS_EXPORTER_URL = 'https://in-otel.hyperdx.io/v1/logs';
+const DEFAULT_OTEL_LOGS_EXPORTER_URL =
+  process.env.OTEL_EXPORTER_OTLP_LOGS_ENDPOINT ??
+  `${process.env.OTEL_EXPORTER_OTLP_ENDPOINT}/v1/logs` ??
+  'https://in-otel.hyperdx.io/v1/logs';
 const DEFAULT_SEND_INTERVAL_MS = 5000;
-const DEFAULT_SERVICE_NAME = 'default app';
+const DEFAULT_SERVICE_NAME =
+  process.env.OTEL_SERVICE_NAME ?? defaultServiceName();
 
 const LOG_PREFIX = `⚠️  ${_LOG_PREFIX}`;
 

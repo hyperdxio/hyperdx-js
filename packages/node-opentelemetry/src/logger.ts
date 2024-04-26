@@ -1,6 +1,8 @@
 import opentelemetry from '@opentelemetry/api';
 
-import HyperDXWinston from '@hyperdx/node-logger/build/src/winston';
+import HyperDXWinston, {
+  HyperDXWinstonOptions,
+} from '@hyperdx/node-logger/build/src/winston';
 
 import hdx from './debug';
 import { hyperDXGlobalContext } from './context';
@@ -15,12 +17,10 @@ const SERVICE_NAME = env.OTEL_SERVICE_NAME as string;
 
 const BETA_MODE = stringToBoolean(env.HDX_NODE_BETA_MODE);
 
-type WinstonTransportOptions = {
-  baseUrl?: string;
-  bufferSize?: number;
-  sendIntervalMs?: number;
-  timeout?: number; // The read/write/connection timeout in milliseconds
-};
+type WinstonTransportOptions = Omit<
+  HyperDXWinstonOptions,
+  'apiKey' | 'getCustomMeta'
+>;
 
 type PinotTransportOptions = WinstonTransportOptions;
 
