@@ -33,8 +33,9 @@ const DEFAULT_EXPORTER_TIMEOUT_MS = otelEnv.OTEL_BLRP_EXPORT_TIMEOUT ?? 30000;
 const DEFAULT_MAX_QUEUE_SIZE = otelEnv.OTEL_BLRP_MAX_QUEUE_SIZE ?? 2048;
 const DEFAULT_OTEL_LOGS_EXPORTER_URL =
   otelEnv.OTEL_EXPORTER_OTLP_LOGS_ENDPOINT ??
-  `${otelEnv.OTEL_EXPORTER_OTLP_ENDPOINT}/v1/logs` ??
-  'https://in-otel.hyperdx.io/v1/logs';
+  (otelEnv.OTEL_EXPORTER_OTLP_ENDPOINT
+    ? `${otelEnv.OTEL_EXPORTER_OTLP_ENDPOINT}/v1/logs`
+    : 'https://in-otel.hyperdx.io/v1/logs');
 const DEFAULT_SEND_INTERVAL_MS = otelEnv.OTEL_BLRP_SCHEDULE_DELAY ?? 5000;
 const DEFAULT_SERVICE_NAME = otelEnv.OTEL_SERVICE_NAME ?? defaultServiceName();
 
@@ -184,6 +185,7 @@ export class Logger {
     const loggerProvider = new LoggerProvider({
       resource: detectedResource.merge(
         new Resource({
+          // TODO: should use otel semantic conventions
           'hyperdx.distro.version': PKG_VERSION,
           'hyperdx.distro.runtime_version': process.versions.node,
           [SEMRESATTRS_SERVICE_NAME]: service ?? DEFAULT_SERVICE_NAME,
@@ -223,7 +225,7 @@ export class Logger {
   }
 
   postMessage(level: string, body: string, attributes: Attributes = {}): void {
-    hdx('Emittiing log from HyperDX node logger...');
+    hdx('Emitting log from HyperDX node logger...');
     this.logger?.emit({
       severityNumber: 0,
       // TODO: set up the mapping between different downstream log levels
