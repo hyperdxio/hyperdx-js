@@ -17,13 +17,19 @@ const PINO_LEVELS = {
 };
 
 export type HyperDXPinoOptions = LoggerOptions & {
+  apiKey: string;
   getCustomMeta?: () => Attributes;
 };
 
-export default (opts: HyperDXPinoOptions) => {
+export default ({ apiKey, getCustomMeta, ...options }: HyperDXPinoOptions) => {
   try {
     hdx('Initializing HyperDX pino transport...');
-    const logger = new Logger(opts);
+    const logger = new Logger({
+      headers: {
+        Authorization: apiKey,
+      },
+      ...options,
+    });
     hdx(`HyperDX pino transport initialized!`);
     return build(
       async function (source) {
@@ -31,7 +37,7 @@ export default (opts: HyperDXPinoOptions) => {
           const { level, message, meta } = parsePinoLog(obj);
           hdx('Sending log to HyperDX');
           logger.postMessage(PINO_LEVELS[level], message, {
-            ...opts.getCustomMeta?.(),
+            ...getCustomMeta?.(),
             ...meta,
           });
           hdx('Log sent to HyperDX');

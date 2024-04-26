@@ -110,11 +110,12 @@ export const parseWinstonLog = (
 };
 
 export type LoggerOptions = {
-  apiKey: string;
   baseUrl?: string;
   bufferSize?: number;
   detectResources?: boolean;
+  headers?: Record<string, string>;
   queueSize?: number;
+  resourceAttributes?: Attributes;
   sendIntervalMs?: number;
   service?: string;
   timeout?: number; // The read/write/connection timeout in milliseconds
@@ -126,29 +127,16 @@ export class Logger {
   private readonly processor: BatchLogRecordProcessor;
 
   constructor({
-    apiKey,
     baseUrl,
     bufferSize,
     detectResources,
+    headers,
     queueSize,
     resourceAttributes,
     sendIntervalMs,
     service,
     timeout,
-  }: {
-    apiKey: string;
-    baseUrl?: string;
-    bufferSize?: number;
-    detectResources?: boolean;
-    queueSize?: number;
-    resourceAttributes?: Attributes;
-    sendIntervalMs?: number;
-    service?: string;
-    timeout?: number;
-  }) {
-    if (!apiKey) {
-      console.error(`${LOG_PREFIX} API key not found`);
-    }
+  }: LoggerOptions) {
     if (!service) {
       console.warn(
         `${LOG_PREFIX} Service name not found. Use "${DEFAULT_SERVICE_NAME}"`,
@@ -177,9 +165,7 @@ export class Logger {
 
     const exporter = new OTLPLogExporter({
       url: _url,
-      headers: {
-        Authorization: apiKey,
-      },
+      ...(headers && { headers }),
     });
     this.processor = new BatchLogRecordProcessor(exporter, {
       /** The maximum batch size of every export. It must be smaller or equal to
@@ -201,14 +187,8 @@ export class Logger {
     });
     loggerProvider.addLogRecordProcessor(this.processor);
 
-    if (apiKey) {
-      this.logger = loggerProvider.getLogger('node-logger');
-      console.log(`${LOG_PREFIX} started!`);
-    } else {
-      console.error(
-        `${LOG_PREFIX} failed to start! Please check your API key.`,
-      );
-    }
+    this.logger = loggerProvider.getLogger('node-logger');
+    console.log(`${LOG_PREFIX} started!`);
   }
 
   private parseTimestamp(meta: Attributes): Date {

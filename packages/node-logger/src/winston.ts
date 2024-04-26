@@ -7,6 +7,7 @@ import { Logger, parseWinstonLog } from './logger';
 import type { LoggerOptions } from './logger';
 
 export type HyperDXWinstonOptions = LoggerOptions & {
+  apiKey: string;
   maxLevel?: string;
   getCustomMeta?: () => Attributes;
 };
@@ -16,11 +17,21 @@ export default class HyperDXWinston extends Transport {
 
   private readonly getCustomMeta: () => Attributes;
 
-  constructor({ maxLevel, getCustomMeta, ...options }: HyperDXWinstonOptions) {
+  constructor({
+    maxLevel,
+    getCustomMeta,
+    apiKey,
+    ...options
+  }: HyperDXWinstonOptions) {
     hdx('Initializing HyperDX winston transport...');
     super({ level: maxLevel ?? 'info' });
     this.getCustomMeta = getCustomMeta;
-    this.logger = new Logger(options);
+    this.logger = new Logger({
+      headers: {
+        Authorization: apiKey,
+      },
+      ...options,
+    });
     hdx(`HyperDX winston transport initialized!`);
   }
 
