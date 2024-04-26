@@ -1,5 +1,11 @@
 # @hyperdx/node-opentelemetry
 
+## 0.7.0-next.1
+
+### Patch Changes
+
+- 9bf6c3b: fix: inject HYPERDX_API_KEY if specified (winston/pino transport)
+
 ## 0.7.0-next.0
 
 ### Minor Changes
