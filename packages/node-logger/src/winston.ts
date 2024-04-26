@@ -1,13 +1,40 @@
 import Transport from 'winston-transport';
 import { Attributes } from '@opentelemetry/api';
+import { isPlainObject, isString } from 'lodash';
 
 import hdx from './debug';
-import { Logger, parseWinstonLog } from './logger';
+import { Logger, jsonToString } from './logger';
 
 import type { LoggerOptions } from './logger';
 
+export const parseWinstonLog = (
+  log: {
+    message: string | Attributes;
+    level: string;
+  } & Attributes,
+) => {
+  const { level, message, ...attributes } = log;
+  const bodyMsg = isString(message) ? message : jsonToString(message);
+
+  let meta = attributes;
+
+  if (isPlainObject(message)) {
+    // FIXME: attributes conflict ??
+    meta = {
+      ...attributes,
+      ...(message as Attributes),
+    };
+  }
+
+  return {
+    level,
+    message: bodyMsg,
+    meta,
+  };
+};
+
 export type HyperDXWinstonOptions = LoggerOptions & {
-  apiKey: string;
+  apiKey?: string;
   maxLevel?: string;
   getCustomMeta?: () => Attributes;
 };
@@ -27,9 +54,11 @@ export default class HyperDXWinston extends Transport {
     super({ level: maxLevel ?? 'info' });
     this.getCustomMeta = getCustomMeta;
     this.logger = new Logger({
-      headers: {
-        Authorization: apiKey,
-      },
+      ...(apiKey && {
+        headers: {
+          Authorization: apiKey,
+        },
+      }),
       ...options,
     });
     hdx(`HyperDX winston transport initialized!`);

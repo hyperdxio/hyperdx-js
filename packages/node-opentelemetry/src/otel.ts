@@ -60,10 +60,7 @@ export const initSDK = (config: SDKConfig) => {
 
   hdx('Initializing OpenTelemetry SDK');
   const consoleInstrumentationEnabled = config.consoleCapture ?? true;
-  const apiKey =
-    env.HYPERDX_API_KEY ?? env.OTEL_EXPORTER_OTLP_HEADERS?.split('=')[1];
   hdxConsoleInstrumentation = new HyperDXConsoleInstrumentation({
-    apiKey,
     betaMode: config.betaMode,
     service: env.OTEL_SERVICE_NAME,
   });

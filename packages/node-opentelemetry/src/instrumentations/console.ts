@@ -1,11 +1,8 @@
 import * as shimmer from 'shimmer';
 import _ from 'lodash';
 import opentelemetry, { Attributes } from '@opentelemetry/api';
-import {
-  Logger,
-  LoggerOptions,
-  parseWinstonLog,
-} from '@hyperdx/node-logger/build/src/logger';
+import { Logger, LoggerOptions } from '@hyperdx/node-logger/build/src/logger';
+import { parseWinstonLog } from '@hyperdx/node-logger/build/src/winston';
 
 import hdx from '../debug';
 import { hyperDXGlobalContext } from '../context';

@@ -1,4 +1,3 @@
-import { isPlainObject, isString } from 'lodash';
 import stringifySafe from 'json-stringify-safe';
 import { Attributes, diag, DiagConsoleLogger } from '@opentelemetry/api';
 import { getEnvWithoutDefaults } from '@opentelemetry/core';
@@ -48,65 +47,13 @@ const DEFAULT_SERVICE_NAME = otelEnv.OTEL_SERVICE_NAME ?? defaultServiceName();
 
 const LOG_PREFIX = `⚠️  ${_LOG_PREFIX}`;
 
-export type PinoLogLine = {
-  level: number;
-  time: number;
-  pid: number;
-  hostname: string;
-  msg: string;
-} & Attributes;
-
-const jsonToString = (json) => {
+export const jsonToString = (json) => {
   try {
     return JSON.stringify(json);
   } catch (ex) {
     hdx(`Failed to stringify json. e = ${ex}`);
     return stringifySafe(json);
   }
-};
-
-export const parsePinoLog = (log: PinoLogLine) => {
-  const { level, msg, message, ...meta } = log;
-  const targetMessage = msg || message;
-  let bodyMsg = '';
-  if (targetMessage) {
-    bodyMsg = isString(targetMessage)
-      ? targetMessage
-      : jsonToString(targetMessage);
-  } else {
-    bodyMsg = jsonToString(log);
-  }
-  return {
-    level,
-    message: bodyMsg,
-    meta,
-  };
-};
-
-export const parseWinstonLog = (
-  log: {
-    message: string | Attributes;
-    level: string;
-  } & Attributes,
-) => {
-  const { level, message, ...attributes } = log;
-  const bodyMsg = isString(message) ? message : jsonToString(message);
-
-  let meta = attributes;
-
-  if (isPlainObject(message)) {
-    // FIXME: attributes conflict ??
-    meta = {
-      ...attributes,
-      ...(message as Attributes),
-    };
-  }
-
-  return {
-    level,
-    message: bodyMsg,
-    meta,
-  };
 };
 
 export type LoggerOptions = {
