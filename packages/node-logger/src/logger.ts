@@ -1,170 +1,172 @@
-import os from 'os';
-import { URL } from 'url';
+import stringifySafe from 'json-stringify-safe';
+import { Attributes, diag, DiagConsoleLogger } from '@opentelemetry/api';
+import { getEnvWithoutDefaults } from '@opentelemetry/core';
+import {
+  BatchLogRecordProcessor,
+  BufferConfig,
+  LoggerProvider,
+} from '@opentelemetry/sdk-logs';
+import { OTLPLogExporter } from '@opentelemetry/exporter-logs-otlp-http';
+import { Logger as OtelLogger, SeverityNumber } from '@opentelemetry/api-logs';
+import {
+  Resource,
+  defaultServiceName,
+  detectResourcesSync,
+  envDetectorSync,
+  hostDetectorSync,
+  osDetectorSync,
+  processDetector,
+} from '@opentelemetry/resources';
+import { SEMRESATTRS_SERVICE_NAME } from '@opentelemetry/semantic-conventions';
 
-import stripAnsi from 'strip-ansi';
-import { isPlainObject, isString } from 'lodash';
+import hdx, { LOG_PREFIX as _LOG_PREFIX } from './debug';
+import { version as PKG_VERSION } from '../package.json';
 
-import { ILogger, createLogger, jsonToString } from './_logger';
-import { LOG_PREFIX as _LOG_PREFIX } from './debug';
+const otelEnv = getEnvWithoutDefaults();
+
+// DEBUG otel modules
+if (otelEnv.OTEL_LOG_LEVEL) {
+  diag.setLogger(new DiagConsoleLogger(), {
+    logLevel: otelEnv.OTEL_LOG_LEVEL,
+  });
+}
+
+// TO EXTRACT ENV VARS [https://github.com/open-telemetry/opentelemetry-js/blob/3ab4f765d8d696327b7d139ae6a45e7bd7edd924/experimental/packages/sdk-logs/src/export/BatchLogRecordProcessorBase.ts#L50]
+// TO EXTRACT DEFAULTS [https://github.com/open-telemetry/opentelemetry-js/blob/3ab4f765d8d696327b7d139ae6a45e7bd7edd924/experimental/packages/sdk-logs/src/types.ts#L49]
+const DEFAULT_EXPORTER_BATCH_SIZE =
+  otelEnv.OTEL_BLRP_MAX_EXPORT_BATCH_SIZE ?? 512;
+const DEFAULT_EXPORTER_TIMEOUT_MS = otelEnv.OTEL_BLRP_EXPORT_TIMEOUT ?? 30000;
+const DEFAULT_MAX_QUEUE_SIZE = otelEnv.OTEL_BLRP_MAX_QUEUE_SIZE ?? 2048;
+const DEFAULT_OTEL_LOGS_EXPORTER_URL =
+  otelEnv.OTEL_EXPORTER_OTLP_LOGS_ENDPOINT ??
+  (otelEnv.OTEL_EXPORTER_OTLP_ENDPOINT
+    ? `${otelEnv.OTEL_EXPORTER_OTLP_ENDPOINT}/v1/logs`
+    : 'https://in-otel.hyperdx.io/v1/logs');
+const DEFAULT_SEND_INTERVAL_MS = otelEnv.OTEL_BLRP_SCHEDULE_DELAY ?? 5000;
+const DEFAULT_SERVICE_NAME = otelEnv.OTEL_SERVICE_NAME ?? defaultServiceName();
 
 const LOG_PREFIX = `⚠️  ${_LOG_PREFIX}`;
 
-// internal types
-export type HdxLog = {
-  b: string; // message body
-  h: string; // hostname
-  sn?: number;
-  st: string; // level in text
-  sv: string; // service name
-  ts: Date; // timestamp
+export const jsonToString = (json) => {
+  try {
+    return JSON.stringify(json);
+  } catch (ex) {
+    hdx(`Failed to stringify json. e = ${ex}`);
+    return stringifySafe(json);
+  }
 };
-
-export type PinoLogLine = {
-  level: number;
-  time: number;
-  pid: number;
-  hostname: string;
-  msg: string;
-};
-
-export const parsePinoLog = (log: PinoLogLine) => {
-  const { level, msg, ...meta } = log;
-  const bodyMsg = isString(msg) ? msg : jsonToString(log);
-  return {
-    level,
-    message: bodyMsg,
-    meta: log,
-  };
-};
-
-export const parseWinstonLog = (log: {
-  message: string | Record<string, any>;
-  level: string;
-}) => {
-  const level = log.level;
-  const bodyMsg = isString(log.message)
-    ? log.message
-    : jsonToString(log.message);
-
-  const meta = {
-    ...log,
-    ...(isPlainObject(log.message) && (log.message as Record<string, unknown>)), // spread the message if its object type
-  };
-
-  return {
-    level,
-    message: bodyMsg,
-    meta,
-  };
-};
-
-const DEFAULT_TIMEOUT = 30000;
 
 export type LoggerOptions = {
-  apiKey: string;
   baseUrl?: string;
   bufferSize?: number;
+  detectResources?: boolean;
+  headers?: Record<string, string>;
+  queueSize?: number;
+  resourceAttributes?: Attributes;
   sendIntervalMs?: number;
   service?: string;
   timeout?: number; // The read/write/connection timeout in milliseconds
 };
 
 export class Logger {
-  private readonly service: string;
+  private readonly logger: OtelLogger;
 
-  private readonly client: ILogger | null;
+  private readonly processor: BatchLogRecordProcessor;
 
   constructor({
-    apiKey,
     baseUrl,
     bufferSize,
+    detectResources,
+    headers,
+    queueSize,
+    resourceAttributes,
     sendIntervalMs,
     service,
     timeout,
-  }: {
-    apiKey: string;
-    baseUrl?: string;
-    bufferSize?: number;
-    sendIntervalMs?: number;
-    service?: string;
-    timeout?: number;
-  }) {
-    if (!apiKey) {
-      console.error(`${LOG_PREFIX} API key not found`);
-    }
+  }: LoggerOptions) {
     if (!service) {
-      console.warn(`${LOG_PREFIX} Service name not found. Use "default app"`);
-    }
-    this.service = service ?? 'default app';
-    let protocol;
-    let host;
-    let port;
-    if (baseUrl) {
-      const url = new URL(baseUrl);
-      protocol = url.protocol.replace(':', '');
-      host = url.hostname;
-      port = url.port;
       console.warn(
-        `${LOG_PREFIX} Sending logs to ${protocol}://${host}:${port} `,
+        `${LOG_PREFIX} Service name not found. Use "${DEFAULT_SERVICE_NAME}"`,
       );
     }
 
-    this.client = apiKey
-      ? createLogger({
-          bufferSize,
-          host,
-          port,
-          protocol,
-          sendIntervalMs,
-          timeout: timeout ?? DEFAULT_TIMEOUT,
-          token: apiKey,
-        })
-      : null;
-    if (this.client) {
-      console.log(`${LOG_PREFIX} started!`);
-    } else {
+    // sanity check bufferSize and queueSize
+    const maxExportBatchSize = bufferSize ?? DEFAULT_EXPORTER_BATCH_SIZE;
+    let maxQueueSize = queueSize ?? DEFAULT_MAX_QUEUE_SIZE;
+    if (maxExportBatchSize > maxQueueSize) {
       console.error(
-        `${LOG_PREFIX} failed to start! Please check your API key.`,
+        `${LOG_PREFIX} bufferSize must be smaller or equal to queueSize. Setting queueSize to ${maxExportBatchSize}`,
       );
+      maxQueueSize = maxExportBatchSize;
     }
+
+    const detectedResource = detectResourcesSync({
+      detectors: detectResources
+        ? [envDetectorSync, hostDetectorSync, osDetectorSync, processDetector]
+        : [],
+    });
+
+    const _url = baseUrl ?? DEFAULT_OTEL_LOGS_EXPORTER_URL;
+
+    console.warn(`${LOG_PREFIX} Sending logs to ${_url}`);
+
+    const exporter = new OTLPLogExporter({
+      url: _url,
+      ...(headers && { headers }),
+    });
+    this.processor = new BatchLogRecordProcessor(exporter, {
+      /** The maximum batch size of every export. It must be smaller or equal to
+       * maxQueueSize. The default value is 512. */
+      maxExportBatchSize,
+      scheduledDelayMillis: sendIntervalMs ?? DEFAULT_SEND_INTERVAL_MS,
+      exportTimeoutMillis: timeout ?? DEFAULT_EXPORTER_TIMEOUT_MS,
+      maxQueueSize,
+    });
+    const loggerProvider = new LoggerProvider({
+      resource: detectedResource.merge(
+        new Resource({
+          // TODO: should use otel semantic conventions
+          'hyperdx.distro.version': PKG_VERSION,
+          [SEMRESATTRS_SERVICE_NAME]: service ?? DEFAULT_SERVICE_NAME,
+          ...resourceAttributes,
+        }),
+      ),
+    });
+    loggerProvider.addLogRecordProcessor(this.processor);
+
+    this.logger = loggerProvider.getLogger('node-logger');
+    console.log(`${LOG_PREFIX} started!`);
   }
 
-  private parseTimestamp(meta: Record<string, any>): Date {
+  private parseTimestamp(meta: Attributes): Date {
     // pino
-    if (meta.time) {
-      return new Date(meta.time);
+    if (Number.isInteger(meta.time)) {
+      return new Date(meta.time as number);
     }
     // set to current time if not provided
     return new Date();
   }
 
-  private buildHdxLog(
-    level: string,
-    body: string,
-    meta: Record<string, any>,
-  ): HdxLog {
-    return {
-      b: stripAnsi(body),
-      h: os.hostname(),
-      sn: 0, // TODO: set up the correct number
-      st: stripAnsi(level),
-      sv: stripAnsi(this.service),
-      ts: this.parseTimestamp(meta),
-    };
+  shutdown() {
+    hdx('Shutting down HyperDX node logger...');
+    return this.processor.shutdown();
   }
 
-  sendAndClose(callback?: (error: Error, bulk: object) => void): void {
-    this.client?.sendAndClose(callback);
+  forceFlush() {
+    hdx('Forcing flush of HyperDX node logger...');
+    return this.processor.forceFlush();
   }
 
-  postMessage(
-    level: string,
-    body: string,
-    meta: Record<string, any> = {},
-  ): void {
-    this.client?.log({
-      ...meta,
-      __hdx: this.buildHdxLog(level, body, meta),
+  postMessage(level: string, body: string, attributes: Attributes = {}): void {
+    hdx('Emitting log from HyperDX node logger...');
+    this.logger.emit({
+      // TODO: should map to otel severity number
+      severityNumber: 0,
+      // TODO: set up the mapping between different downstream log levels
+      severityText: level,
+      body,
+      attributes,
+      timestamp: this.parseTimestamp(attributes),
     });
   }
 }

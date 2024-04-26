@@ -1,9 +1,37 @@
 import build from 'pino-abstract-transport';
+import isString from 'lodash.isstring';
+import { Attributes } from '@opentelemetry/api';
 
 import hdx from './debug';
-import { Logger, parsePinoLog } from './logger';
+import { Logger, jsonToString } from './logger';
 
 import type { LoggerOptions } from './logger';
+
+export type PinoLogLine = {
+  level: number;
+  time: number;
+  pid: number;
+  hostname: string;
+  msg: string;
+} & Attributes;
+
+export const parsePinoLog = (log: PinoLogLine) => {
+  const { level, msg, message, ...meta } = log;
+  const targetMessage = msg || message;
+  let bodyMsg = '';
+  if (targetMessage) {
+    bodyMsg = isString(targetMessage)
+      ? targetMessage
+      : jsonToString(targetMessage);
+  } else {
+    bodyMsg = jsonToString(log);
+  }
+  return {
+    level,
+    message: bodyMsg,
+    meta,
+  };
+};
 
 // map pino level to text
 const PINO_LEVELS = {
@@ -16,13 +44,21 @@ const PINO_LEVELS = {
 };
 
 export type HyperDXPinoOptions = LoggerOptions & {
-  getCustomMeta?: () => Record<string, any>;
+  apiKey?: string;
+  getCustomMeta?: () => Attributes;
 };
 
-export default (opts: HyperDXPinoOptions) => {
+export default ({ apiKey, getCustomMeta, ...options }: HyperDXPinoOptions) => {
   try {
     hdx('Initializing HyperDX pino transport...');
-    const logger = new Logger(opts);
+    const logger = new Logger({
+      ...(apiKey && {
+        headers: {
+          Authorization: apiKey,
+        },
+      }),
+      ...options,
+    });
     hdx(`HyperDX pino transport initialized!`);
     return build(
       async function (source) {
@@ -30,7 +66,7 @@ export default (opts: HyperDXPinoOptions) => {
           const { level, message, meta } = parsePinoLog(obj);
           hdx('Sending log to HyperDX');
           logger.postMessage(PINO_LEVELS[level], message, {
-            ...opts.getCustomMeta?.(),
+            ...getCustomMeta?.(),
             ...meta,
           });
           hdx('Log sent to HyperDX');
@@ -39,16 +75,8 @@ export default (opts: HyperDXPinoOptions) => {
       {
         async close(err) {
           hdx('Sending and closing HyperDX pino transport...');
-          await new Promise<void>((resolve, reject) =>
-            logger.sendAndClose((_err) => {
-              if (_err) {
-                reject(_err);
-                return;
-              }
-              hdx('HyperDX pino transport closed!');
-              resolve();
-            }),
-          );
+          await logger.shutdown();
+          hdx('HyperDX pino transport closed!');
         },
       },
     );

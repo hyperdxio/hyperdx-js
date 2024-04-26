@@ -1,5 +1,5 @@
 const express = require('express');
-const PORT = parseInt(process.env.PORT || '7777');
+const PORT = parseInt(process.env.PORT || '7788');
 const winston = require('winston');
 const pino = require('pino');
 const app = express();
@@ -10,12 +10,17 @@ const { HyperDXWinston } = require('./build/src');
 // RANDOM API KEY
 const HDX_API_KEY = '<KEY1>';
 const HDX_API_KEY2 = '<KEY2>';
-const HDX_API_URL = 'http://localhost:8002';
+const HDX_API_URL = 'http://localhost:4318/v1/logs';
+const DETECT_RESOURCES = false;
 
 const logger = new Logger({
-  apiKey: HDX_API_KEY,
+  headers: {
+    Authorization: HDX_API_KEY,
+  },
   baseUrl: HDX_API_URL,
   service: 'native',
+  bufferSize: 100,
+  queueSize: 10,
 });
 
 const winstonLogger = winston.createLogger({
@@ -24,6 +29,7 @@ const winstonLogger = winston.createLogger({
   transports: [
     new winston.transports.Console(),
     new HyperDXWinston({
+      detectResources: DETECT_RESOURCES,
       apiKey: HDX_API_KEY,
       maxLevel: 'info',
       service: 'winston',
@@ -38,6 +44,7 @@ const winstonLogger2 = winston.createLogger({
   transports: [
     new winston.transports.Console(),
     new HyperDXWinston({
+      detectResources: DETECT_RESOURCES,
       apiKey: HDX_API_KEY2,
       maxLevel: 'info',
       service: 'winston',
@@ -52,6 +59,7 @@ const pinoLogger = pino(
       {
         target: './build/src/pino',
         options: {
+          detectResources: DETECT_RESOURCES,
           apiKey: HDX_API_KEY,
           service: 'pino',
           baseUrl: HDX_API_URL,
@@ -67,15 +75,35 @@ app.get('/', (req, res) => {
     headers: req.headers,
     method: req.method,
     url: req.url,
-    query: req.query,
+    query: {
+      foo: {
+        bar: {
+          baz: 'qux',
+        },
+      },
+    },
   });
-  winstonLogger.info('🍕');
-  winstonLogger.error({
+  winstonLogger.info('🍕', {
     message: 'BANG !!!',
-    headers: req.headers,
+    foo: 'bar',
   });
-  winstonLogger2.info('🤯🤯🤯');
-  pinoLogger.info('🍕');
+  winstonLogger.info('🍕', {
+    foo: 'bar',
+  });
+  winstonLogger.info(
+    {
+      foo: 'bar',
+    },
+    {
+      foo1: 'bar1',
+    },
+  );
+  pinoLogger.error('🍕');
+  pinoLogger.error({
+    pizza: '🍕',
+    message: 'BANG !!!',
+    foo: 'bar',
+  });
   res.send('Hello World');
 });
 
