@@ -1,5 +1,16 @@
 # @hyperdx/node-opentelemetry
 
+## 0.7.0-next.0
+
+### Minor Changes
+
+- 43aab55: feat + migration: Use Otel logs module
+
+### Patch Changes
+
+- Updated dependencies [43aab55]
+  - @hyperdx/node-logger@0.4.0-next.0
+
 ## 0.6.2
 
 ### Patch Changes

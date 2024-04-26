@@ -1,5 +1,11 @@
 # @hyperdx/node-logger
 
+## 0.4.0-next.0
+
+### Minor Changes
+
+- 43aab55: feat + migration: Use Otel logs module
+
 ## 0.3.2
 
 ### Patch Changes
