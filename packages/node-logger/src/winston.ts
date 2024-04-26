@@ -28,6 +28,10 @@ export default class HyperDXWinston extends Transport {
     info: { message: string | Attributes; level: string } & Attributes,
     callback: () => void,
   ) {
+    setImmediate(() => {
+      this.emit('logged', info);
+    });
+
     hdx('Received log from winston');
     setImmediate(() => {
       this.emit('logged', info);
@@ -40,6 +44,7 @@ export default class HyperDXWinston extends Transport {
       ...meta,
     });
     hdx('Log sent to HyperDX');
+
     callback();
   }
 
