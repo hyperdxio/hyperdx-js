@@ -25,7 +25,9 @@ const logger = winston.createLogger({
   level: 'info',
   format: winston.format.json(),
   transports: [
-    getWinstonTransport('info'), // append this to the existing transports
+    getWinstonTransport('info', {
+      detectResources: true,
+    }), // append this to the existing transports
   ],
 });
 
