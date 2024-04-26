@@ -1,6 +1,7 @@
 import { isPlainObject, isString } from 'lodash';
 import stringifySafe from 'json-stringify-safe';
 import { Attributes } from '@opentelemetry/api';
+import { getEnv } from '@opentelemetry/core';
 import {
   BatchLogRecordProcessor,
   BufferConfig,
@@ -22,16 +23,20 @@ import { SEMRESATTRS_SERVICE_NAME } from '@opentelemetry/semantic-conventions';
 import hdx, { LOG_PREFIX as _LOG_PREFIX } from './debug';
 import { version as PKG_VERSION } from '../package.json';
 
-const DEFAULT_EXPORTER_BATCH_SIZE = 512;
-const DEFAULT_EXPORTER_TIMEOUT_MS = 30000;
-const DEFAULT_MAX_QUEUE_SIZE = 2048;
+const otelEnv = getEnv();
+
+// TO EXTRACT ENV VARS [https://github.com/open-telemetry/opentelemetry-js/blob/3ab4f765d8d696327b7d139ae6a45e7bd7edd924/experimental/packages/sdk-logs/src/export/BatchLogRecordProcessorBase.ts#L50]
+// TO EXTRACT DEFAULTS [https://github.com/open-telemetry/opentelemetry-js/blob/3ab4f765d8d696327b7d139ae6a45e7bd7edd924/experimental/packages/sdk-logs/src/types.ts#L49]
+const DEFAULT_EXPORTER_BATCH_SIZE =
+  otelEnv.OTEL_BLRP_MAX_EXPORT_BATCH_SIZE ?? 512;
+const DEFAULT_EXPORTER_TIMEOUT_MS = otelEnv.OTEL_BLRP_EXPORT_TIMEOUT ?? 30000;
+const DEFAULT_MAX_QUEUE_SIZE = otelEnv.OTEL_BLRP_MAX_QUEUE_SIZE ?? 2048;
 const DEFAULT_OTEL_LOGS_EXPORTER_URL =
-  process.env.OTEL_EXPORTER_OTLP_LOGS_ENDPOINT ??
-  `${process.env.OTEL_EXPORTER_OTLP_ENDPOINT}/v1/logs` ??
+  otelEnv.OTEL_EXPORTER_OTLP_LOGS_ENDPOINT ??
+  `${otelEnv.OTEL_EXPORTER_OTLP_ENDPOINT}/v1/logs` ??
   'https://in-otel.hyperdx.io/v1/logs';
-const DEFAULT_SEND_INTERVAL_MS = 5000;
-const DEFAULT_SERVICE_NAME =
-  process.env.OTEL_SERVICE_NAME ?? defaultServiceName();
+const DEFAULT_SEND_INTERVAL_MS = otelEnv.OTEL_BLRP_SCHEDULE_DELAY ?? 5000;
+const DEFAULT_SERVICE_NAME = otelEnv.OTEL_SERVICE_NAME ?? defaultServiceName();
 
 const LOG_PREFIX = `⚠️  ${_LOG_PREFIX}`;
 
