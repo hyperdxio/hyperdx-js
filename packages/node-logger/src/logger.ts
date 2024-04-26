@@ -1,6 +1,6 @@
 import { isPlainObject, isString } from 'lodash';
 import stringifySafe from 'json-stringify-safe';
-import { Attributes } from '@opentelemetry/api';
+import { Attributes, diag, DiagConsoleLogger } from '@opentelemetry/api';
 import { getEnvWithoutDefaults } from '@opentelemetry/core';
 import {
   BatchLogRecordProcessor,
@@ -24,6 +24,13 @@ import hdx, { LOG_PREFIX as _LOG_PREFIX } from './debug';
 import { version as PKG_VERSION } from '../package.json';
 
 const otelEnv = getEnvWithoutDefaults();
+
+// DEBUG otel modules
+if (otelEnv.OTEL_LOG_LEVEL) {
+  diag.setLogger(new DiagConsoleLogger(), {
+    logLevel: otelEnv.OTEL_LOG_LEVEL,
+  });
+}
 
 // TO EXTRACT ENV VARS [https://github.com/open-telemetry/opentelemetry-js/blob/3ab4f765d8d696327b7d139ae6a45e7bd7edd924/experimental/packages/sdk-logs/src/export/BatchLogRecordProcessorBase.ts#L50]
 // TO EXTRACT DEFAULTS [https://github.com/open-telemetry/opentelemetry-js/blob/3ab4f765d8d696327b7d139ae6a45e7bd7edd924/experimental/packages/sdk-logs/src/types.ts#L49]
