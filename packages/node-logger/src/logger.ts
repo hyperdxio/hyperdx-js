@@ -187,7 +187,6 @@ export class Logger {
         new Resource({
           // TODO: should use otel semantic conventions
           'hyperdx.distro.version': PKG_VERSION,
-          'hyperdx.distro.runtime_version': process.versions.node,
           [SEMRESATTRS_SERVICE_NAME]: service ?? DEFAULT_SERVICE_NAME,
           ...resourceAttributes,
         }),
@@ -227,6 +226,7 @@ export class Logger {
   postMessage(level: string, body: string, attributes: Attributes = {}): void {
     hdx('Emitting log from HyperDX node logger...');
     this.logger?.emit({
+      // TODO: should map to otel severity number
       severityNumber: 0,
       // TODO: set up the mapping between different downstream log levels
       severityText: level,
