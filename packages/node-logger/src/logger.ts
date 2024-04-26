@@ -69,7 +69,7 @@ export type LoggerOptions = {
 };
 
 export class Logger {
-  private readonly logger: OtelLogger | undefined;
+  private readonly logger: OtelLogger;
 
   private readonly processor: BatchLogRecordProcessor;
 
@@ -159,7 +159,7 @@ export class Logger {
 
   postMessage(level: string, body: string, attributes: Attributes = {}): void {
     hdx('Emitting log from HyperDX node logger...');
-    this.logger?.emit({
+    this.logger.emit({
       // TODO: should map to otel severity number
       severityNumber: 0,
       // TODO: set up the mapping between different downstream log levels
