@@ -1,5 +1,13 @@
 # @hyperdx/node-opentelemetry
 
+## 0.7.0-next.2
+
+### Patch Changes
+
+- fix: adjust logs default send interval
+- Updated dependencies
+  - @hyperdx/node-logger@0.4.0-next.1
+
 ## 0.7.0-next.1
 
 ### Patch Changes

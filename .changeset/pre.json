@@ -7,5 +7,9 @@
     "@hyperdx/node-logger": "0.3.2",
     "@hyperdx/node-opentelemetry": "0.6.2"
   },
-  "changesets": ["lazy-donuts-judge", "popular-apes-admire"]
+  "changesets": [
+    "cuddly-swans-remember",
+    "lazy-donuts-judge",
+    "popular-apes-admire"
+  ]
 }

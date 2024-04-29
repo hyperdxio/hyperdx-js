@@ -42,7 +42,7 @@ const DEFAULT_OTEL_LOGS_EXPORTER_URL =
   (otelEnv.OTEL_EXPORTER_OTLP_ENDPOINT
     ? `${otelEnv.OTEL_EXPORTER_OTLP_ENDPOINT}/v1/logs`
     : 'https://in-otel.hyperdx.io/v1/logs');
-const DEFAULT_SEND_INTERVAL_MS = otelEnv.OTEL_BLRP_SCHEDULE_DELAY ?? 5000;
+const DEFAULT_SEND_INTERVAL_MS = otelEnv.OTEL_BLRP_SCHEDULE_DELAY ?? 2000;
 const DEFAULT_SERVICE_NAME = otelEnv.OTEL_SERVICE_NAME ?? defaultServiceName();
 
 const LOG_PREFIX = `⚠️  ${_LOG_PREFIX}`;

@@ -1,5 +1,11 @@
 # @hyperdx/node-logger
 
+## 0.4.0-next.1
+
+### Patch Changes
+
+- fix: adjust logs default send interval
+
 ## 0.4.0-next.0
 
 ### Minor Changes
