@@ -3,9 +3,8 @@ import isString from 'lodash.isstring';
 import { Attributes } from '@opentelemetry/api';
 
 import hdx from './debug';
-import { Logger, jsonToString } from './logger';
-
-import type { LoggerOptions } from './logger';
+import { Logger, jsonToString } from '@hyperdx/node-logger/build/src/logger';
+import type { LoggerOptions } from '@hyperdx/node-logger/build/src/logger';
 
 export type PinoLogLine = {
   level: number;

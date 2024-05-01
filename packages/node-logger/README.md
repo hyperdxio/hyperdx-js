@@ -59,40 +59,6 @@ export default logger;
 - **bufferSize** - The maximum number of messages the logger will accumulate before sending them all as a bulk. Default: `100`.
 - **timeout** - The read/write/connection timeout in milliseconds. Default: `30000`.
 
-### Pino Transport
-
-Create a new HyperDX Pino Transport and append it to your list of transports. Example:
-
-```
-import pino from 'pino';
-
-const logger = pino(
-  pino.transport({
-    targets: [
-      {
-        target: '@hyperdx/node-logger/build/src/pino',
-        options: {
-          apiKey: ***HYPERDX_API_KEY***,
-          service: 'my-app',
-        },
-        level: 'info',
-      },
-      // other transports
-    ],
-  }),
-);
-
-export default logger;
-```
-
-#### Options
-
-- **apiKey** - Required. Your HyperDX ingestion API key.
-- **service** - The name of the service.
-- **sendIntervalMs** - Time in milliseconds to wait between retry attempts. Default: `2000` (2 sec)
-- **bufferSize** - The maximum number of messages the logger will accumulate before sending them all as a bulk. Default: `100`.
-- **timeout** - The read/write/connection timeout in milliseconds. Default: `30000`.
-
 ### NestJS Custom Logger
 
 (powered by [nest-winston](https://www.npmjs.com/package/nest-winston?activeTab=readme))

@@ -1,7 +1,6 @@
 const express = require('express');
 const PORT = parseInt(process.env.PORT || '7788');
 const winston = require('winston');
-const pino = require('pino');
 const app = express();
 
 const { Logger } = require('./build/src/logger');
@@ -53,23 +52,6 @@ const winstonLogger2 = winston.createLogger({
   ],
 });
 
-const pinoLogger = pino(
-  pino.transport({
-    targets: [
-      {
-        target: './build/src/pino',
-        options: {
-          detectResources: DETECT_RESOURCES,
-          apiKey: HDX_API_KEY,
-          service: 'pino',
-          baseUrl: HDX_API_URL,
-        },
-        level: 'info',
-      },
-    ],
-  }),
-);
-
 app.get('/', (req, res) => {
   logger.postMessage('info', 'body message', {
     headers: req.headers,
@@ -98,12 +80,6 @@ app.get('/', (req, res) => {
       foo1: 'bar1',
     },
   );
-  pinoLogger.error('🍕');
-  pinoLogger.error({
-    pizza: '🍕',
-    message: 'BANG !!!',
-    foo: 'bar',
-  });
   res.send('Hello World');
 });
 

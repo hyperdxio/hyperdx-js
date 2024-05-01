@@ -1,8 +1,8 @@
 {
-  "name": "@hyperdx/node-logger",
+  "name": "@hyperdx/otel-pino-transport",
   "author": "Warren <warren@users.noreply.github.com>",
   "license": "MIT",
-  "version": "0.4.0",
+  "version": "0.0.0",
   "description": "",
   "homepage": "https://www.hyperdx.io",
   "repository": {
@@ -30,30 +30,18 @@
     "prettier": "prettier --config .prettierrc --write ."
   },
   "dependencies": {
-    "@nestjs/common": "^9.4.2",
-    "@opentelemetry/api-logs": "~0.51.0",
-    "@opentelemetry/core": "~1.24.0",
-    "@opentelemetry/exporter-logs-otlp-http": "~0.51.0",
-    "@opentelemetry/resources": "~1.24.0",
-    "@opentelemetry/sdk-logs": "~0.51.0",
-    "@opentelemetry/semantic-conventions": "~1.24.0",
+    "@hyperdx/node-logger": "~0.4.0-next.1",
     "debug": "^4.3.4",
-    "json-stringify-safe": "^5.0.1",
-    "lodash.isplainobject": "^4.0.6",
     "lodash.isstring": "^4.0.1",
-    "nest-winston": "^1.9.2",
-    "reflect-metadata": "^0.1.13",
-    "rxjs": "^7.8.1",
-    "tslib": "^2.5.3",
-    "winston": "^3.9.0",
-    "winston-transport": "^4.7.0"
+    "pino-abstract-transport": "^1.0.0"
   },
   "devDependencies": {},
   "peerDependencies": {},
   "keywords": [
-    "winston",
+    "pino",
+    "opentelemetry",
+    "otel",
     "transport",
-    "nest",
     "logging"
   ]
 }
