@@ -1,11 +1,8 @@
 import path from 'path';
 
 import pino from 'pino';
-import winston from 'winston';
 
-import { HyperDXWinston } from '../src';
-
-const target = path.resolve('build/src/pino.js');
+const target = path.resolve('build/src/index.js');
 
 const HYPERDX_API_KEY = 'b0451b4a-da1a-4a6e-8055-db224498be0b';
 const SERVICE_NAME = 'test-jest';
@@ -34,26 +31,5 @@ describe('Logger', () => {
     });
     logger.warn('Hello Pino! 🍕🍕🍕');
     logger.error('Hello Pino! 🍕🍕🍕');
-  });
-
-  it('winston', () => {
-    const MAX_LEVEL = 'info';
-    const logger = winston.createLogger({
-      level: MAX_LEVEL,
-      format: winston.format.json(),
-      transports: [
-        new winston.transports.Console(),
-        new HyperDXWinston({
-          apiKey: HYPERDX_API_KEY,
-          baseUrl: HYPERDX_BASE_URL,
-          maxLevel: MAX_LEVEL,
-          service: SERVICE_NAME,
-        }),
-      ],
-    });
-
-    logger.info({
-      message: 'Hello Winston! 🍕🍕🍕',
-    });
   });
 });
