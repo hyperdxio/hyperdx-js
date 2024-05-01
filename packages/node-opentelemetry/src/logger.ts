@@ -1,9 +1,8 @@
 import opentelemetry from '@opentelemetry/api';
 
-import HyperDXWinston from '@hyperdx/node-logger/build/src/winston';
-
-import type { HyperDXPinoOptions } from '@hyperdx/node-logger/build/src/pino';
-import type { HyperDXWinstonOptions } from '@hyperdx/node-logger/build/src/winston';
+import HyperDXWinston from '@hyperdx/otel-winston-transport';
+import type { HyperDXWinstonOptions } from '@hyperdx/otel-winston-transport';
+import type { HyperDXPinoOptions } from '@hyperdx/otel-pino-transport';
 
 import hdx from './debug';
 import { hyperDXGlobalContext } from './context';

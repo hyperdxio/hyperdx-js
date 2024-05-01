@@ -24,41 +24,6 @@ HyperDX and visiting your team page:
 [https://hyperdx.io/team](https://www.hyperdx.io/team).
 This key is necessary for sending logs to your account.
 
-### Winston Transport
-
-Create a new HyperDX Winston Transport and append it to your list of transports. Example:
-
-```
-import winston from 'winston';
-import { HyperDXWinston } from '@hyperdx/node-logger';
-
-const hyperdxTransport = new HyperDXWinston({
-  apiKey: ***HYPERDX_API_KEY***,
-  maxLevel: 'info',
-  service: 'my-app',
-});
-
-
-const logger = winston.createLogger({
-  level: 'info',
-  format: winston.format.json(),
-  transports: [
-    new winston.transports.Console(),
-    hyperdxTransport, // append this to the existing transports
-  ],
-});
-
-export default logger;
-```
-
-#### Options
-
-- **apiKey** - Required. Your HyperDX ingestion API key.
-- **service** - The name of the service.
-- **sendIntervalMs** - Time in milliseconds to wait between retry attempts. Default: `2000` (2 sec)
-- **bufferSize** - The maximum number of messages the logger will accumulate before sending them all as a bulk. Default: `100`.
-- **timeout** - The read/write/connection timeout in milliseconds. Default: `30000`.
-
 ### NestJS Custom Logger
 
 (powered by [nest-winston](https://www.npmjs.com/package/nest-winston?activeTab=readme))

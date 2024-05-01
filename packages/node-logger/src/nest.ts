@@ -4,8 +4,7 @@ import {
   WINSTON_MODULE_PROVIDER,
   WinstonModule,
 } from 'nest-winston';
-
-import HyperDXWinston from './winston';
+import HyperDXWinston from '@hyperdx/otel-winston-transport';
 
 type HyperDXNestLoggerModuleConfigs = {
   apiKey: string;
