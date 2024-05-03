@@ -1,5 +1,11 @@
 # @hyperdx/node-opentelemetry
 
+## 0.7.0-next.3
+
+### Minor Changes
+
+- 26396ee: chore: bump otel deps + uninstall hdx node-logger
+
 ## 0.7.0-next.2
 
 ### Patch Changes

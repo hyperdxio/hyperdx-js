@@ -8,6 +8,7 @@
     "@hyperdx/node-opentelemetry": "0.6.2"
   },
   "changesets": [
+    "brown-apples-attack",
     "cuddly-swans-remember",
     "lazy-donuts-judge",
     "popular-apes-admire"
