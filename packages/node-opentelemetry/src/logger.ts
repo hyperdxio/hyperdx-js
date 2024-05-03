@@ -1,9 +1,9 @@
 import opentelemetry from '@opentelemetry/api';
 
-import HyperDXWinston from '@hyperdx/node-logger/build/src/winston';
+import HyperDXWinston from './otel-logger/winston';
 
-import type { HyperDXPinoOptions } from '@hyperdx/node-logger/build/src/pino';
-import type { HyperDXWinstonOptions } from '@hyperdx/node-logger/build/src/winston';
+import type { HyperDXPinoOptions } from './otel-logger/pino';
+import type { HyperDXWinstonOptions } from './otel-logger/winston';
 
 import hdx from './debug';
 import { hyperDXGlobalContext } from './context';
@@ -54,7 +54,7 @@ export const getPinoTransport = (
   maxLevel = 'info',
   options: PinotTransportOptions = {},
 ) => ({
-  target: '@hyperdx/node-logger/build/src/pino',
+  target: '@hyperdx/node-opentelemetry/build/src/otel-logger/pino',
   options: {
     ...(HYPERDX_API_KEY && { apiKey: HYPERDX_API_KEY }),
     service: SERVICE_NAME,

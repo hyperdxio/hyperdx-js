@@ -2,8 +2,8 @@ import * as shimmer from 'shimmer';
 import isObject from 'lodash.isobject';
 import isPlainObject from 'lodash.isplainobject';
 import opentelemetry, { Attributes } from '@opentelemetry/api';
-import { Logger, LoggerOptions } from '@hyperdx/node-logger/build/src/logger';
-import { parseWinstonLog } from '@hyperdx/node-logger/build/src/winston';
+import { Logger, LoggerOptions } from '../otel-logger';
+import { parseWinstonLog } from '../otel-logger/winston';
 
 import hdx from '../debug';
 import { hyperDXGlobalContext } from '../context';
