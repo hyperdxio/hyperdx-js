@@ -164,7 +164,7 @@ export const initSDK = (config: SDKConfig) => {
     }
   } else {
     console.warn(
-      `${LOG_PREFIX} OTEL_EXPORTER_OTLP_ENDPOINT and OTEL_EXPORTER_OTLP_HEADERS are not set, tracing is disabled`,
+      `${LOG_PREFIX} HYPERDX_API_KEY or OTEL_EXPORTER_OTLP_HEADERS is not set, tracing is disabled`,
     );
   }
 
