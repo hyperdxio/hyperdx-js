@@ -1,3 +1,4 @@
+import { DiagLogLevel } from '@opentelemetry/api';
 import { InstrumentationBase } from '@opentelemetry/instrumentation';
 import { NodeSDK } from '@opentelemetry/sdk-node';
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-proto';
@@ -9,10 +10,7 @@ import {
 
 import HyperDXConsoleInstrumentation from './instrumentations/console';
 import HyperDXSpanProcessor from './spanProcessor';
-import hdx, {
-  HDX_DEBUG_MODE_ENABLED,
-  LOG_PREFIX as _LOG_PREFIX,
-} from './debug';
+import hdx, { LOG_PREFIX as _LOG_PREFIX } from './debug';
 import { getHyperDXHTTPInstrumentationConfig } from './instrumentations/http';
 import {
   DEFAULT_OTEL_EXPORTER_OTLP_TRACES_TIMEOUT,
@@ -44,7 +42,6 @@ export const setTraceAttributes = hyperDXGlobalContext.setTraceAttributes;
 const setOtelEnvs = () => {
   // set default otel env vars
   env.OTEL_NODE_RESOURCE_DETECTORS = env.OTEL_NODE_RESOURCE_DETECTORS ?? 'all';
-  env.OTEL_LOG_LEVEL = DEFAULT_OTEL_LOG_LEVEL;
   env.OTEL_TRACES_SAMPLER = DEFAULT_OTEL_TRACES_SAMPLER;
   env.OTEL_TRACES_SAMPLER_ARG = DEFAULT_OTEL_TRACES_SAMPLER_ARG;
 };
@@ -69,7 +66,7 @@ export const initSDK = (config: SDKConfig) => {
 
   hdx('Initializing OpenTelemetry SDK');
   let consoleInstrumentationEnabled = config.consoleCapture ?? true;
-  if (DEFAULT_OTEL_LOG_LEVEL.toLowerCase() === 'debug') {
+  if (DEFAULT_OTEL_LOG_LEVEL === DiagLogLevel.DEBUG) {
     // FIXME: better to disable console instrumentation if otel log is enabled
     consoleInstrumentationEnabled = false;
     console.warn(

@@ -1,13 +1,11 @@
 import stringifySafe from 'json-stringify-safe';
-import { Attributes, diag, DiagConsoleLogger } from '@opentelemetry/api';
-import { getEnvWithoutDefaults } from '@opentelemetry/core';
+import { Attributes } from '@opentelemetry/api';
 import {
   BatchLogRecordProcessor,
-  BufferConfig,
   LoggerProvider,
 } from '@opentelemetry/sdk-logs';
-import { OTLPLogExporter } from '@opentelemetry/exporter-logs-otlp-http';
 import { Logger as OtelLogger } from '@opentelemetry/api-logs';
+import { OTLPLogExporter } from '@opentelemetry/exporter-logs-otlp-http';
 import {
   Resource,
   detectResourcesSync,
@@ -28,15 +26,6 @@ import {
 } from '../constants';
 import hdx, { LOG_PREFIX as _LOG_PREFIX } from '../debug';
 import { version as PKG_VERSION } from '../../package.json';
-
-const otelEnv = getEnvWithoutDefaults();
-
-// DEBUG otel modules
-if (otelEnv.OTEL_LOG_LEVEL) {
-  diag.setLogger(new DiagConsoleLogger(), {
-    logLevel: otelEnv.OTEL_LOG_LEVEL,
-  });
-}
 
 const LOG_PREFIX = `⚠️  ${_LOG_PREFIX}`;
 

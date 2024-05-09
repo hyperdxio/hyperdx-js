@@ -8,7 +8,6 @@ const winston = require('winston');
 const {
   getPinoTransport,
   getWinstonTransport,
-  init,
 } = require('../build/src/logger');
 const { setTraceAttributes } = require('../build/src');
 // const { shutdown } = require('@hyperdx/node-opentelemetry');
@@ -31,7 +30,14 @@ const logger = winston.createLogger({
   ],
 });
 
-const pinoLogger = pino();
+const pinoLogger = pino(
+  pino.transport({
+    targets: [
+      getPinoTransport('info'),
+      // other transports
+    ],
+  }),
+);
 
 async function sendGetRequest() {
   const postData = JSON.stringify({

@@ -34,6 +34,4 @@ export const DEFAULT_OTEL_TRACES_SAMPLER_ARG =
   otelEnv.OTEL_TRACES_SAMPLER_ARG ?? '1';
 export const DEFAULT_OTEL_EXPORTER_OTLP_TRACES_TIMEOUT =
   otelEnv.OTEL_EXPORTER_OTLP_TRACES_TIMEOUT ?? 60000;
-export const DEFAULT_OTEL_LOG_LEVEL =
-  (otelEnv.OTEL_LOG_LEVEL as unknown as string | undefined) ?? // need to be string not number bruh...
-  (HDX_DEBUG_MODE_ENABLED ? 'debug' : 'none');
+export const DEFAULT_OTEL_LOG_LEVEL = otelEnv.OTEL_LOG_LEVEL;
