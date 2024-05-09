@@ -68,7 +68,15 @@ export const initSDK = (config: SDKConfig) => {
   }
 
   hdx('Initializing OpenTelemetry SDK');
-  const consoleInstrumentationEnabled = config.consoleCapture ?? true;
+  let consoleInstrumentationEnabled = config.consoleCapture ?? true;
+  if (DEFAULT_OTEL_LOG_LEVEL.toLowerCase() === 'debug') {
+    // FIXME: better to disable console instrumentation if otel log is enabled
+    consoleInstrumentationEnabled = false;
+    console.warn(
+      `${LOG_PREFIX} OTEL_LOG_LEVEL is set to 'debug', disabling console instrumentation`,
+    );
+  }
+
   hdxConsoleInstrumentation = new HyperDXConsoleInstrumentation({
     baseUrl: DEFAULT_OTEL_LOGS_EXPORTER_URL,
     betaMode: config.betaMode,
