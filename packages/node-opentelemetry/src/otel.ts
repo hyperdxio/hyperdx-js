@@ -22,6 +22,7 @@ import {
   DEFAULT_OTEL_LOG_LEVEL,
 } from './constants';
 import { hyperDXGlobalContext } from './context';
+import { initSDK as initSentrySDK } from './sentry/node';
 import { version as PKG_VERSION } from '../package.json';
 
 const LOG_PREFIX = `⚠️  ${_LOG_PREFIX}`;
@@ -188,6 +189,11 @@ export const initSDK = (config: SDKConfig) => {
       handleTerminationSignal('SIGINT');
     });
   }
+
+  hdx('Initializing Sentry SDK');
+  setTimeout(() => {
+    initSentrySDK();
+  }, 1000);
 };
 
 const _shutdown = () => {

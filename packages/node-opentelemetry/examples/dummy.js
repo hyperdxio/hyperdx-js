@@ -4,6 +4,7 @@ const express = require('express');
 const http = require('http');
 const pino = require('pino');
 const winston = require('winston');
+const Sentry = require('@sentry/node');
 
 const {
   getPinoTransport,
@@ -16,6 +17,10 @@ const { setTraceAttributes } = require('../build/src');
 //   await shutdown();
 //   process.exit(0);
 // });
+
+Sentry.init({
+  dsn: '',
+});
 
 const PORT = parseInt(process.env.PORT || '7788');
 const app = express();
@@ -88,6 +93,8 @@ function generateRandomString(length) {
   return result;
 }
 
+app.use(Sentry.Handlers.requestHandler());
+
 app.use(compression());
 
 // set custom trace attributes
@@ -131,6 +138,12 @@ app.get('/', async (req, res) => {
     random: generateRandomString(8),
   });
 });
+
+app.get('/error', (req, res) => {
+  throw new Error('This is a test error');
+});
+
+app.use(Sentry.Handlers.errorHandler());
 
 app.listen(PORT, () => {
   console.log(`Listening for requests on http://localhost:${PORT}`);
