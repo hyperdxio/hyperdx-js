@@ -5,6 +5,7 @@ import HyperDXWinston from './otel-logger/winston';
 import type { HyperDXPinoOptions } from './otel-logger/pino';
 import type { HyperDXWinstonOptions } from './otel-logger/winston';
 
+import { DEFAULT_SERVICE_NAME } from './constants';
 import hdx from './debug';
 import { hyperDXGlobalContext } from './context';
 import { stringToBoolean } from './utils';
@@ -12,8 +13,6 @@ import { stringToBoolean } from './utils';
 const env = process.env;
 
 const HYPERDX_API_KEY = env.HYPERDX_API_KEY;
-
-const SERVICE_NAME = env.OTEL_SERVICE_NAME as string;
 
 const BETA_MODE = stringToBoolean(env.HDX_NODE_BETA_MODE);
 
@@ -39,9 +38,13 @@ export const getWinstonTransport = (
 ) => {
   hdx('Initializing winston transport');
   return new HyperDXWinston({
-    ...(HYPERDX_API_KEY && { apiKey: HYPERDX_API_KEY }),
+    ...(HYPERDX_API_KEY && {
+      headers: {
+        Authorization: HYPERDX_API_KEY,
+      },
+    }),
     maxLevel,
-    service: SERVICE_NAME,
+    service: DEFAULT_SERVICE_NAME,
     getCustomMeta: BETA_MODE ? getCustomMeta : () => ({}),
     ...options,
   });
@@ -56,8 +59,12 @@ export const getPinoTransport = (
 ) => ({
   target: '@hyperdx/node-opentelemetry/build/src/otel-logger/pino',
   options: {
-    ...(HYPERDX_API_KEY && { apiKey: HYPERDX_API_KEY }),
-    service: SERVICE_NAME,
+    ...(HYPERDX_API_KEY && {
+      headers: {
+        Authorization: HYPERDX_API_KEY,
+      },
+    }),
+    service: DEFAULT_SERVICE_NAME,
     // getCustomMeta, // FIXME: DOMException [DataCloneError]
     ...options,
   },

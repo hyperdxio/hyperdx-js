@@ -2,11 +2,11 @@ import * as shimmer from 'shimmer';
 import isObject from 'lodash.isobject';
 import isPlainObject from 'lodash.isplainobject';
 import opentelemetry, { Attributes } from '@opentelemetry/api';
-import { Logger, LoggerOptions } from '../otel-logger';
-import { parseWinstonLog } from '../otel-logger/winston';
 
 import hdx from '../debug';
+import { Logger, LoggerOptions } from '../otel-logger';
 import { hyperDXGlobalContext } from '../context';
+import { parseWinstonLog } from '../otel-logger/winston';
 
 export const _parseConsoleArgs = (args: any[]) => {
   const stringifiedArgs = [];

@@ -1,16 +1,13 @@
 import stringifySafe from 'json-stringify-safe';
-import { Attributes, diag, DiagConsoleLogger } from '@opentelemetry/api';
-import { getEnvWithoutDefaults } from '@opentelemetry/core';
+import { Attributes } from '@opentelemetry/api';
 import {
   BatchLogRecordProcessor,
-  BufferConfig,
   LoggerProvider,
 } from '@opentelemetry/sdk-logs';
+import { Logger as OtelLogger } from '@opentelemetry/api-logs';
 import { OTLPLogExporter } from '@opentelemetry/exporter-logs-otlp-http';
-import { Logger as OtelLogger, SeverityNumber } from '@opentelemetry/api-logs';
 import {
   Resource,
-  defaultServiceName,
   detectResourcesSync,
   envDetectorSync,
   hostDetectorSync,
@@ -19,31 +16,16 @@ import {
 } from '@opentelemetry/resources';
 import { SEMRESATTRS_SERVICE_NAME } from '@opentelemetry/semantic-conventions';
 
+import {
+  DEFAULT_EXPORTER_BATCH_SIZE,
+  DEFAULT_EXPORTER_TIMEOUT_MS,
+  DEFAULT_MAX_QUEUE_SIZE,
+  DEFAULT_OTEL_LOGS_EXPORTER_URL,
+  DEFAULT_SEND_INTERVAL_MS,
+  DEFAULT_SERVICE_NAME,
+} from '../constants';
 import hdx, { LOG_PREFIX as _LOG_PREFIX } from '../debug';
 import { version as PKG_VERSION } from '../../package.json';
-
-const otelEnv = getEnvWithoutDefaults();
-
-// DEBUG otel modules
-if (otelEnv.OTEL_LOG_LEVEL) {
-  diag.setLogger(new DiagConsoleLogger(), {
-    logLevel: otelEnv.OTEL_LOG_LEVEL,
-  });
-}
-
-// TO EXTRACT ENV VARS [https://github.com/open-telemetry/opentelemetry-js/blob/3ab4f765d8d696327b7d139ae6a45e7bd7edd924/experimental/packages/sdk-logs/src/export/BatchLogRecordProcessorBase.ts#L50]
-// TO EXTRACT DEFAULTS [https://github.com/open-telemetry/opentelemetry-js/blob/3ab4f765d8d696327b7d139ae6a45e7bd7edd924/experimental/packages/sdk-logs/src/types.ts#L49]
-const DEFAULT_EXPORTER_BATCH_SIZE =
-  otelEnv.OTEL_BLRP_MAX_EXPORT_BATCH_SIZE ?? 512;
-const DEFAULT_EXPORTER_TIMEOUT_MS = otelEnv.OTEL_BLRP_EXPORT_TIMEOUT ?? 30000;
-const DEFAULT_MAX_QUEUE_SIZE = otelEnv.OTEL_BLRP_MAX_QUEUE_SIZE ?? 2048;
-const DEFAULT_OTEL_LOGS_EXPORTER_URL =
-  otelEnv.OTEL_EXPORTER_OTLP_LOGS_ENDPOINT ??
-  (otelEnv.OTEL_EXPORTER_OTLP_ENDPOINT
-    ? `${otelEnv.OTEL_EXPORTER_OTLP_ENDPOINT}/v1/logs`
-    : 'https://in-otel.hyperdx.io/v1/logs');
-const DEFAULT_SEND_INTERVAL_MS = otelEnv.OTEL_BLRP_SCHEDULE_DELAY ?? 2000;
-const DEFAULT_SERVICE_NAME = otelEnv.OTEL_SERVICE_NAME ?? defaultServiceName();
 
 const LOG_PREFIX = `⚠️  ${_LOG_PREFIX}`;
 
