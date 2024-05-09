@@ -14,6 +14,15 @@ import hdx, {
   LOG_PREFIX as _LOG_PREFIX,
 } from './debug';
 import { getHyperDXHTTPInstrumentationConfig } from './instrumentations/http';
+import {
+  DEFAULT_OTEL_EXPORTER_OTLP_TRACES_TIMEOUT,
+  DEFAULT_OTEL_LOGS_EXPORTER_URL,
+  DEFAULT_OTEL_TRACES_EXPORTER_URL,
+  DEFAULT_OTEL_TRACES_SAMPLER,
+  DEFAULT_OTEL_TRACES_SAMPLER_ARG,
+  DEFAULT_SERVICE_NAME,
+  DEFAULT_OTEL_LOG_LEVEL,
+} from './constants';
 import { hyperDXGlobalContext } from './context';
 import { version as PKG_VERSION } from '../package.json';
 
@@ -32,37 +41,39 @@ export type SDKConfig = {
 
 export const setTraceAttributes = hyperDXGlobalContext.setTraceAttributes;
 
+const setOtelEnvs = () => {
+  // set default otel env vars
+  env.OTEL_NODE_RESOURCE_DETECTORS = env.OTEL_NODE_RESOURCE_DETECTORS ?? 'all';
+  env.OTEL_LOG_LEVEL = DEFAULT_OTEL_LOG_LEVEL;
+  env.OTEL_TRACES_SAMPLER = DEFAULT_OTEL_TRACES_SAMPLER;
+  env.OTEL_TRACES_SAMPLER_ARG = DEFAULT_OTEL_TRACES_SAMPLER_ARG;
+};
+
 let sdk: NodeSDK;
 let hdxConsoleInstrumentation: HyperDXConsoleInstrumentation;
 
 export const initSDK = (config: SDKConfig) => {
-  // enable otel debug mode if HDX_DEBUG_MODE_ENABLED is set
-  if (HDX_DEBUG_MODE_ENABLED) {
-    env.OTEL_LOG_LEVEL = 'debug';
-  }
+  hdx('Setting otel envs');
+  setOtelEnvs();
 
-  // set default otel env vars
-  env.OTEL_EXPORTER_OTLP_ENDPOINT =
-    env.OTEL_EXPORTER_OTLP_ENDPOINT ?? 'https://in-otel.hyperdx.io';
-  env.OTEL_NODE_RESOURCE_DETECTORS = env.OTEL_NODE_RESOURCE_DETECTORS ?? 'all';
-  env.OTEL_LOG_LEVEL = env.OTEL_LOG_LEVEL ?? 'none'; // silence by default
-  env.OTEL_TRACES_SAMPLER = env.OTEL_TRACES_SAMPLER ?? 'parentbased_always_on';
-  env.OTEL_TRACES_SAMPLER_ARG = env.OTEL_TRACES_SAMPLER_ARG ?? '1';
+  const stopOnTerminationSignals = config.stopOnTerminationSignals ?? true; // Stop by default
 
-  // patch OTEL_EXPORTER_OTLP_HEADERS to include API key
+  let exporterHeaders;
   if (env.HYPERDX_API_KEY) {
-    env.OTEL_EXPORTER_OTLP_HEADERS = `${env.OTEL_EXPORTER_OTLP_HEADERS},authorization=${env.HYPERDX_API_KEY}`;
+    exporterHeaders = {
+      Authorization: env.HYPERDX_API_KEY,
+    };
   } else {
     console.warn(`${LOG_PREFIX} HYPERDX_API_KEY is not set`);
   }
 
-  const stopOnTerminationSignals = config.stopOnTerminationSignals ?? true; // Stop by default
-
   hdx('Initializing OpenTelemetry SDK');
   const consoleInstrumentationEnabled = config.consoleCapture ?? true;
   hdxConsoleInstrumentation = new HyperDXConsoleInstrumentation({
+    baseUrl: DEFAULT_OTEL_LOGS_EXPORTER_URL,
     betaMode: config.betaMode,
-    service: env.OTEL_SERVICE_NAME,
+    service: DEFAULT_SERVICE_NAME,
+    headers: exporterHeaders,
   });
 
   sdk = new NodeSDK({
@@ -76,13 +87,17 @@ export const initSDK = (config: SDKConfig) => {
       ? {
           spanProcessor: new HyperDXSpanProcessor(
             new OTLPTraceExporter({
-              timeoutMillis: 60000,
+              timeoutMillis: DEFAULT_OTEL_EXPORTER_OTLP_TRACES_TIMEOUT,
+              url: DEFAULT_OTEL_TRACES_EXPORTER_URL,
+              headers: exporterHeaders,
             }),
           ) as any,
         }
       : {
           traceExporter: new OTLPTraceExporter({
-            timeoutMillis: 60000,
+            timeoutMillis: DEFAULT_OTEL_EXPORTER_OTLP_TRACES_TIMEOUT,
+            url: DEFAULT_OTEL_TRACES_EXPORTER_URL,
+            headers: exporterHeaders,
           }),
         }),
     instrumentations: [
@@ -109,21 +124,21 @@ export const initSDK = (config: SDKConfig) => {
     ],
   });
 
-  if (env.OTEL_EXPORTER_OTLP_ENDPOINT && env.OTEL_EXPORTER_OTLP_HEADERS) {
+  if (env.OTEL_EXPORTER_OTLP_HEADERS || env.HYPERDX_API_KEY) {
     console.warn(
       `${LOG_PREFIX} Tracing is enabled with configs (${JSON.stringify(
         {
           advancedNetworkCapture: config.advancedNetworkCapture,
           betaMode: config.betaMode,
           consoleCapture: consoleInstrumentationEnabled,
-          endpoint: env.OTEL_EXPORTER_OTLP_ENDPOINT,
-          logLevel: env.OTEL_LOG_LEVEL,
+          endpoint: DEFAULT_OTEL_TRACES_EXPORTER_URL,
+          logLevel: DEFAULT_OTEL_LOG_LEVEL,
           propagators: env.OTEL_PROPAGATORS,
           resourceAttributes: env.OTEL_RESOURCE_ATTRIBUTES,
           resourceDetectors: env.OTEL_NODE_RESOURCE_DETECTORS,
-          sampler: env.OTEL_TRACES_SAMPLER,
-          samplerArg: env.OTEL_TRACES_SAMPLER_ARG,
-          serviceName: env.OTEL_SERVICE_NAME,
+          sampler: DEFAULT_OTEL_TRACES_SAMPLER,
+          samplerArg: DEFAULT_OTEL_TRACES_SAMPLER_ARG,
+          serviceName: DEFAULT_SERVICE_NAME,
           stopOnTerminationSignals,
         },
         null,
