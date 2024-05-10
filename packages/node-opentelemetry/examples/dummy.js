@@ -140,7 +140,8 @@ app.get('/', async (req, res) => {
 });
 
 app.get('/error', (req, res) => {
-  throw new Error('This is a test error');
+  Sentry.captureMessage('This is a test message');
+  throw new TypeError('This is a test error');
 });
 
 app.use(Sentry.Handlers.errorHandler());
