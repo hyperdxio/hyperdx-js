@@ -20,6 +20,19 @@ const { setTraceAttributes } = require('../build/src');
 
 Sentry.init({
   dsn: '',
+  integrations: [
+    // Common
+    new Sentry.Integrations.InboundFilters(),
+    new Sentry.Integrations.FunctionToString(),
+    new Sentry.Integrations.LinkedErrors(),
+    new Sentry.Integrations.RequestData(),
+    // Global Handlers
+    new Sentry.Integrations.OnUnhandledRejection(),
+    new Sentry.Integrations.OnUncaughtException(),
+    // Event Info
+    new Sentry.Integrations.ContextLines(),
+    new Sentry.Integrations.LocalVariables(),
+  ],
 });
 
 const PORT = parseInt(process.env.PORT || '7788');
@@ -141,7 +154,7 @@ app.get('/', async (req, res) => {
 
 app.get('/error', (req, res) => {
   Sentry.captureMessage('This is a test message');
-  throw new TypeError('This is a test error');
+  throw new RangeError('This is a test error');
 });
 
 app.use(Sentry.Handlers.errorHandler());

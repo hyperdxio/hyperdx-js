@@ -16,6 +16,7 @@ import {
   DEFAULT_HDX_NODE_ADVANCED_NETWORK_CAPTURE,
   DEFAULT_HDX_NODE_BETA_MODE,
   DEFAULT_HDX_NODE_CONSOLE_CAPTURE,
+  DEFAULT_HDX_NODE_EXPERIMENTAL_EXCEPTION_CAPTURE,
   DEFAULT_HDX_NODE_STOP_ON_TERMINATION_SIGNALS,
   DEFAULT_OTEL_EXPORTER_OTLP_TRACES_TIMEOUT,
   DEFAULT_OTEL_LOGS_EXPORTER_URL,
@@ -34,11 +35,12 @@ const LOG_PREFIX = `⚠️  ${_LOG_PREFIX}`;
 const env = process.env;
 
 export type SDKConfig = {
+  additionalInstrumentations?: InstrumentationBase[];
   advancedNetworkCapture?: boolean;
   betaMode?: boolean;
   consoleCapture?: boolean;
+  experimentalExceptionCapture?: boolean;
   instrumentations?: InstrumentationConfigMap;
-  additionalInstrumentations?: InstrumentationBase[];
   stopOnTerminationSignals?: boolean;
 };
 
@@ -83,6 +85,8 @@ export const initSDK = (config: SDKConfig) => {
   }
 
   const defaultBetaMode = config.betaMode ?? DEFAULT_HDX_NODE_BETA_MODE;
+  const defaultAdvancedNetworkCapture =
+    config.advancedNetworkCapture ?? DEFAULT_HDX_NODE_ADVANCED_NETWORK_CAPTURE;
 
   hdxConsoleInstrumentation = new HyperDXConsoleInstrumentation({
     baseUrl: DEFAULT_OTEL_LOGS_EXPORTER_URL,
@@ -90,9 +94,6 @@ export const initSDK = (config: SDKConfig) => {
     service: DEFAULT_SERVICE_NAME,
     headers: exporterHeaders,
   });
-
-  const defaultAdvancedNetworkCapture =
-    config.advancedNetworkCapture ?? DEFAULT_HDX_NODE_ADVANCED_NETWORK_CAPTURE;
 
   sdk = new NodeSDK({
     resource: new Resource({
@@ -202,10 +203,13 @@ export const initSDK = (config: SDKConfig) => {
     });
   }
 
-  hdx('Initializing Sentry SDK');
-  setTimeout(() => {
+  if (
+    config.experimentalExceptionCapture ??
+    DEFAULT_HDX_NODE_EXPERIMENTAL_EXCEPTION_CAPTURE
+  ) {
+    console.warn(`${LOG_PREFIX} Experimental exception capture is enabled`);
     initSentrySDK();
-  }, 1000);
+  }
 };
 
 const _shutdown = () => {
