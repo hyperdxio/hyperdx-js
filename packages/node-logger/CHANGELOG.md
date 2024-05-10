@@ -1,5 +1,15 @@
 # @hyperdx/node-logger
 
+## 0.4.0
+
+### Minor Changes
+
+- 43aab55: feat + migration: Use Otel logs module
+
+### Patch Changes
+
+- 0073937: fix: adjust logs default send interval
+
 ## 0.4.0-next.1
 
 ### Patch Changes

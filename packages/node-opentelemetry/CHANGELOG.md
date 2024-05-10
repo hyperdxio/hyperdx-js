@@ -1,5 +1,19 @@
 # @hyperdx/node-opentelemetry
 
+## 0.7.0
+
+### Minor Changes
+
+- 26396ee: chore: bump otel deps + uninstall hdx node-logger
+- 43aab55: feat + migration: Use Otel logs module
+
+### Patch Changes
+
+- 0073937: fix: adjust logs default send interval
+- a2ebf6a: fix: disable console instrumentation if otel debug mode is on
+- a2ebf6a: style: move all constants to one file
+- 9bf6c3b: fix: inject HYPERDX_API_KEY if specified (winston/pino transport)
+
 ## 0.7.0-next.4
 
 ### Patch Changes
