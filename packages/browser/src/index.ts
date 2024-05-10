@@ -7,6 +7,7 @@ import { resolveAsyncGlobal } from './utils';
 import type { RumOtelWebConfig } from '@hyperdx/otel-web';
 
 type Instrumentations = RumOtelWebConfig['instrumentations'];
+type IgnoreUrls = RumOtelWebConfig['ignoreUrls'];
 
 type BrowserSDKConfig = {
   advancedNetworkCapture?: boolean;
@@ -19,6 +20,7 @@ type BrowserSDKConfig = {
   disableReplay?: boolean;
   ignoreClass?: string;
   instrumentations?: Instrumentations;
+  ignoreUrls?: IgnoreUrls;
   maskAllInputs?: boolean;
   maskAllText?: boolean;
   maskClass?: string;
@@ -48,6 +50,7 @@ class Browser {
     disableReplay = false,
     ignoreClass,
     instrumentations = {},
+    ignoreUrls,
     maskAllInputs = true,
     maskAllText = false,
     maskClass,
@@ -81,6 +84,7 @@ class Browser {
       allowInsecureUrl: true,
       apiKey,
       app: service,
+      ignoreUrls,
       instrumentations: {
         visibility: true,
         console: captureConsole ?? consoleCapture ?? false,
