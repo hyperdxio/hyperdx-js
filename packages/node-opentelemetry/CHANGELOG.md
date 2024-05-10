@@ -1,5 +1,12 @@
 # @hyperdx/node-opentelemetry
 
+## 0.7.0-next.4
+
+### Patch Changes
+
+- a2ebf6a: fix: disable console instrumentation if otel debug mode is on
+- a2ebf6a: style: move all constants to one file
+
 ## 0.7.0-next.3
 
 ### Minor Changes
