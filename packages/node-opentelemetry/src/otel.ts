@@ -208,6 +208,7 @@ export const initSDK = (config: SDKConfig) => {
     DEFAULT_HDX_NODE_EXPERIMENTAL_EXCEPTION_CAPTURE
   ) {
     console.warn(`${LOG_PREFIX} Experimental exception capture is enabled`);
+    // WARNING: make it async and non-blocking so the main process will load sentry SDK first
     initSentrySDK();
   }
 };

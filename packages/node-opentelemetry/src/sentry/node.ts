@@ -83,23 +83,8 @@ export const initSDK = async () => {
   try {
     const Sentry = await import('@sentry/node');
     if (!Sentry.isInitialized()) {
-      Sentry.init({
-        dsn: '',
-        integrations: [
-          // Common
-          new Sentry.Integrations.InboundFilters(),
-          new Sentry.Integrations.FunctionToString(),
-          new Sentry.Integrations.LinkedErrors(),
-          new Sentry.Integrations.RequestData(),
-          // Global Handlers
-          new Sentry.Integrations.OnUnhandledRejection(),
-          new Sentry.Integrations.OnUncaughtException(),
-          // Event Info
-          new Sentry.Integrations.ContextLines(),
-          new Sentry.Integrations.LocalVariables(),
-        ],
-      });
-      hdx('Initialized Sentry SDK');
+      hdx('Sentry SDK not initialized');
+      return;
     }
     const client = Sentry.getClient();
     if (!client) {
