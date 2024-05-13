@@ -7,8 +7,8 @@ import {
 } from '@opentelemetry/semantic-conventions';
 import { Event, EventHint, Exception } from '@sentry/types';
 
-import hdx from '../debug';
-import { jsonToString } from '../utils';
+import hdx from './debug';
+import { jsonToString } from './utils';
 
 const tracer = api.trace.getTracer('@hyperdx/node-opentelemetry');
 

@@ -27,7 +27,7 @@ import {
   DEFAULT_SERVICE_NAME,
 } from './constants';
 import { hyperDXGlobalContext } from './context';
-import { initSDK as initSentrySDK } from './sentry/node';
+import { initSDK as initSentrySDK } from './sentry';
 import { version as PKG_VERSION } from '../package.json';
 
 const LOG_PREFIX = `⚠️  ${_LOG_PREFIX}`;
