@@ -1,5 +1,11 @@
 # @hyperdx/node-opentelemetry
 
+## 0.8.0-next.0
+
+### Minor Changes
+
+- f7cb5f9: feat: introduce exception capture - BETA
+
 ## 0.7.0
 
 ### Minor Changes
