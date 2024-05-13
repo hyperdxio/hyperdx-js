@@ -7,7 +7,7 @@ import {
   SEMATTRS_HTTP_STATUS_CODE,
   SEMATTRS_HTTP_RESPONSE_CONTENT_LENGTH,
 } from '@opentelemetry/semantic-conventions';
-import { Event, EventHint, Exception } from '@sentry/types';
+import { Event, EventHint, Exception, EventProcessor } from '@sentry/types';
 
 import hdx from './debug';
 import { jsonToString } from './utils';
@@ -157,26 +157,45 @@ const startOtelSpanFromSentryEvent = (event: Event, hint: EventHint) => {
   }
 };
 
-const registerBeforeSendEvent = (event: Event, hint: EventHint) => {
+const registerEventProcessor = (event: Event, hint: EventHint) => {
   hdx('Received event at beforeSendEvent hook');
   if (isSentryEventAnException(event)) {
     startOtelSpanFromSentryEvent(event, hint);
   }
+
+  return event;
 };
 
 export const initSDK = async () => {
   try {
     const Sentry = await import('@sentry/node');
-    if (!Sentry.isInitialized()) {
-      hdx('Sentry SDK not initialized');
-      return;
-    }
-    const client = Sentry.getClient();
+    hdx(`Detected Sentry installed with SDK version: ${Sentry.SDK_VERSION}`);
+    const client = Sentry.getCurrentHub()?.getClient();
     if (!client) {
       hdx('Sentry client not found');
       return;
     }
-    client.on('beforeSendEvent', registerBeforeSendEvent);
+    // TODO: initialize Sentry SDK ??
+
+    let eventProcessor: (cb: EventProcessor) => void;
+    // v8
+    // @ts-ignore
+    if (typeof Sentry.addEventProcessor === 'function') {
+      hdx('Sentry.addEventProcessor is available');
+      // @ts-ignore
+      eventProcessor = Sentry.addEventProcessor;
+    }
+    // v7
+    // @ts-ignore
+    else if (typeof Sentry.addGlobalEventProcessor === 'function') {
+      hdx('Sentry.addGlobalEventProcessor is available');
+      // @ts-ignore
+      eventProcessor = Sentry.addGlobalEventProcessor;
+    } else {
+      hdx('No Sentry api available to register event processor');
+      return;
+    }
+    eventProcessor(registerEventProcessor);
     hdx('Registered Sentry event hooks');
   } catch (e) {
     hdx('Error initializing Sentry SDK');
