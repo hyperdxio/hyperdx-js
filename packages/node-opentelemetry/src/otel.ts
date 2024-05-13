@@ -8,6 +8,7 @@ import {
   InstrumentationConfigMap,
 } from '@opentelemetry/auto-instrumentations-node';
 
+import * as Sentry from './sentry';
 import HyperDXConsoleInstrumentation from './instrumentations/console';
 import HyperDXSpanProcessor from './spanProcessor';
 import hdx, { LOG_PREFIX as _LOG_PREFIX } from './debug';
@@ -27,7 +28,6 @@ import {
   DEFAULT_SERVICE_NAME,
 } from './constants';
 import { hyperDXGlobalContext } from './context';
-import { initSDK as initSentrySDK } from './sentry';
 import { version as PKG_VERSION } from '../package.json';
 
 const LOG_PREFIX = `⚠️  ${_LOG_PREFIX}`;
@@ -97,9 +97,9 @@ export const initSDK = (config: SDKConfig) => {
 
   sdk = new NodeSDK({
     resource: new Resource({
-      // TODO: should use otel semantic conventions
-      'hyperdx.distro.version': PKG_VERSION,
-      'hyperdx.distro.runtime_version': process.versions.node,
+      // https://opentelemetry.io/docs/specs/semconv/resource/#telemetry-sdk-experimental
+      'telemetry.distro.name': 'hyperdx',
+      'telemetry.distro.version': PKG_VERSION,
     }),
     // metricReader: metricReader,
     ...(defaultBetaMode
@@ -209,7 +209,7 @@ export const initSDK = (config: SDKConfig) => {
   ) {
     console.warn(`${LOG_PREFIX} Experimental exception capture is enabled`);
     // WARNING: make it async and non-blocking so the main process will load sentry SDK first
-    initSentrySDK();
+    Sentry.initSDK();
   }
 };
 
