@@ -19,7 +19,7 @@ const { setTraceAttributes } = require('../build/src');
 // });
 
 Sentry.init({
-  dsn: '',
+  dsn: 'http://public@localhost:5000/1',
   integrations: [
     // Common
     new Sentry.Integrations.InboundFilters(),
