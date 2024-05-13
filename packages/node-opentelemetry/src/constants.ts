@@ -1,8 +1,9 @@
-import { DiagLogLevel } from '@opentelemetry/api';
 import { defaultServiceName } from '@opentelemetry/resources';
 import { getEnvWithoutDefaults } from '@opentelemetry/core';
 
-import { HDX_DEBUG_MODE_ENABLED } from './debug';
+import { stringToBoolean } from './utils';
+
+const env = process.env;
 
 // enable otel debug mode if HDX_DEBUG_MODE_ENABLED is set
 const otelEnv = getEnvWithoutDefaults();
@@ -35,3 +36,15 @@ export const DEFAULT_OTEL_TRACES_SAMPLER_ARG =
 export const DEFAULT_OTEL_EXPORTER_OTLP_TRACES_TIMEOUT =
   otelEnv.OTEL_EXPORTER_OTLP_TRACES_TIMEOUT ?? 60000;
 export const DEFAULT_OTEL_LOG_LEVEL = otelEnv.OTEL_LOG_LEVEL;
+
+// HyperDX SDK specific configuration
+export const DEFAULT_HDX_NODE_BETA_MODE =
+  stringToBoolean(env.HDX_NODE_BETA_MODE) ?? false;
+export const DEFAULT_HDX_NODE_CONSOLE_CAPTURE =
+  stringToBoolean(env.HDX_NODE_CONSOLE_CAPTURE) ?? true;
+export const DEFAULT_HDX_NODE_ADVANCED_NETWORK_CAPTURE =
+  stringToBoolean(env.HDX_NODE_ADVANCED_NETWORK_CAPTURE) ?? false;
+export const DEFAULT_HDX_NODE_STOP_ON_TERMINATION_SIGNALS =
+  stringToBoolean(env.HDX_NODE_STOP_ON_TERMINATION_SIGNALS) ?? true;
+export const DEFAULT_HDX_NODE_EXPERIMENTAL_EXCEPTION_CAPTURE =
+  stringToBoolean(env.HDX_NODE_EXPERIMENTAL_EXCEPTION_CAPTURE) ?? false;

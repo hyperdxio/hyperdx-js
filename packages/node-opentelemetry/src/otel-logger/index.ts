@@ -1,4 +1,3 @@
-import stringifySafe from 'json-stringify-safe';
 import { Attributes } from '@opentelemetry/api';
 import {
   BatchLogRecordProcessor,
@@ -28,15 +27,6 @@ import hdx, { LOG_PREFIX as _LOG_PREFIX } from '../debug';
 import { version as PKG_VERSION } from '../../package.json';
 
 const LOG_PREFIX = `⚠️  ${_LOG_PREFIX}`;
-
-export const jsonToString = (json) => {
-  try {
-    return JSON.stringify(json);
-  } catch (ex) {
-    hdx(`Failed to stringify json. e = ${ex}`);
-    return stringifySafe(json);
-  }
-};
 
 export type LoggerOptions = {
   baseUrl?: string;

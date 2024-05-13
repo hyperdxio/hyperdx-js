@@ -8,18 +8,24 @@ import {
   InstrumentationConfigMap,
 } from '@opentelemetry/auto-instrumentations-node';
 
+import * as Sentry from './sentry';
 import HyperDXConsoleInstrumentation from './instrumentations/console';
 import HyperDXSpanProcessor from './spanProcessor';
 import hdx, { LOG_PREFIX as _LOG_PREFIX } from './debug';
 import { getHyperDXHTTPInstrumentationConfig } from './instrumentations/http';
 import {
+  DEFAULT_HDX_NODE_ADVANCED_NETWORK_CAPTURE,
+  DEFAULT_HDX_NODE_BETA_MODE,
+  DEFAULT_HDX_NODE_CONSOLE_CAPTURE,
+  DEFAULT_HDX_NODE_EXPERIMENTAL_EXCEPTION_CAPTURE,
+  DEFAULT_HDX_NODE_STOP_ON_TERMINATION_SIGNALS,
   DEFAULT_OTEL_EXPORTER_OTLP_TRACES_TIMEOUT,
   DEFAULT_OTEL_LOGS_EXPORTER_URL,
+  DEFAULT_OTEL_LOG_LEVEL,
   DEFAULT_OTEL_TRACES_EXPORTER_URL,
   DEFAULT_OTEL_TRACES_SAMPLER,
   DEFAULT_OTEL_TRACES_SAMPLER_ARG,
   DEFAULT_SERVICE_NAME,
-  DEFAULT_OTEL_LOG_LEVEL,
 } from './constants';
 import { hyperDXGlobalContext } from './context';
 import { version as PKG_VERSION } from '../package.json';
@@ -29,11 +35,12 @@ const LOG_PREFIX = `⚠️  ${_LOG_PREFIX}`;
 const env = process.env;
 
 export type SDKConfig = {
+  additionalInstrumentations?: InstrumentationBase[];
   advancedNetworkCapture?: boolean;
   betaMode?: boolean;
   consoleCapture?: boolean;
+  experimentalExceptionCapture?: boolean;
   instrumentations?: InstrumentationConfigMap;
-  additionalInstrumentations?: InstrumentationBase[];
   stopOnTerminationSignals?: boolean;
 };
 
@@ -53,7 +60,9 @@ export const initSDK = (config: SDKConfig) => {
   hdx('Setting otel envs');
   setOtelEnvs();
 
-  const stopOnTerminationSignals = config.stopOnTerminationSignals ?? true; // Stop by default
+  const stopOnTerminationSignals =
+    config.stopOnTerminationSignals ??
+    DEFAULT_HDX_NODE_STOP_ON_TERMINATION_SIGNALS; // Stop by default
 
   let exporterHeaders;
   if (env.HYPERDX_API_KEY) {
@@ -65,7 +74,8 @@ export const initSDK = (config: SDKConfig) => {
   }
 
   hdx('Initializing OpenTelemetry SDK');
-  let consoleInstrumentationEnabled = config.consoleCapture ?? true;
+  let consoleInstrumentationEnabled =
+    config.consoleCapture ?? DEFAULT_HDX_NODE_CONSOLE_CAPTURE;
   if (DEFAULT_OTEL_LOG_LEVEL === DiagLogLevel.DEBUG) {
     // FIXME: better to disable console instrumentation if otel log is enabled
     consoleInstrumentationEnabled = false;
@@ -74,21 +84,25 @@ export const initSDK = (config: SDKConfig) => {
     );
   }
 
+  const defaultBetaMode = config.betaMode ?? DEFAULT_HDX_NODE_BETA_MODE;
+  const defaultAdvancedNetworkCapture =
+    config.advancedNetworkCapture ?? DEFAULT_HDX_NODE_ADVANCED_NETWORK_CAPTURE;
+
   hdxConsoleInstrumentation = new HyperDXConsoleInstrumentation({
     baseUrl: DEFAULT_OTEL_LOGS_EXPORTER_URL,
-    betaMode: config.betaMode,
+    betaMode: defaultBetaMode,
     service: DEFAULT_SERVICE_NAME,
     headers: exporterHeaders,
   });
 
   sdk = new NodeSDK({
     resource: new Resource({
-      // TODO: should use otel semantic conventions
-      'hyperdx.distro.version': PKG_VERSION,
-      'hyperdx.distro.runtime_version': process.versions.node,
+      // https://opentelemetry.io/docs/specs/semconv/resource/#telemetry-sdk-experimental
+      'telemetry.distro.name': 'hyperdx',
+      'telemetry.distro.version': PKG_VERSION,
     }),
     // metricReader: metricReader,
-    ...(config.betaMode
+    ...(defaultBetaMode
       ? {
           spanProcessor: new HyperDXSpanProcessor(
             new OTLPTraceExporter({
@@ -107,7 +121,7 @@ export const initSDK = (config: SDKConfig) => {
         }),
     instrumentations: [
       getNodeAutoInstrumentations({
-        '@opentelemetry/instrumentation-http': config.advancedNetworkCapture
+        '@opentelemetry/instrumentation-http': defaultAdvancedNetworkCapture
           ? getHyperDXHTTPInstrumentationConfig({
               httpCaptureHeadersClientRequest:
                 env.OTEL_INSTRUMENTATION_HTTP_CAPTURE_HEADERS_CLIENT_REQUEST,
@@ -133,8 +147,8 @@ export const initSDK = (config: SDKConfig) => {
     console.warn(
       `${LOG_PREFIX} Tracing is enabled with configs (${JSON.stringify(
         {
-          advancedNetworkCapture: config.advancedNetworkCapture,
-          betaMode: config.betaMode,
+          advancedNetworkCapture: defaultAdvancedNetworkCapture,
+          betaMode: defaultBetaMode,
           consoleCapture: consoleInstrumentationEnabled,
           endpoint: DEFAULT_OTEL_TRACES_EXPORTER_URL,
           logLevel: DEFAULT_OTEL_LOG_LEVEL,
@@ -158,7 +172,7 @@ export const initSDK = (config: SDKConfig) => {
     hdx('Starting opentelemetry SDK');
     sdk.start();
 
-    if (config.betaMode) {
+    if (defaultBetaMode) {
       hdx(`Beta mode enabled, starting global context`);
       hyperDXGlobalContext.start();
     }
@@ -187,6 +201,15 @@ export const initSDK = (config: SDKConfig) => {
     process.on('SIGINT', () => {
       handleTerminationSignal('SIGINT');
     });
+  }
+
+  if (
+    config.experimentalExceptionCapture ??
+    DEFAULT_HDX_NODE_EXPERIMENTAL_EXCEPTION_CAPTURE
+  ) {
+    console.warn(`${LOG_PREFIX} Experimental exception capture is enabled`);
+    // WARNING: make it async and non-blocking so the main process will load sentry SDK first
+    Sentry.initSDK();
   }
 };
 

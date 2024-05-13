@@ -3,7 +3,8 @@ import isString from 'lodash.isstring';
 import { Attributes } from '@opentelemetry/api';
 
 import hdx from '../debug';
-import { Logger, jsonToString } from './';
+import { Logger } from './';
+import { jsonToString } from '../utils';
 
 import type { LoggerOptions } from './';
 
