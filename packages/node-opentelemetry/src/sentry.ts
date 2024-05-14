@@ -59,7 +59,7 @@ const startOtelSpanFromSentryEvent = (event: Event, hint: EventHint) => {
       'app.version': event.contexts.app.app_version,
     }),
     // https://opentelemetry.io/docs/specs/semconv/http/http-spans/
-    ...(event.contexts.response && {
+    ...(event.contexts?.response && {
       [SEMATTRS_HTTP_STATUS_CODE]: event.contexts.response.status_code,
       [SEMATTRS_HTTP_RESPONSE_CONTENT_LENGTH]:
         event.contexts.response.body_size,
@@ -159,7 +159,7 @@ const startOtelSpanFromSentryEvent = (event: Event, hint: EventHint) => {
 
 const registerEventProcessor = (event: Event, hint: EventHint) => {
   try {
-    hdx(`Received event: ${JSON.stringify(event, null, 2)}`);
+    hdx('Received event');
     if (isSentryEventAnException(event)) {
       startOtelSpanFromSentryEvent(event, hint);
     }
@@ -177,7 +177,6 @@ export const initSDK = async () => {
     const client = Sentry.getCurrentHub()?.getClient();
     if (!client) {
       hdx('Sentry client not found');
-      return;
     }
     // TODO: initialize Sentry SDK ??
 
