@@ -67,6 +67,6 @@
     "pino": "^8.14.1"
   },
   "peerDependencies": {
-    "@sentry/node": "7.x"
+    "@sentry/node": "^7.0.0 || ^8.0.0"
   }
 }

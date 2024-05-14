@@ -7,7 +7,7 @@ import {
   SEMATTRS_HTTP_STATUS_CODE,
   SEMATTRS_HTTP_RESPONSE_CONTENT_LENGTH,
 } from '@opentelemetry/semantic-conventions';
-import { Event, EventHint, Exception } from '@sentry/types';
+import { Event, EventHint, Exception, EventProcessor } from '@sentry/types';
 
 import hdx from './debug';
 import { jsonToString } from './utils';
@@ -59,7 +59,7 @@ const startOtelSpanFromSentryEvent = (event: Event, hint: EventHint) => {
       'app.version': event.contexts.app.app_version,
     }),
     // https://opentelemetry.io/docs/specs/semconv/http/http-spans/
-    ...(event.contexts.response && {
+    ...(event.contexts?.response && {
       [SEMATTRS_HTTP_STATUS_CODE]: event.contexts.response.status_code,
       [SEMATTRS_HTTP_RESPONSE_CONTENT_LENGTH]:
         event.contexts.response.body_size,
@@ -157,28 +157,50 @@ const startOtelSpanFromSentryEvent = (event: Event, hint: EventHint) => {
   }
 };
 
-const registerBeforeSendEvent = (event: Event, hint: EventHint) => {
-  hdx('Received event at beforeSendEvent hook');
-  if (isSentryEventAnException(event)) {
-    startOtelSpanFromSentryEvent(event, hint);
+const registerEventProcessor = (event: Event, hint: EventHint) => {
+  try {
+    hdx('Received event');
+    if (isSentryEventAnException(event)) {
+      startOtelSpanFromSentryEvent(event, hint);
+    }
+  } catch (e) {
+    hdx(`Error processing event: ${e}`);
   }
+  // WARNING: always return the event
+  return event;
 };
 
 export const initSDK = async () => {
   try {
     const Sentry = await import('@sentry/node');
-    if (!Sentry.isInitialized()) {
-      hdx('Sentry SDK not initialized');
-      return;
-    }
-    const client = Sentry.getClient();
+    hdx(`Detected Sentry installed with SDK version: ${Sentry.SDK_VERSION}`);
+    const client = Sentry.getCurrentHub()?.getClient();
     if (!client) {
       hdx('Sentry client not found');
+    }
+    // TODO: initialize Sentry SDK ??
+
+    let eventProcessor: (cb: EventProcessor) => void;
+    // v8
+    // @ts-ignore
+    if (typeof Sentry.addEventProcessor === 'function') {
+      hdx('Sentry.addEventProcessor is available');
+      // @ts-ignore
+      eventProcessor = Sentry.addEventProcessor;
+    }
+    // v7
+    // @ts-ignore
+    else if (typeof Sentry.addGlobalEventProcessor === 'function') {
+      hdx('Sentry.addGlobalEventProcessor is available');
+      // @ts-ignore
+      eventProcessor = Sentry.addGlobalEventProcessor;
+    } else {
+      hdx('No Sentry api available to register event processor');
       return;
     }
-    client.on('beforeSendEvent', registerBeforeSendEvent);
+    eventProcessor(registerEventProcessor);
     hdx('Registered Sentry event hooks');
   } catch (e) {
-    hdx('Error initializing Sentry SDK');
+    hdx(`Error initializing Sentry SDK: ${e}`);
   }
 };
