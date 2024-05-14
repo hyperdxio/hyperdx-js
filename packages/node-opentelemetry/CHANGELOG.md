@@ -1,5 +1,11 @@
 # @hyperdx/node-opentelemetry
 
+## 0.8.0-next.1
+
+### Patch Changes
+
+- 34bb72b: fix: support sentry node v8
+
 ## 0.8.0-next.0
 
 ### Minor Changes
