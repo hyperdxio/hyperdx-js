@@ -201,6 +201,6 @@ export const initSDK = async () => {
     eventProcessor(registerEventProcessor);
     hdx('Registered Sentry event hooks');
   } catch (e) {
-    hdx('Error initializing Sentry SDK');
+    hdx(`Error initializing Sentry SDK: ${e}`);
   }
 };
