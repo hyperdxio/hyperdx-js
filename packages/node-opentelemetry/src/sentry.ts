@@ -158,11 +158,15 @@ const startOtelSpanFromSentryEvent = (event: Event, hint: EventHint) => {
 };
 
 const registerEventProcessor = (event: Event, hint: EventHint) => {
-  hdx('Received event at beforeSendEvent hook');
-  if (isSentryEventAnException(event)) {
-    startOtelSpanFromSentryEvent(event, hint);
+  try {
+    hdx(`Received event: ${JSON.stringify(event, null, 2)}`);
+    if (isSentryEventAnException(event)) {
+      startOtelSpanFromSentryEvent(event, hint);
+    }
+  } catch (e) {
+    hdx(`Error processing event: ${e}`);
   }
-
+  // WARNING: always return the event
   return event;
 };
 

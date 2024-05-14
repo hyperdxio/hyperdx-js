@@ -20,19 +20,6 @@ const { setTraceAttributes } = require('../build/src');
 
 Sentry.init({
   dsn: 'http://public@localhost:5000/1',
-  integrations: [
-    // Common
-    new Sentry.Integrations.InboundFilters(),
-    new Sentry.Integrations.FunctionToString(),
-    new Sentry.Integrations.LinkedErrors(),
-    new Sentry.Integrations.RequestData(),
-    // Global Handlers
-    new Sentry.Integrations.OnUnhandledRejection(),
-    new Sentry.Integrations.OnUncaughtException(),
-    // Event Info
-    new Sentry.Integrations.ContextLines(),
-    new Sentry.Integrations.LocalVariables(),
-  ],
 });
 
 const PORT = parseInt(process.env.PORT || '7788');
@@ -106,8 +93,6 @@ function generateRandomString(length) {
   return result;
 }
 
-app.use(Sentry.Handlers.requestHandler());
-
 app.use(compression());
 
 // set custom trace attributes
@@ -157,7 +142,8 @@ app.get('/error', (req, res) => {
   throw new RangeError('This is a test error');
 });
 
-app.use(Sentry.Handlers.errorHandler());
+// Add this after all routes and other middlewares are defined
+Sentry.setupExpressErrorHandler(app);
 
 app.listen(PORT, () => {
   console.log(`Listening for requests on http://localhost:${PORT}`);
