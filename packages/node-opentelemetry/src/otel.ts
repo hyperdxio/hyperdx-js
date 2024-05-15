@@ -4,8 +4,8 @@ import { NodeSDK } from '@opentelemetry/sdk-node';
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-proto';
 import { Resource } from '@opentelemetry/resources';
 import {
-  getNodeAutoInstrumentations,
   InstrumentationConfigMap,
+  getNodeAutoInstrumentations,
 } from '@opentelemetry/auto-instrumentations-node';
 
 import * as Sentry from './sentry';
@@ -55,6 +55,26 @@ const setOtelEnvs = () => {
 
 let sdk: NodeSDK;
 let hdxConsoleInstrumentation: HyperDXConsoleInstrumentation;
+
+const isModuleImported = (moduleName: string) => {
+  try {
+    require.resolve(moduleName);
+    return true;
+  } catch (e) {
+    return false;
+  }
+};
+
+const reimportModule = async (moduleName: string) => {
+  if (isModuleImported(moduleName)) {
+    console.log(`👺👺👺 Reimporting ${moduleName} 👺👺👺`);
+    try {
+      require(moduleName);
+    } catch (e) {
+      hdx(`Failed to reimport ${moduleName}. e = ${e}`);
+    }
+  }
+};
 
 export const initSDK = (config: SDKConfig) => {
   hdx('Setting otel envs');
@@ -204,6 +224,19 @@ export const initSDK = (config: SDKConfig) => {
     // WARNING: make it async and non-blocking so the main process will load sentry SDK first
     Sentry.initSDK();
   }
+
+  // reimport all installed modules
+  // reimportModule('express');
+  // reimportModule('koa');
+  // reimportModule('mongodb');
+  // reimportModule('connect');
+  // reimportModule('bunyan');
+  // reimportModule('amqplib/callback_apji');
+  // reimportModule('@cucumber/cucumber');
+  // reimportModule('dataloader');
+  // reimportModule('lru-memoizer');
+  // reimportModule('mongoose');
+  // reimportModule('socket.io');
 };
 
 const _shutdown = () => {
