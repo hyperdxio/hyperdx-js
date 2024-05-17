@@ -17,6 +17,9 @@ const tracer = api.trace.getTracer('@hyperdx/node-opentelemetry');
 // CUSTOM SEMANTIC CONVENTIONS
 const SEMATTRS_EXCEPTION_MODULES = 'exception.modules';
 const SEMATTRS_EXCEPTION_TAGS = 'exception.tags';
+const SEMATTRS_EXCEPTION_MECHANISM = 'exception.mechanism';
+const SEMATTRS_EXCEPTION_THREAD_ID = 'exception.thread_id';
+const SEMATTRS_EXCEPTION_MODULE = 'exception.module';
 
 // https://github.com/open-telemetry/opentelemetry-js/blob/ca027b5eed282b4e81e098ca885db9ce27fdd562/packages/opentelemetry-sdk-trace-base/src/Span.ts#L299
 const recordException = (span: Span, exception: Exception) => {
@@ -24,6 +27,15 @@ const recordException = (span: Span, exception: Exception) => {
     [SEMATTRS_EXCEPTION_MESSAGE]: exception.value,
     [SEMATTRS_EXCEPTION_STACKTRACE]: jsonToString(exception.stacktrace),
     [SEMATTRS_EXCEPTION_TYPE]: exception.type,
+    ...(exception.mechanism && {
+      [SEMATTRS_EXCEPTION_MECHANISM]: jsonToString(exception.mechanism),
+    }),
+    ...(exception.module && {
+      [SEMATTRS_EXCEPTION_MODULE]: exception.module,
+    }),
+    ...(exception.thread_id && {
+      [SEMATTRS_EXCEPTION_THREAD_ID]: exception.thread_id,
+    }),
   });
 };
 
@@ -45,10 +57,13 @@ const startOtelSpanFromSentryEvent = (event: Event, hint: EventHint) => {
     ...(event.modules && {
       [SEMATTRS_EXCEPTION_MODULES]: jsonToString(event.modules),
     }),
-    // TODO: decide what to do with tags
+    // TODO: decide what to do with these sentry specific tags
     [SEMATTRS_EXCEPTION_TAGS]: jsonToString({
       culture: event.contexts?.culture,
+      dist: event.dist,
       environment: event.environment,
+      mechanism: hint.mechanism,
+      release: event.release,
     }),
     ...(event.contexts?.app && {
       'app.build_type': event.contexts.app.build_type,
