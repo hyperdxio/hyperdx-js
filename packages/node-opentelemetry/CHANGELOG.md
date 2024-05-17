@@ -1,5 +1,11 @@
 # @hyperdx/node-opentelemetry
 
+## 0.8.0-next.2
+
+### Patch Changes
+
+- 7ce9e08: feat: add more exception tags
+
 ## 0.8.0-next.1
 
 ### Patch Changes
