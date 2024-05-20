@@ -58,13 +58,19 @@
     "winston-transport": "^4.7.0"
   },
   "devDependencies": {
+    "@hapi/hapi": "^21.3.9",
     "@koa/router": "^12.0.0",
     "@sentry/node": "7.x",
     "@sentry/types": "^7.114.0",
+    "bunyan": "^1.8.15",
     "compression": "^1.7.4",
     "express": "^4.19.2",
-    "koa": "^2.14.2",
-    "pino": "^8.14.1"
+    "fastify": "^4.27.0",
+    "ioredis": "^5.4.1",
+    "koa": "^2.15.3",
+    "mongoose": "^8.4.0",
+    "pino": "^8.14.1",
+    "redis": "^4.6.14"
   },
   "peerDependencies": {
     "@sentry/node": "^7.0.0 || ^8.0.0"

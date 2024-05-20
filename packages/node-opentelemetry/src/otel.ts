@@ -67,8 +67,8 @@ const isModuleImported = (moduleName: string) => {
 
 const reimportModule = async (moduleName: string) => {
   if (isModuleImported(moduleName)) {
-    console.log(`👺👺👺 Reimporting ${moduleName} 👺👺👺`);
     try {
+      hdx(`Reimporting ${moduleName}...`);
       require(moduleName);
     } catch (e) {
       hdx(`Failed to reimport ${moduleName}. e = ${e}`);
@@ -226,17 +226,14 @@ export const initSDK = (config: SDKConfig) => {
   }
 
   // reimport all installed modules
-  // reimportModule('express');
-  // reimportModule('koa');
-  // reimportModule('mongodb');
-  // reimportModule('connect');
-  // reimportModule('bunyan');
-  // reimportModule('amqplib/callback_apji');
-  // reimportModule('@cucumber/cucumber');
-  // reimportModule('dataloader');
-  // reimportModule('lru-memoizer');
-  // reimportModule('mongoose');
-  // reimportModule('socket.io');
+  // TODO: reinit all (might not work for all instrumentations) ?
+  // servers
+  reimportModule('express');
+  reimportModule('koa');
+  // loggers
+  reimportModule('bunyan');
+  reimportModule('pino');
+  reimportModule('winston');
 };
 
 const _shutdown = () => {

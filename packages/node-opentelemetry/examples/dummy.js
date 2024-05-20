@@ -1,22 +1,24 @@
-const axios = require('axios');
 const compression = require('compression');
-const express = require('express');
 const http = require('http');
+const https = require('https');
+const dns = require('dns');
+
+// TEST INSTRUMENTATIONS
+const Koa = require('koa');
+const Sentry = require('@sentry/node');
+const bunyan = require('bunyan');
+const express = require('express');
+const mongoose = require('mongoose');
 const pino = require('pino');
 const winston = require('winston');
-const Sentry = require('@sentry/node');
 
 const {
   getPinoTransport,
   getWinstonTransport,
 } = require('../build/src/logger');
-const { setTraceAttributes } = require('../build/src');
-// const { shutdown } = require('@hyperdx/node-opentelemetry');
+const { initSDK, setTraceAttributes, shutdown } = require('../build/src');
 
-// process.on('SIGINT', async () => {
-//   await shutdown();
-//   process.exit(0);
-// });
+initSDK({});
 
 Sentry.init({
   dsn: 'http://public@localhost:5000/1',
@@ -35,8 +37,20 @@ Sentry.init({
   ],
 });
 
-const PORT = parseInt(process.env.PORT || '7788');
-const app = express();
+process.on('SIGINT', async () => {
+  await shutdown();
+  process.exit(0);
+});
+
+const initInstrumentationTest = async (moduleName, runTest) => {
+  logger.info(`Running tests for ${moduleName}`);
+  try {
+    await runTest();
+    logger.info(`Tests for ${moduleName} passed`);
+  } catch (error) {
+    logger.error(`Tests for ${moduleName} failed`, error);
+  }
+};
 
 const logger = winston.createLogger({
   level: 'info',
@@ -56,6 +70,11 @@ const pinoLogger = pino(
     ],
   }),
 );
+
+const bunyanLogger = bunyan.createLogger({ name: 'myapp' });
+
+const PORT = parseInt(process.env.PORT || '7788');
+const app = express();
 
 async function sendGetRequest() {
   const postData = JSON.stringify({
@@ -120,13 +139,49 @@ app.use((req, res, next) => {
 
 app.use(express.json());
 
-app.post('/dump', (req, res) => {
-  const body = req.body;
-  console.log(body);
-  res.send('Hello World');
+app.get('/instruments', async (req, res) => {
+  // not working
+  // await initInstrumentationTest('mongodb', async () => {
+  //   const mongoClient = new MongoClient('mongodb://localhost:27017');
+  //   await mongoClient.connect();
+  //   const db = mongoClient.db('hyperdx');
+  //   await db.collection('users').find({}).toArray();
+  // });
+
+  await Promise.all([
+    initInstrumentationTest('dns', async () => {
+      return new Promise((resolve, reject) => {
+        dns.lookup('example.com', (err, address, family) => {
+          if (err) {
+            reject(err);
+          } else {
+            resolve(address);
+          }
+        });
+      });
+    }),
+    initInstrumentationTest('https', async () => {
+      return new Promise((resolve, reject) => {
+        https.get('https://example.com', (res) => {
+          res.on('data', (data) => {
+            resolve(data.toString());
+          });
+        });
+      });
+    }),
+    initInstrumentationTest('mongoose', async () => {
+      await mongoose.connect('mongodb://localhost:27017/hyperdx');
+      const User = mongoose.model('User', {
+        name: String,
+      });
+      await User.find({}, { name: 1 }).exec();
+    }),
+  ]);
+
+  res.send('Tests completed');
 });
 
-app.get('/', async (req, res) => {
+app.get('/logs', async (req, res) => {
   console.debug({
     headers: req.headers,
     method: req.method,
@@ -143,8 +198,11 @@ app.get('/', async (req, res) => {
   });
   pinoLogger.info('Pino 🍕');
 
+  bunyanLogger.info('Bunyan 🍕');
+
   console.log(await sendGetRequest());
   // console.log(await axios.get('https://hyperdx.free.beeceptor.com'));
+  //
 
   res.json({
     foo: 'bar',
@@ -161,4 +219,13 @@ app.use(Sentry.Handlers.errorHandler());
 
 app.listen(PORT, () => {
   console.log(`Listening for requests on http://localhost:${PORT}`);
+});
+
+// Koa
+const koaApp = new Koa();
+koaApp.use(async (ctx) => {
+  ctx.body = 'Hello Koa';
+});
+koaApp.listen(PORT + 1, () => {
+  console.log(`Koa server listening on http://localhost:${PORT + 1}`);
 });
