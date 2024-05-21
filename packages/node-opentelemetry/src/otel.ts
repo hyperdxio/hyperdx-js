@@ -1,5 +1,9 @@
 import { DiagLogLevel } from '@opentelemetry/api';
-import { InstrumentationBase } from '@opentelemetry/instrumentation';
+import {
+  InstrumentationBase,
+  Instrumentation,
+  InstrumentationNodeModuleDefinition,
+} from '@opentelemetry/instrumentation';
 import { NodeSDK } from '@opentelemetry/sdk-node';
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-proto';
 import { Resource } from '@opentelemetry/resources';
@@ -57,17 +61,26 @@ const setOtelEnvs = () => {
 let sdk: NodeSDK;
 let hdxConsoleInstrumentation: HyperDXConsoleInstrumentation;
 
-const isModuleImported = (moduleName: string) => {
+const getModuleId = (moduleName: string) => {
   try {
-    require.resolve(moduleName);
-    return true;
+    const moduleId = require.resolve(moduleName);
+    return moduleId;
   } catch (e) {
-    return false;
+    return null;
+  }
+};
+
+const deleteModuleCache = (moduleName: string) => {
+  const moduleId = getModuleId(moduleName);
+  if (moduleId !== null) {
+    delete require.cache[moduleId];
+    hdx(`Deleted cache for ${moduleName}`);
   }
 };
 
 const reimportModule = async (moduleName: string) => {
-  if (isModuleImported(moduleName)) {
+  const moduleId = getModuleId(moduleName);
+  if (moduleId !== null) {
     try {
       hdx(`Reimporting ${moduleName}...`);
       require(moduleName);
@@ -116,6 +129,49 @@ export const initSDK = (config: SDKConfig) => {
     headers: exporterHeaders,
   });
 
+  const allInstrumentations = [
+    ...getNodeAutoInstrumentations({
+      '@opentelemetry/instrumentation-http': defaultAdvancedNetworkCapture
+        ? getHyperDXHTTPInstrumentationConfig({
+            httpCaptureHeadersClientRequest:
+              env.OTEL_INSTRUMENTATION_HTTP_CAPTURE_HEADERS_CLIENT_REQUEST,
+            httpCaptureHeadersClientResponse:
+              env.OTEL_INSTRUMENTATION_HTTP_CAPTURE_HEADERS_CLIENT_RESPONSE,
+            httpCaptureHeadersServerRequest:
+              env.OTEL_INSTRUMENTATION_HTTP_CAPTURE_HEADERS_SERVER_REQUEST,
+            httpCaptureHeadersServerResponse:
+              env.OTEL_INSTRUMENTATION_HTTP_CAPTURE_HEADERS_SERVER_RESPONSE,
+          })
+        : { enabled: true },
+      // FIXME: issue detected with fs instrumentation (infinite loop)
+      '@opentelemetry/instrumentation-fs': {
+        enabled: false,
+      },
+      ...config.instrumentations,
+    }),
+    ...(config.additionalInstrumentations ?? []),
+  ];
+
+  const _targetModuleNames: Set<string> = new Set();
+
+  if (config.programmaticImports) {
+    for (const instrumentation of allInstrumentations) {
+      // https://github.com/open-telemetry/opentelemetry-js/blob/20182d8804f0742ddb1b2543ad9de0d88a941a65/experimental/packages/opentelemetry-instrumentation/src/platform/node/instrumentation.ts#L61
+      let modules: InstrumentationNodeModuleDefinition[] = (
+        instrumentation as any
+      ).init();
+      if (modules && !Array.isArray(modules)) {
+        modules = [modules];
+      }
+
+      if (Array.isArray(modules)) {
+        for (const module of modules) {
+          _targetModuleNames.add(module.name);
+        }
+      }
+    }
+  }
+
   sdk = new NodeSDK({
     resource: new Resource({
       // https://opentelemetry.io/docs/specs/semconv/resource/#telemetry-sdk-experimental
@@ -133,28 +189,7 @@ export const initSDK = (config: SDKConfig) => {
         enableHDXGlobalContext: defaultBetaMode,
       }),
     ],
-    instrumentations: [
-      getNodeAutoInstrumentations({
-        '@opentelemetry/instrumentation-http': defaultAdvancedNetworkCapture
-          ? getHyperDXHTTPInstrumentationConfig({
-              httpCaptureHeadersClientRequest:
-                env.OTEL_INSTRUMENTATION_HTTP_CAPTURE_HEADERS_CLIENT_REQUEST,
-              httpCaptureHeadersClientResponse:
-                env.OTEL_INSTRUMENTATION_HTTP_CAPTURE_HEADERS_CLIENT_RESPONSE,
-              httpCaptureHeadersServerRequest:
-                env.OTEL_INSTRUMENTATION_HTTP_CAPTURE_HEADERS_SERVER_REQUEST,
-              httpCaptureHeadersServerResponse:
-                env.OTEL_INSTRUMENTATION_HTTP_CAPTURE_HEADERS_SERVER_RESPONSE,
-            })
-          : { enabled: true },
-        // FIXME: issue detected with fs instrumentation (infinite loop)
-        '@opentelemetry/instrumentation-fs': {
-          enabled: false,
-        },
-        ...config.instrumentations,
-      }),
-      ...(config.additionalInstrumentations ?? []),
-    ],
+    instrumentations: allInstrumentations,
   });
 
   if (env.OTEL_EXPORTER_OTLP_HEADERS || env.HYPERDX_API_KEY) {
@@ -227,20 +262,10 @@ export const initSDK = (config: SDKConfig) => {
     Sentry.initSDK();
   }
 
-  // reimport all installed modules
-  // TODO: reinit all (might not work for all instrumentations) ?
   if (config.programmaticImports) {
-    // built-in modules
-    reimportModule('dns');
-    // servers
-    reimportModule('express');
-    reimportModule('koa');
-    // dbs
-    reimportModule('ioredis');
-    // loggers
-    reimportModule('bunyan');
-    reimportModule('pino');
-    reimportModule('winston');
+    for (const targetModuleName of _targetModuleNames) {
+      reimportModule(targetModuleName);
+    }
   }
 };
 

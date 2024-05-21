@@ -1,3 +1,9 @@
+const { initSDK, setTraceAttributes, shutdown } = require('../build/src');
+
+initSDK({
+  programmaticImports: true,
+});
+
 const compression = require('compression');
 const http = require('http');
 const https = require('https');
@@ -8,21 +14,17 @@ const Koa = require('koa');
 const Sentry = require('@sentry/node');
 const bunyan = require('bunyan');
 const express = require('express');
-const mongoose = require('mongoose');
+const { MongoClient } = require('mongodb');
 const pino = require('pino');
 const winston = require('winston');
 const IORedis = require('ioredis');
 const Redis = require('redis');
+const mongoose = require('mongoose');
 
 const {
   getPinoTransport,
   getWinstonTransport,
 } = require('../build/src/logger');
-const { initSDK, setTraceAttributes, shutdown } = require('../build/src');
-
-initSDK({
-  programmaticImports: true,
-});
 
 Sentry.init({
   dsn: 'http://public@localhost:5000/1',
@@ -150,7 +152,7 @@ app.get('/instruments', async (req, res) => {
       const mongoClient = new MongoClient('mongodb://localhost:27017');
       await mongoClient.connect();
       const db = mongoClient.db('hyperdx');
-      await db.collection('users').find({}).toArray();
+      await db.collection('teams').find({}).toArray();
     }),
     // FIXME: not working
     initInstrumentationTest('mongoose', async () => {
