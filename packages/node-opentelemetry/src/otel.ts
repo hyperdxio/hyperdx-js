@@ -102,23 +102,16 @@ export const initSDK = (config: SDKConfig) => {
       'telemetry.distro.version': PKG_VERSION,
     }),
     // metricReader: metricReader,
-    ...(defaultBetaMode
-      ? {
-          spanProcessor: new HyperDXSpanProcessor(
-            new OTLPTraceExporter({
-              timeoutMillis: DEFAULT_OTEL_EXPORTER_OTLP_TRACES_TIMEOUT,
-              url: DEFAULT_OTEL_TRACES_EXPORTER_URL,
-              headers: exporterHeaders,
-            }),
-          ) as any,
-        }
-      : {
-          traceExporter: new OTLPTraceExporter({
-            timeoutMillis: DEFAULT_OTEL_EXPORTER_OTLP_TRACES_TIMEOUT,
-            url: DEFAULT_OTEL_TRACES_EXPORTER_URL,
-            headers: exporterHeaders,
-          }),
+    spanProcessors: [
+      new HyperDXSpanProcessor({
+        exporter: new OTLPTraceExporter({
+          timeoutMillis: DEFAULT_OTEL_EXPORTER_OTLP_TRACES_TIMEOUT,
+          url: DEFAULT_OTEL_TRACES_EXPORTER_URL,
+          headers: exporterHeaders,
         }),
+        enableHDXGlobalContext: defaultBetaMode,
+      }),
+    ],
     instrumentations: [
       getNodeAutoInstrumentations({
         '@opentelemetry/instrumentation-http': defaultAdvancedNetworkCapture
