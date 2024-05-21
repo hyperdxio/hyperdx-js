@@ -41,6 +41,7 @@ export type SDKConfig = {
   consoleCapture?: boolean;
   experimentalExceptionCapture?: boolean;
   instrumentations?: InstrumentationConfigMap;
+  programmaticImports?: boolean; // TEMP
   stopOnTerminationSignals?: boolean;
 };
 
@@ -172,6 +173,7 @@ export const initSDK = (config: SDKConfig) => {
           samplerArg: DEFAULT_OTEL_TRACES_SAMPLER_ARG,
           serviceName: DEFAULT_SERVICE_NAME,
           stopOnTerminationSignals,
+          programmaticImports: config.programmaticImports,
         },
         null,
         2,
@@ -227,13 +229,19 @@ export const initSDK = (config: SDKConfig) => {
 
   // reimport all installed modules
   // TODO: reinit all (might not work for all instrumentations) ?
-  // servers
-  reimportModule('express');
-  reimportModule('koa');
-  // loggers
-  reimportModule('bunyan');
-  reimportModule('pino');
-  reimportModule('winston');
+  if (config.programmaticImports) {
+    // built-in modules
+    reimportModule('dns');
+    // servers
+    reimportModule('express');
+    reimportModule('koa');
+    // dbs
+    reimportModule('ioredis');
+    // loggers
+    reimportModule('bunyan');
+    reimportModule('pino');
+    reimportModule('winston');
+  }
 };
 
 const _shutdown = () => {

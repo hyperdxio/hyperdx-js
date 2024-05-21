@@ -11,6 +11,8 @@ const express = require('express');
 const mongoose = require('mongoose');
 const pino = require('pino');
 const winston = require('winston');
+const IORedis = require('ioredis');
+const Redis = require('redis');
 
 const {
   getPinoTransport,
@@ -18,7 +20,9 @@ const {
 } = require('../build/src/logger');
 const { initSDK, setTraceAttributes, shutdown } = require('../build/src');
 
-initSDK({});
+initSDK({
+  programmaticImports: true,
+});
 
 Sentry.init({
   dsn: 'http://public@localhost:5000/1',
@@ -140,15 +144,43 @@ app.use((req, res, next) => {
 app.use(express.json());
 
 app.get('/instruments', async (req, res) => {
-  // not working
-  // await initInstrumentationTest('mongodb', async () => {
-  //   const mongoClient = new MongoClient('mongodb://localhost:27017');
-  //   await mongoClient.connect();
-  //   const db = mongoClient.db('hyperdx');
-  //   await db.collection('users').find({}).toArray();
-  // });
-
   await Promise.all([
+    // FIXME: not working
+    initInstrumentationTest('mongodb', async () => {
+      const mongoClient = new MongoClient('mongodb://localhost:27017');
+      await mongoClient.connect();
+      const db = mongoClient.db('hyperdx');
+      await db.collection('users').find({}).toArray();
+    }),
+    // FIXME: not working
+    initInstrumentationTest('mongoose', async () => {
+      await mongoose.connect('mongodb://localhost:27017/hyperdx');
+      const User = mongoose.model('User', {
+        name: String,
+      });
+      await User.find({}, { name: 1 }).exec();
+    }),
+    initInstrumentationTest('ioredis', async () => {
+      const redis = new IORedis({
+        host: 'localhost',
+        port: 6379,
+      });
+      await redis.set('foo', 'bar');
+      await redis.get('foo');
+    }),
+    initInstrumentationTest('redis', async () => {
+      const redis = await Redis.createClient({
+        host: 'localhost',
+        port: 6379,
+      })
+        .on('error', (error) => {
+          logger.error('Redis error', error);
+        })
+        .connect();
+      await redis.set('foo1', 'bar1');
+      await redis.get('foo1');
+      await redis.disconnect();
+    }),
     initInstrumentationTest('dns', async () => {
       return new Promise((resolve, reject) => {
         dns.lookup('example.com', (err, address, family) => {
@@ -168,13 +200,6 @@ app.get('/instruments', async (req, res) => {
           });
         });
       });
-    }),
-    initInstrumentationTest('mongoose', async () => {
-      await mongoose.connect('mongodb://localhost:27017/hyperdx');
-      const User = mongoose.model('User', {
-        name: String,
-      });
-      await User.find({}, { name: 1 }).exec();
     }),
   ]);
 
