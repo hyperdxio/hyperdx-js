@@ -1,11 +1,18 @@
-import { DiagLogLevel } from '@opentelemetry/api';
-import { InstrumentationBase } from '@opentelemetry/instrumentation';
+import path from 'path';
+
+import { satisfies } from 'semver';
+import { DiagLogLevel, diag } from '@opentelemetry/api';
+import {
+  InstrumentationBase,
+  Instrumentation,
+  InstrumentationModuleDefinition,
+} from '@opentelemetry/instrumentation';
 import { NodeSDK } from '@opentelemetry/sdk-node';
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-proto';
 import { Resource } from '@opentelemetry/resources';
 import {
-  getNodeAutoInstrumentations,
   InstrumentationConfigMap,
+  getNodeAutoInstrumentations,
 } from '@opentelemetry/auto-instrumentations-node';
 
 import * as Sentry from './sentry';
@@ -41,6 +48,7 @@ export type SDKConfig = {
   consoleCapture?: boolean;
   experimentalExceptionCapture?: boolean;
   instrumentations?: InstrumentationConfigMap;
+  programmaticImports?: boolean; // TEMP
   stopOnTerminationSignals?: boolean;
 };
 
@@ -55,6 +63,31 @@ const setOtelEnvs = () => {
 
 let sdk: NodeSDK;
 let hdxConsoleInstrumentation: HyperDXConsoleInstrumentation;
+
+const getModuleId = (moduleName: string) => {
+  try {
+    const moduleId = require.resolve(moduleName);
+    return moduleId;
+  } catch (e) {
+    return null;
+  }
+};
+
+// https://github.com/open-telemetry/opentelemetry-js/blob/e49c4c7f42c6c444da3f802687cfa4f2d6983f46/experimental/packages/opentelemetry-instrumentation/src/platform/node/instrumentation.ts#L360
+const isSupported = (
+  supportedVersions: string[],
+  version?: string,
+  includePrerelease?: boolean,
+): boolean => {
+  if (typeof version === 'undefined') {
+    // If we don't have the version, accept the wildcard case only
+    return supportedVersions.includes('*');
+  }
+
+  return supportedVersions.some((supportedVersion) => {
+    return satisfies(version, supportedVersion, { includePrerelease });
+  });
+};
 
 export const initSDK = (config: SDKConfig) => {
   hdx('Setting otel envs');
@@ -95,6 +128,29 @@ export const initSDK = (config: SDKConfig) => {
     headers: exporterHeaders,
   });
 
+  const allInstrumentations = [
+    ...getNodeAutoInstrumentations({
+      '@opentelemetry/instrumentation-http': defaultAdvancedNetworkCapture
+        ? getHyperDXHTTPInstrumentationConfig({
+            httpCaptureHeadersClientRequest:
+              env.OTEL_INSTRUMENTATION_HTTP_CAPTURE_HEADERS_CLIENT_REQUEST,
+            httpCaptureHeadersClientResponse:
+              env.OTEL_INSTRUMENTATION_HTTP_CAPTURE_HEADERS_CLIENT_RESPONSE,
+            httpCaptureHeadersServerRequest:
+              env.OTEL_INSTRUMENTATION_HTTP_CAPTURE_HEADERS_SERVER_REQUEST,
+            httpCaptureHeadersServerResponse:
+              env.OTEL_INSTRUMENTATION_HTTP_CAPTURE_HEADERS_SERVER_RESPONSE,
+          })
+        : { enabled: true },
+      // FIXME: issue detected with fs instrumentation (infinite loop)
+      '@opentelemetry/instrumentation-fs': {
+        enabled: false,
+      },
+      ...config.instrumentations,
+    }),
+    ...(config.additionalInstrumentations ?? []),
+  ];
+
   sdk = new NodeSDK({
     resource: new Resource({
       // https://opentelemetry.io/docs/specs/semconv/resource/#telemetry-sdk-experimental
@@ -112,28 +168,7 @@ export const initSDK = (config: SDKConfig) => {
         enableHDXGlobalContext: defaultBetaMode,
       }),
     ],
-    instrumentations: [
-      getNodeAutoInstrumentations({
-        '@opentelemetry/instrumentation-http': defaultAdvancedNetworkCapture
-          ? getHyperDXHTTPInstrumentationConfig({
-              httpCaptureHeadersClientRequest:
-                env.OTEL_INSTRUMENTATION_HTTP_CAPTURE_HEADERS_CLIENT_REQUEST,
-              httpCaptureHeadersClientResponse:
-                env.OTEL_INSTRUMENTATION_HTTP_CAPTURE_HEADERS_CLIENT_RESPONSE,
-              httpCaptureHeadersServerRequest:
-                env.OTEL_INSTRUMENTATION_HTTP_CAPTURE_HEADERS_SERVER_REQUEST,
-              httpCaptureHeadersServerResponse:
-                env.OTEL_INSTRUMENTATION_HTTP_CAPTURE_HEADERS_SERVER_RESPONSE,
-            })
-          : { enabled: true },
-        // FIXME: issue detected with fs instrumentation (infinite loop)
-        '@opentelemetry/instrumentation-fs': {
-          enabled: false,
-        },
-        ...config.instrumentations,
-      }),
-      ...(config.additionalInstrumentations ?? []),
-    ],
+    instrumentations: allInstrumentations,
   });
 
   if (env.OTEL_EXPORTER_OTLP_HEADERS || env.HYPERDX_API_KEY) {
@@ -152,6 +187,7 @@ export const initSDK = (config: SDKConfig) => {
           samplerArg: DEFAULT_OTEL_TRACES_SAMPLER_ARG,
           serviceName: DEFAULT_SERVICE_NAME,
           stopOnTerminationSignals,
+          programmaticImports: config.programmaticImports,
         },
         null,
         2,
@@ -203,6 +239,115 @@ export const initSDK = (config: SDKConfig) => {
     console.warn(`${LOG_PREFIX} Experimental exception capture is enabled`);
     // WARNING: make it async and non-blocking so the main process will load sentry SDK first
     Sentry.initSDK();
+  }
+
+  if (config.programmaticImports) {
+    for (const instrumentation of allInstrumentations) {
+      // https://github.com/open-telemetry/opentelemetry-js/blob/20182d8804f0742ddb1b2543ad9de0d88a941a65/experimental/packages/opentelemetry-instrumentation/src/platform/node/instrumentation.ts#L61
+      let modules = (instrumentation as any).init();
+      if (modules && !Array.isArray(modules)) {
+        modules = [modules];
+      }
+
+      if (Array.isArray(modules)) {
+        for (const module of modules) {
+          // re-require moduleExports
+          if (getModuleId(module.name)) {
+            try {
+              // eslint-disable-next-line @typescript-eslint/no-var-requires
+              const _m = require(module.name);
+              module.moduleExports = _m;
+            } catch (e) {
+              diag.error('Error re-requiring moduleExports for nodejs module', {
+                module: module.name,
+                version: module.moduleVersion,
+                error: e,
+              });
+            }
+            try {
+              // eslint-disable-next-line @typescript-eslint/no-var-requires
+              const _pkg = require(path.join(module.name, 'package.json'));
+              module.moduleVersion = _pkg.version;
+            } catch (e) {
+              diag.error('Error re-requiring package.json for nodejs module', {
+                module: module.name,
+                version: module.moduleVersion,
+                error: e,
+              });
+            }
+
+            // https://github.com/open-telemetry/opentelemetry-js/blob/e49c4c7f42c6c444da3f802687cfa4f2d6983f46/experimental/packages/opentelemetry-instrumentation/src/platform/node/instrumentation.ts#L265
+            if (
+              isSupported(
+                module.supportedVersions,
+                module.moduleVersion,
+                module.includePrerelease,
+              ) &&
+              typeof module.patch === 'function' &&
+              module.moduleExports
+            ) {
+              diag.debug(
+                'Applying instrumentation patch for nodejs module on instrumentation enabled',
+                {
+                  module: module.name,
+                  version: module.moduleVersion,
+                },
+              );
+              try {
+                module.patch(module.moduleExports, module.moduleVersion);
+              } catch (e) {
+                diag.error(
+                  'Error applying instrumentation patch for nodejs module',
+                  e,
+                );
+              }
+            }
+
+            const files = module.files ?? [];
+            const supportedFileInstrumentations = files.filter((f) =>
+              isSupported(
+                f.supportedVersions,
+                module.moduleVersion,
+                module.includePrerelease,
+              ),
+            );
+
+            for (const sfi of supportedFileInstrumentations) {
+              try {
+                // eslint-disable-next-line @typescript-eslint/no-var-requires
+                const _m = require(sfi.name);
+                sfi.moduleExports = _m;
+              } catch (e) {
+                diag.error(
+                  'Error re-requiring moduleExports for nodejs module file',
+                  e,
+                );
+                continue;
+              }
+
+              diag.debug(
+                'Applying instrumentation patch for nodejs module file on require hook',
+                {
+                  module: module.name,
+                  version: module.moduleVersion,
+                  fileName: sfi.name,
+                },
+              );
+
+              try {
+                // patch signature is not typed, so we cast it assuming it's correct
+                sfi.patch(sfi.moduleExports, module.moduleVersion);
+              } catch (e) {
+                diag.error(
+                  'Error applying instrumentation patch for nodejs module file',
+                  e,
+                );
+              }
+            }
+          }
+        }
+      }
+    }
   }
 };
 
