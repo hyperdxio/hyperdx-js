@@ -53,6 +53,7 @@
     "lodash.isplainobject": "^4.0.6",
     "lodash.isstring": "^4.0.1",
     "pino-abstract-transport": "^1.0.0",
+    "semver": "^7.6.2",
     "shimmer": "^1.2.1",
     "tslib": "^2.5.3",
     "winston-transport": "^4.7.0"
@@ -68,7 +69,8 @@
     "fastify": "^4.27.0",
     "ioredis": "^5.4.1",
     "koa": "^2.15.3",
-    "mongoose": "^8.4.0",
+    "mongodb": "^6.6.2",
+    "mongoose": "^6.12.8",
     "pino": "^8.14.1",
     "redis": "^4.6.14"
   },
