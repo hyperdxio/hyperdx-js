@@ -1,6 +1,3 @@
-const compression = require('compression');
-const express = require('express');
-
 const { diag, DiagConsoleLogger, DiagLogLevel } = require('@opentelemetry/api');
 const {
   BatchSpanProcessor,
@@ -13,6 +10,7 @@ const { registerInstrumentations } = require('@opentelemetry/instrumentation');
 const {
   ExpressInstrumentation,
 } = require('@opentelemetry/instrumentation-express');
+const { HttpInstrumentation } = require('@opentelemetry/instrumentation-http');
 
 const { ExceptionInstrumentation } = require('../build/src');
 
@@ -43,11 +41,14 @@ provider.register();
 
 registerInstrumentations({
   instrumentations: [
-    new ExceptionInstrumentation(NodeTracerProvider, BatchSpanProcessor),
+    new ExceptionInstrumentation(),
+    new HttpInstrumentation(),
     new ExpressInstrumentation(),
   ],
 });
 
+const compression = require('compression');
+const express = require('express');
 const Sentry = require('@sentry/node');
 
 Sentry.init({
