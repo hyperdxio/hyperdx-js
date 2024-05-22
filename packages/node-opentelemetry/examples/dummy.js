@@ -1,8 +1,8 @@
-const { initSDK, setTraceAttributes, shutdown } = require('../build/src');
-
-initSDK({
-  programmaticImports: true,
-});
+// Spin up DBs
+// MySQL:
+// docker run --rm --name some-mysql -e MYSQL_ROOT_PASSWORD=my-secret-pw -p 3306:3306 mysql:latest
+// Postgres:
+// docker run --rm --name some-postgres -e POSTGRES_PASSWORD=my-secret-pw -p 5432:5432 postgres:latest
 
 const compression = require('compression');
 const http = require('http');
@@ -10,21 +10,32 @@ const https = require('https');
 const dns = require('dns');
 
 // TEST INSTRUMENTATIONS
+const Hapi = require('@hapi/hapi');
+const IORedis = require('ioredis');
 const Koa = require('koa');
+const Redis = require('redis');
 const Sentry = require('@sentry/node');
 const bunyan = require('bunyan');
 const express = require('express');
-const { MongoClient } = require('mongodb');
+const fastify = require('fastify');
+const knex = require('knex');
+const mongodb = require('mongodb');
+const mongoose = require('mongoose');
+const mysql = require('mysql');
+const mysql2 = require('mysql2');
+const pg = require('pg');
 const pino = require('pino');
 const winston = require('winston');
-const IORedis = require('ioredis');
-const Redis = require('redis');
-const mongoose = require('mongoose');
 
 const {
   getPinoTransport,
   getWinstonTransport,
 } = require('../build/src/logger');
+
+const { initSDK, setTraceAttributes, shutdown } = require('../build/src');
+initSDK({
+  programmaticImports: true,
+});
 
 Sentry.init({
   dsn: 'http://public@localhost:5000/1',
@@ -91,7 +102,7 @@ async function sendGetRequest() {
   const options = {
     hostname: 'hyperdx.free.beeceptor.com', // Replace with the API hostname
     method: 'POST',
-    paht: '/',
+    path: '/',
     headers: {
       'Content-Type': 'application/json',
       'Content-Length': postData.length,
@@ -147,14 +158,12 @@ app.use(express.json());
 
 app.get('/instruments', async (req, res) => {
   await Promise.all([
-    // FIXME: not working
     initInstrumentationTest('mongodb', async () => {
-      const mongoClient = new MongoClient('mongodb://localhost:27017');
+      const mongoClient = new mongodb.MongoClient('mongodb://localhost:27017');
       await mongoClient.connect();
       const db = mongoClient.db('hyperdx');
       await db.collection('teams').find({}).toArray();
     }),
-    // FIXME: not working
     initInstrumentationTest('mongoose', async () => {
       await mongoose.connect('mongodb://localhost:27017/hyperdx');
       const User = mongoose.model('User', {
@@ -182,6 +191,56 @@ app.get('/instruments', async (req, res) => {
       await redis.set('foo1', 'bar1');
       await redis.get('foo1');
       await redis.disconnect();
+    }),
+    initInstrumentationTest('pg', async () => {
+      const client = new pg.Client({
+        user: 'postgres',
+        host: 'localhost',
+        password: 'my-secret-pw',
+        port: 5432,
+      });
+      await client.connect();
+      const res = await client.query('SELECT $1::text as message', [
+        'Hello world!',
+      ]);
+      await client.end();
+    }),
+    initInstrumentationTest('mysql', async () => {
+      const connection = mysql.createConnection({
+        host: 'localhost',
+        user: 'root',
+        password: 'my-secret-pw',
+        port: 3306,
+      });
+      connection.connect((err) => {
+        if (err) {
+          logger.error('MySQL connection error', err);
+        }
+      });
+      connection.query('SELECT 1 + 1 AS solution', (error, results, fields) => {
+        // blabla
+      });
+    }),
+    initInstrumentationTest('mysql2', async () => {
+      const connection = await mysql2.createConnection({
+        host: 'localhost',
+        user: 'root',
+        password: 'my-secret-pw',
+        port: 3306,
+      });
+      await connection.query('SELECT 1 + 1 AS solution');
+    }),
+    initInstrumentationTest('knex', async () => {
+      const knexInstance = knex({
+        client: 'pg',
+        connection: {
+          user: 'postgres',
+          host: 'localhost',
+          password: 'my-secret-pw',
+          port: 5432,
+        },
+      });
+      await knexInstance.raw('SELECT 1+1 as result');
     }),
     initInstrumentationTest('dns', async () => {
       return new Promise((resolve, reject) => {
@@ -255,4 +314,29 @@ koaApp.use(async (ctx) => {
 });
 koaApp.listen(PORT + 1, () => {
   console.log(`Koa server listening on http://localhost:${PORT + 1}`);
+});
+
+// Hapi
+const hapiServer = Hapi.server({
+  port: PORT + 2,
+  host: 'localhost',
+});
+hapiServer.route({
+  method: 'GET',
+  path: '/',
+  handler: (request, h) => {
+    return 'Hello Hapi';
+  },
+});
+hapiServer.start().then(() => {
+  console.log(`Hapi server listening on http://localhost:${PORT + 2}`);
+});
+
+// fastify
+const fastifyServer = fastify();
+fastifyServer.get('/', async (request, reply) => {
+  return 'Hello Fastify';
+});
+fastifyServer.listen(PORT + 3, () => {
+  console.log(`Fastify server listening on http://localhost:${PORT + 3}`);
 });
