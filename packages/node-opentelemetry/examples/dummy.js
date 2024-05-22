@@ -18,6 +18,7 @@ const Sentry = require('@sentry/node');
 const bunyan = require('bunyan');
 const express = require('express');
 const fastify = require('fastify');
+const graphql = require('graphql');
 const knex = require('knex');
 const mongodb = require('mongodb');
 const mongoose = require('mongoose');
@@ -65,7 +66,7 @@ const initInstrumentationTest = async (moduleName, runTest) => {
     await runTest();
     logger.info(`Tests for ${moduleName} passed`);
   } catch (error) {
-    logger.error(`Tests for ${moduleName} failed`, error);
+    Sentry.captureException(error);
   }
 };
 
@@ -260,6 +261,27 @@ app.get('/instruments', async (req, res) => {
             resolve(data.toString());
           });
         });
+      });
+    }),
+    initInstrumentationTest('graphql', async () => {
+      const schema = new graphql.GraphQLSchema({
+        query: new graphql.GraphQLObjectType({
+          name: 'Query',
+          fields: {
+            hello: {
+              type: graphql.GraphQLString,
+              resolve() {
+                return 'world';
+              },
+            },
+          },
+        }),
+      });
+
+      const query = '{ hello }';
+      await graphql.graphql({
+        schema,
+        source: query,
       });
     }),
   ]);
