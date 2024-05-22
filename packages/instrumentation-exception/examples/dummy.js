@@ -15,9 +15,9 @@ const { HttpInstrumentation } = require('@opentelemetry/instrumentation-http');
 const { ExceptionInstrumentation } = require('../build/src');
 
 const collectorOptions = {
-  url: 'https://in-otel.hyperdx.io/v1/traces', // url is optional and can be omitted - default is http://localhost:4318/v1/traces
+  url: 'http://localhost:4318/v1/traces', // url is optional and can be omitted - default is http://localhost:4318/v1/traces
   headers: {
-    Authorization: '1c2fb47f-c461-463b-8f76-2e330f082ad6',
+    Authorization: 'd4d513c3-fbe5-412c-8a52-ae8bef2fa81b',
   }, // an optional object containing custom headers to be sent with each request
   concurrencyLimit: 10, // an optional limit on pending requests
 };

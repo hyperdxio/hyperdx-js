@@ -44,7 +44,7 @@ export class ExceptionInstrumentation extends InstrumentationBase {
     return [
       new InstrumentationNodeModuleDefinition(
         '@sentry/node',
-        ['^7.0.0'],
+        ['^7.0.0', '^8.0.0'],
         (moduleExports) => {
           diag.debug(
             `Detected Sentry installed with SDK version: ${moduleExports.SDK_VERSION}`,
@@ -54,36 +54,20 @@ export class ExceptionInstrumentation extends InstrumentationBase {
             diag.info('Sentry client not found');
             // TODO: initialize Sentry SDK ??
           }
-          if (!(typeof moduleExports.addGlobalEventProcessor === 'function')) {
-            diag.error('Sentry.addGlobalEventProcessor is not available');
+
+          if (typeof moduleExports.addGlobalEventProcessor === 'function') {
+            diag.debug('Sentry.addGlobalEventProcessor is available');
+            moduleExports.addGlobalEventProcessor(this._registerEventProcessor);
+            diag.debug('Registered Sentry event hooks');
             return moduleExports;
           }
-          moduleExports.addGlobalEventProcessor(this._registerEventProcessor);
-          diag.debug('Registered Sentry event hooks');
-          return moduleExports;
-        },
-        (moduleExports) => {
-          // TODO: do we need to remove the event processor?
-        },
-      ),
-      new InstrumentationNodeModuleDefinition(
-        '@sentry/node',
-        ['^8.0.0'],
-        (moduleExports) => {
-          diag.debug(
-            `Detected Sentry installed with SDK version: ${moduleExports.SDK_VERSION}`,
-          );
-          const client = moduleExports.getCurrentHub()?.getClient();
-          if (!client) {
-            diag.info('Sentry client not found');
-            // TODO: initialize Sentry SDK ??
-          }
-          if (!(typeof moduleExports.addEventProcessor === 'function')) {
-            diag.error('Sentry.addGlobalEventProcessor is not available');
+          if (typeof moduleExports.addEventProcessor === 'function') {
+            diag.debug('Sentry.addEventProcessor is available');
+            moduleExports.addEventProcessor(this._registerEventProcessor);
+            diag.debug('Registered Sentry event hooks');
             return moduleExports;
           }
-          moduleExports.addEventProcessor(this._registerEventProcessor);
-          diag.debug('Registered Sentry event hooks');
+          diag.error('Sentry event processor not found');
           return moduleExports;
         },
         (moduleExports) => {
