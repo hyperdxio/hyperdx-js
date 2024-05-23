@@ -1,6 +1,7 @@
 import path from 'path';
 
 import { satisfies } from 'semver';
+import { ExceptionInstrumentation } from '@hyperdx/instrumentation-exception';
 import { DiagLogLevel, diag } from '@opentelemetry/api';
 import {
   InstrumentationBase,
@@ -15,7 +16,6 @@ import {
   getNodeAutoInstrumentations,
 } from '@opentelemetry/auto-instrumentations-node';
 
-import * as Sentry from './sentry';
 import HyperDXConsoleInstrumentation from './instrumentations/console';
 import HyperDXSpanProcessor from './spanProcessor';
 import hdx, { LOG_PREFIX as _LOG_PREFIX } from './debug';
@@ -128,6 +128,10 @@ export const initSDK = (config: SDKConfig) => {
     headers: exporterHeaders,
   });
 
+  const defaultExceptionCapture =
+    config.experimentalExceptionCapture ??
+    DEFAULT_HDX_NODE_EXPERIMENTAL_EXCEPTION_CAPTURE;
+
   const allInstrumentations = [
     ...getNodeAutoInstrumentations({
       '@opentelemetry/instrumentation-http': defaultAdvancedNetworkCapture
@@ -148,6 +152,7 @@ export const initSDK = (config: SDKConfig) => {
       },
       ...config.instrumentations,
     }),
+    ...(defaultExceptionCapture ? [new ExceptionInstrumentation()] : []),
     ...(config.additionalInstrumentations ?? []),
   ];
 
@@ -230,15 +235,6 @@ export const initSDK = (config: SDKConfig) => {
     process.on('SIGINT', () => {
       handleTerminationSignal('SIGINT');
     });
-  }
-
-  if (
-    config.experimentalExceptionCapture ??
-    DEFAULT_HDX_NODE_EXPERIMENTAL_EXCEPTION_CAPTURE
-  ) {
-    console.warn(`${LOG_PREFIX} Experimental exception capture is enabled`);
-    // WARNING: make it async and non-blocking so the main process will load sentry SDK first
-    Sentry.initSDK();
   }
 
   if (config.programmaticImports) {

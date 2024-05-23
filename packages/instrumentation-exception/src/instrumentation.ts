@@ -1,4 +1,4 @@
-import api, { Span, SpanKind, diag } from '@opentelemetry/api';
+import { Span, SpanKind, diag } from '@opentelemetry/api';
 import { ExceptionEventName } from '@opentelemetry/sdk-trace-base/build/src/enums';
 import {
   InstrumentationBase,
@@ -16,8 +16,6 @@ import { Event, EventHint, Exception, EventProcessor } from '@sentry/types';
 import { ExceptionInstrumentationConfig } from './types';
 import { jsonToString } from './utils';
 import { name as PKG_NAME, version as PKG_VERSION } from '../package.json';
-
-const tracer = api.trace.getTracer('@hyperdx/node-opentelemetry');
 
 // CUSTOM SEMANTIC CONVENTIONS
 const SEMATTRS_EXCEPTION_MODULES = 'exception.modules';
@@ -79,7 +77,7 @@ export class ExceptionInstrumentation extends InstrumentationBase {
 
   private _registerEventProcessor = (event: Event, hint: EventHint) => {
     try {
-      diag.debug('Received event');
+      diag.debug('Received Sentry event', event);
       if (this._isSentryEventAnException(event)) {
         this._startOtelSpanFromSentryEvent(event, hint);
       }
@@ -116,6 +114,7 @@ export class ExceptionInstrumentation extends InstrumentationBase {
     [event.exception?.values[0].type, event.transaction].join(' ');
 
   private _startOtelSpanFromSentryEvent = (event: Event, hint: EventHint) => {
+    const instrumentation = this;
     // FIXME: can't attach to the active span
     // since Sentry would overwrite the active span
     // let span = api.trace.getActiveSpan();
@@ -226,11 +225,14 @@ export class ExceptionInstrumentation extends InstrumentationBase {
     };
     if (span == null) {
       isRootSpan = true;
-      span = tracer.startSpan(this._buildSingleSpanName(event), {
-        attributes,
-        startTime,
-        kind: SpanKind.INTERNAL,
-      });
+      span = instrumentation.tracer.startSpan(
+        this._buildSingleSpanName(event),
+        {
+          attributes,
+          startTime,
+          kind: SpanKind.INTERNAL,
+        },
+      );
     }
     // record exceptions
     for (const exception of event.exception?.values ?? []) {
