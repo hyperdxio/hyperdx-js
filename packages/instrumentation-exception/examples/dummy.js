@@ -77,7 +77,11 @@ app.use(compression());
 app.use(express.json());
 
 app.get('/error', (req, res) => {
-  Sentry.captureMessage('This is a test message');
+  Sentry.captureException('This is a test for capturing exception in text');
+  Sentry.captureException({
+    message: 'This is a test for capturing exception in object',
+    foo: 'bar',
+  });
   throw new RangeError('This is a test error');
 });
 
