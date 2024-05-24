@@ -1,5 +1,6 @@
 import path from 'path';
 
+import { wrap } from 'shimmer';
 import { satisfies } from 'semver';
 import { ExceptionInstrumentation } from '@hyperdx/instrumentation-exception';
 import { DiagLogLevel, diag } from '@opentelemetry/api';
@@ -15,6 +16,7 @@ import {
   InstrumentationConfigMap,
   getNodeAutoInstrumentations,
 } from '@opentelemetry/auto-instrumentations-node';
+import { Hook, OnRequireFn } from 'require-in-the-middle';
 
 import HyperDXConsoleInstrumentation from './instrumentations/console';
 import HyperDXSpanProcessor from './spanProcessor';
@@ -39,6 +41,14 @@ import { version as PKG_VERSION } from '../package.json';
 const LOG_PREFIX = `⚠️  [INSTRUMENTOR]`;
 
 const env = process.env;
+
+// https://github.com/open-telemetry/opentelemetry-js/blob/e49c4c7f42c6c444da3f802687cfa4f2d6983f46/experimental/packages/opentelemetry-instrumentation/src/platform/node/instrumentation.ts#L49
+type InstrumentationHook =
+  | {
+      moduleName: string;
+      onRequire: OnRequireFn;
+    }
+  | Hook;
 
 export type SDKConfig = {
   additionalInstrumentations?: InstrumentationBase[];
@@ -203,8 +213,165 @@ export const initSDK = (config: SDKConfig) => {
       diag.debug('Enabling console instrumentation');
       hdxConsoleInstrumentation.enable();
     }
+
+    for (const instrumentation of allInstrumentations) {
+      const modules = (instrumentation as any)
+        ._modules as InstrumentationModuleDefinition[];
+      for (const module of modules) {
+        if (typeof module.patch === 'function') {
+          // benchmark when patch gets called
+          wrap(module, 'patch', (original) => {
+            return (...args: any[]) => {
+              const start = process.hrtime();
+              // @ts-ignore
+              const result = original.apply(this, args);
+              const end = process.hrtime(start);
+              diag.info(
+                `🚄🚄🚄 Patched ${module.name} in ${
+                  end[0] * 1e3 + end[1] / 1e6
+                } ms 🚄🚄🚄`,
+              );
+              return result;
+            };
+          });
+        }
+        for (const file of module.files) {
+          if (typeof file.patch === 'function') {
+            wrap(file, 'patch', (original) => {
+              return (...args: any[]) => {
+                const start = process.hrtime();
+                // @ts-ignore
+                const result = original.apply(this, args);
+                const end = process.hrtime(start);
+                diag.info(
+                  `🚄🚄🚄 Patched ${module.name} file ${file.name} in ${
+                    end[0] * 1e3 + end[1] / 1e6
+                  } ms 🚄🚄🚄`,
+                );
+                return result;
+              };
+            });
+          }
+        }
+      }
+    }
+
     diag.debug('Starting opentelemetry SDK');
     sdk.start();
+
+    if (config.programmaticImports) {
+      for (const instrumentation of allInstrumentations) {
+        const modules = (instrumentation as any)
+          ._modules as InstrumentationModuleDefinition[];
+        if (Array.isArray(modules)) {
+          // disable first before re-patching
+          instrumentation.disable();
+
+          for (const module of modules) {
+            // re-require moduleExports
+            if (getModuleId(module.name)) {
+              try {
+                // eslint-disable-next-line @typescript-eslint/no-var-requires
+                const _m = require(module.name);
+                module.moduleExports = _m;
+              } catch (e) {
+                diag.error(
+                  'Error re-requiring moduleExports for nodejs module',
+                  {
+                    module: module.name,
+                    version: module.moduleVersion,
+                    error: e,
+                  },
+                );
+              }
+              try {
+                // eslint-disable-next-line @typescript-eslint/no-var-requires
+                const _pkg = require(path.join(module.name, 'package.json'));
+                module.moduleVersion = _pkg.version;
+              } catch (e) {
+                diag.error(
+                  'Error re-requiring package.json for nodejs module',
+                  {
+                    module: module.name,
+                    version: module.moduleVersion,
+                    error: e,
+                  },
+                );
+              }
+
+              // https://github.com/open-telemetry/opentelemetry-js/blob/e49c4c7f42c6c444da3f802687cfa4f2d6983f46/experimental/packages/opentelemetry-instrumentation/src/platform/node/instrumentation.ts#L265
+              if (
+                isSupported(
+                  module.supportedVersions,
+                  module.moduleVersion,
+                  module.includePrerelease,
+                ) &&
+                typeof module.patch === 'function' &&
+                module.moduleExports
+              ) {
+                diag.debug(
+                  'Applying instrumentation patch for nodejs module on instrumentation enabled',
+                  {
+                    module: module.name,
+                    version: module.moduleVersion,
+                  },
+                );
+                try {
+                  module.patch(module.moduleExports, module.moduleVersion);
+                } catch (e) {
+                  diag.error(
+                    'Error applying instrumentation patch for nodejs module',
+                    e,
+                  );
+                }
+              }
+
+              const files = module.files ?? [];
+              const supportedFileInstrumentations = files.filter((f) =>
+                isSupported(
+                  f.supportedVersions,
+                  module.moduleVersion,
+                  module.includePrerelease,
+                ),
+              );
+
+              for (const sfi of supportedFileInstrumentations) {
+                try {
+                  // eslint-disable-next-line @typescript-eslint/no-var-requires
+                  const _m = require(sfi.name);
+                  sfi.moduleExports = _m;
+                } catch (e) {
+                  diag.error(
+                    'Error re-requiring moduleExports for nodejs module file',
+                    e,
+                  );
+                  continue;
+                }
+
+                diag.debug(
+                  'Applying instrumentation patch for nodejs module file on require hook',
+                  {
+                    module: module.name,
+                    version: module.moduleVersion,
+                    fileName: sfi.name,
+                  },
+                );
+
+                try {
+                  // patch signature is not typed, so we cast it assuming it's correct
+                  sfi.patch(sfi.moduleExports, module.moduleVersion);
+                } catch (e) {
+                  diag.error(
+                    'Error applying instrumentation patch for nodejs module file',
+                    e,
+                  );
+                }
+              }
+            }
+          }
+        }
+      }
+    }
 
     if (defaultBetaMode) {
       diag.debug(`Beta mode enabled, starting global context`);
@@ -235,115 +402,6 @@ export const initSDK = (config: SDKConfig) => {
     process.on('SIGINT', () => {
       handleTerminationSignal('SIGINT');
     });
-  }
-
-  if (config.programmaticImports) {
-    for (const instrumentation of allInstrumentations) {
-      // https://github.com/open-telemetry/opentelemetry-js/blob/20182d8804f0742ddb1b2543ad9de0d88a941a65/experimental/packages/opentelemetry-instrumentation/src/platform/node/instrumentation.ts#L61
-      let modules = (instrumentation as any).init();
-      if (modules && !Array.isArray(modules)) {
-        modules = [modules];
-      }
-
-      if (Array.isArray(modules)) {
-        for (const module of modules) {
-          // re-require moduleExports
-          if (getModuleId(module.name)) {
-            try {
-              // eslint-disable-next-line @typescript-eslint/no-var-requires
-              const _m = require(module.name);
-              module.moduleExports = _m;
-            } catch (e) {
-              diag.error('Error re-requiring moduleExports for nodejs module', {
-                module: module.name,
-                version: module.moduleVersion,
-                error: e,
-              });
-            }
-            try {
-              // eslint-disable-next-line @typescript-eslint/no-var-requires
-              const _pkg = require(path.join(module.name, 'package.json'));
-              module.moduleVersion = _pkg.version;
-            } catch (e) {
-              diag.error('Error re-requiring package.json for nodejs module', {
-                module: module.name,
-                version: module.moduleVersion,
-                error: e,
-              });
-            }
-
-            // https://github.com/open-telemetry/opentelemetry-js/blob/e49c4c7f42c6c444da3f802687cfa4f2d6983f46/experimental/packages/opentelemetry-instrumentation/src/platform/node/instrumentation.ts#L265
-            if (
-              isSupported(
-                module.supportedVersions,
-                module.moduleVersion,
-                module.includePrerelease,
-              ) &&
-              typeof module.patch === 'function' &&
-              module.moduleExports
-            ) {
-              diag.debug(
-                'Applying instrumentation patch for nodejs module on instrumentation enabled',
-                {
-                  module: module.name,
-                  version: module.moduleVersion,
-                },
-              );
-              try {
-                module.patch(module.moduleExports, module.moduleVersion);
-              } catch (e) {
-                diag.error(
-                  'Error applying instrumentation patch for nodejs module',
-                  e,
-                );
-              }
-            }
-
-            const files = module.files ?? [];
-            const supportedFileInstrumentations = files.filter((f) =>
-              isSupported(
-                f.supportedVersions,
-                module.moduleVersion,
-                module.includePrerelease,
-              ),
-            );
-
-            for (const sfi of supportedFileInstrumentations) {
-              try {
-                // eslint-disable-next-line @typescript-eslint/no-var-requires
-                const _m = require(sfi.name);
-                sfi.moduleExports = _m;
-              } catch (e) {
-                diag.error(
-                  'Error re-requiring moduleExports for nodejs module file',
-                  e,
-                );
-                continue;
-              }
-
-              diag.debug(
-                'Applying instrumentation patch for nodejs module file on require hook',
-                {
-                  module: module.name,
-                  version: module.moduleVersion,
-                  fileName: sfi.name,
-                },
-              );
-
-              try {
-                // patch signature is not typed, so we cast it assuming it's correct
-                sfi.patch(sfi.moduleExports, module.moduleVersion);
-              } catch (e) {
-                diag.error(
-                  'Error applying instrumentation patch for nodejs module file',
-                  e,
-                );
-              }
-            }
-          }
-        }
-      }
-    }
   }
 };
 
