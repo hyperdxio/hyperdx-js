@@ -1,5 +1,22 @@
 # @hyperdx/node-opentelemetry
 
+## 0.8.0-next.3
+
+### Minor Changes
+
+- 1092fca: style: deprecate hyperdx debug flag
+
+### Patch Changes
+
+- 133dfd7: dx: init sdk programmatically - pt1
+- 6b82cb1: feat: introduce internal profiling
+- aee31d1: style: use HyperDXSpanProcessor
+- 93da1df: feat: import @hyperdx/instrumentation-exception pkg
+- Updated dependencies [a93c519]
+- Updated dependencies [93da1df]
+- Updated dependencies [3bca092]
+  - @hyperdx/instrumentation-exception@0.1.0-next.0
+
 ## 0.8.0-next.2
 
 ### Patch Changes

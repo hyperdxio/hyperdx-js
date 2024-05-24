@@ -5,7 +5,20 @@
     "@hyperdx/browser": "0.20.0",
     "@hyperdx/deno": "0.0.2",
     "@hyperdx/node-logger": "0.4.0",
-    "@hyperdx/node-opentelemetry": "0.7.0"
+    "@hyperdx/node-opentelemetry": "0.7.0",
+    "@hyperdx/instrumentation-exception": "0.0.0"
   },
-  "changesets": ["clever-points-rhyme", "fifty-gifts-flow", "strong-months-act"]
+  "changesets": [
+    "clever-points-rhyme",
+    "curly-crews-deliver",
+    "curly-garlics-smell",
+    "early-owls-build",
+    "fifty-gifts-flow",
+    "gentle-sheep-roll",
+    "loud-actors-boil",
+    "orange-poems-peel",
+    "slow-days-reflect",
+    "small-zebras-sniff",
+    "strong-months-act"
+  ]
 }
