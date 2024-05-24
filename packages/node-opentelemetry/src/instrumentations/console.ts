@@ -37,6 +37,7 @@ export const _parseConsoleArgs = (args: any[]) => {
     : stringifiedArgs.join(' ');
 };
 
+// FIXME: this should extend InstrumentationBase
 export default class HyperDXConsoleInstrumentation {
   private readonly betaMode: boolean;
 
