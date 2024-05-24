@@ -32,8 +32,8 @@ const {
   getPinoTransport,
   getWinstonTransport,
 } = require('../build/src/logger');
-
 const { initSDK, setTraceAttributes, shutdown } = require('../build/src');
+
 initSDK({
   programmaticImports: true,
 });
@@ -319,7 +319,7 @@ app.get('/logs', async (req, res) => {
 });
 
 app.get('/error', (req, res) => {
-  Sentry.captureMessage('This is a test message');
+  Sentry.captureException(new Error('This is a test error'));
   throw new RangeError('This is a test error');
 });
 
