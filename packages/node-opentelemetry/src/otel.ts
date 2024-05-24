@@ -34,9 +34,9 @@ import {
   DEFAULT_SERVICE_NAME,
 } from './constants';
 import { hyperDXGlobalContext } from './context';
-import { version as PKG_VERSION, name as PKG_NAME } from '../package.json';
+import { version as PKG_VERSION } from '../package.json';
 
-const LOG_PREFIX = `[${PKG_NAME} v${PKG_VERSION}]`;
+const LOG_PREFIX = `⚠️  [INSTRUMENTOR]`;
 
 const env = process.env;
 
@@ -182,8 +182,10 @@ export const initSDK = (config: SDKConfig) => {
           advancedNetworkCapture: defaultAdvancedNetworkCapture,
           betaMode: defaultBetaMode,
           consoleCapture: consoleInstrumentationEnabled,
+          distroVersion: PKG_VERSION,
           endpoint: DEFAULT_OTEL_TRACES_EXPORTER_URL,
           logLevel: DEFAULT_OTEL_LOG_LEVEL,
+          programmaticImports: config.programmaticImports,
           propagators: env.OTEL_PROPAGATORS,
           resourceAttributes: env.OTEL_RESOURCE_ATTRIBUTES,
           resourceDetectors: env.OTEL_NODE_RESOURCE_DETECTORS,
@@ -191,7 +193,6 @@ export const initSDK = (config: SDKConfig) => {
           samplerArg: DEFAULT_OTEL_TRACES_SAMPLER_ARG,
           serviceName: DEFAULT_SERVICE_NAME,
           stopOnTerminationSignals,
-          programmaticImports: config.programmaticImports,
         },
         null,
         2,
