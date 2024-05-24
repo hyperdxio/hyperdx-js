@@ -18,7 +18,6 @@ import {
 
 import HyperDXConsoleInstrumentation from './instrumentations/console';
 import HyperDXSpanProcessor from './spanProcessor';
-import hdx, { LOG_PREFIX as _LOG_PREFIX } from './debug';
 import { getHyperDXHTTPInstrumentationConfig } from './instrumentations/http';
 import {
   DEFAULT_HDX_NODE_ADVANCED_NETWORK_CAPTURE,
@@ -35,9 +34,9 @@ import {
   DEFAULT_SERVICE_NAME,
 } from './constants';
 import { hyperDXGlobalContext } from './context';
-import { version as PKG_VERSION } from '../package.json';
+import { version as PKG_VERSION, name as PKG_NAME } from '../package.json';
 
-const LOG_PREFIX = `⚠️  ${_LOG_PREFIX}`;
+const LOG_PREFIX = `[${PKG_NAME} v${PKG_VERSION}]`;
 
 const env = process.env;
 
@@ -90,7 +89,7 @@ const isSupported = (
 };
 
 export const initSDK = (config: SDKConfig) => {
-  hdx('Setting otel envs');
+  diag.debug('Setting otel envs');
   setOtelEnvs();
 
   const stopOnTerminationSignals =
@@ -106,7 +105,7 @@ export const initSDK = (config: SDKConfig) => {
     console.warn(`${LOG_PREFIX} HYPERDX_API_KEY is not set`);
   }
 
-  hdx('Initializing OpenTelemetry SDK');
+  diag.debug('Initializing OpenTelemetry SDK');
   let consoleInstrumentationEnabled =
     config.consoleCapture ?? DEFAULT_HDX_NODE_CONSOLE_CAPTURE;
   if (DEFAULT_OTEL_LOG_LEVEL === DiagLogLevel.DEBUG) {
@@ -200,14 +199,14 @@ export const initSDK = (config: SDKConfig) => {
     );
 
     if (consoleInstrumentationEnabled) {
-      hdx('Enabling console instrumentation');
+      diag.debug('Enabling console instrumentation');
       hdxConsoleInstrumentation.enable();
     }
-    hdx('Starting opentelemetry SDK');
+    diag.debug('Starting opentelemetry SDK');
     sdk.start();
 
     if (defaultBetaMode) {
-      hdx(`Beta mode enabled, starting global context`);
+      diag.debug(`Beta mode enabled, starting global context`);
       hyperDXGlobalContext.start();
     }
   } else {
@@ -216,14 +215,14 @@ export const initSDK = (config: SDKConfig) => {
     );
   }
 
-  hdx(
+  diag.debug(
     stopOnTerminationSignals
       ? 'stopOnTerminationSignals enabled'
       : 'stopOnTerminationSignals disabled (user is responsible for graceful shutdown on termination signals)',
   );
 
   function handleTerminationSignal(signal: string) {
-    hdx(`${signal} received, shutting down...`);
+    diag.debug(`${signal} received, shutting down...`);
     _shutdown().finally(() => process.exit());
   }
 
@@ -359,6 +358,6 @@ const _shutdown = () => {
 };
 
 export const shutdown = () => {
-  hdx('shutdown() called');
+  diag.debug('shutdown() called');
   return _shutdown();
 };
