@@ -1,8 +1,6 @@
-import { Attributes, context, trace } from '@opentelemetry/api';
+import { Attributes, context, diag, trace } from '@opentelemetry/api';
 import { Span } from '@opentelemetry/sdk-trace-base';
 import { suppressTracing } from '@opentelemetry/core';
-
-import hdx from './debug';
 
 const HDX_CONTEXT_MAX_SPANS_PER_TRACE = 100;
 const HDX_CONTEXT_MAX_TRACKED_TRACE_IDS = 50000; // ~ 500 MB of memory (10 spans / trace, 1k per span)
@@ -27,13 +25,15 @@ class HyperDXContext {
     this.started = true;
     // expires after 5 minutes
     this.refreshInterval = setInterval(() => {
-      hdx(`Running _traceMap expiration check`);
+      diag.debug(`Running _traceMap expiration check`);
       const now = Date.now();
       for (const [traceId, data] of this._traceMap.entries()) {
         if (now - data.lastUpdateAt > HDX_CONTEXT_TRACE_ATTRIBUTES_EXPIRATION) {
           this._traceMap.delete(traceId);
           this._traceAttributes.delete(traceId);
-          hdx(`Deleted traceId ${traceId} from _traceMap and _traceAttributes`);
+          diag.debug(
+            `Deleted traceId ${traceId} from _traceMap and _traceAttributes`,
+          );
         }
       }
     }, HDX_CONTEXT_REFRESHER_INTERVAL);
@@ -78,11 +78,11 @@ class HyperDXContext {
 
     // prevent downstream exporter calls from generating spans
     context.with(suppressTracing(context.active()), () => {
-      hdx(`Adding traceId ${traceId} to _traceMap`);
+      diag.debug(`Adding traceId ${traceId} to _traceMap`);
       const traceData = this._traceMap.get(traceId);
       if (!traceData) {
         if (this._traceMap.size >= HDX_CONTEXT_MAX_TRACKED_TRACE_IDS) {
-          hdx(
+          diag.debug(
             `Exceeded max tracked trace ids: ${HDX_CONTEXT_MAX_TRACKED_TRACE_IDS}`,
           );
           return;
@@ -93,7 +93,7 @@ class HyperDXContext {
         });
       } else {
         if (traceData.spans.length >= HDX_CONTEXT_MAX_SPANS_PER_TRACE) {
-          hdx(
+          diag.debug(
             `Exceeded max spans per trace: ${HDX_CONTEXT_MAX_SPANS_PER_TRACE}`,
           );
           return;
@@ -122,7 +122,7 @@ class HyperDXContext {
         return;
       }
       if (this._traceAttributes.size >= HDX_CONTEXT_MAX_TRACKED_TRACE_IDS) {
-        hdx(
+        diag.debug(
           `Exceeded max tracked trace ids: ${HDX_CONTEXT_MAX_TRACKED_TRACE_IDS}`,
         );
         return;

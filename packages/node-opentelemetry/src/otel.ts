@@ -18,7 +18,6 @@ import {
 
 import HyperDXConsoleInstrumentation from './instrumentations/console';
 import HyperDXSpanProcessor from './spanProcessor';
-import hdx, { LOG_PREFIX as _LOG_PREFIX } from './debug';
 import { getHyperDXHTTPInstrumentationConfig } from './instrumentations/http';
 import {
   DEFAULT_HDX_NODE_ADVANCED_NETWORK_CAPTURE,
@@ -37,7 +36,7 @@ import {
 import { hyperDXGlobalContext } from './context';
 import { version as PKG_VERSION } from '../package.json';
 
-const LOG_PREFIX = `⚠️  ${_LOG_PREFIX}`;
+const LOG_PREFIX = `⚠️  [INSTRUMENTOR]`;
 
 const env = process.env;
 
@@ -90,7 +89,7 @@ const isSupported = (
 };
 
 export const initSDK = (config: SDKConfig) => {
-  hdx('Setting otel envs');
+  diag.debug('Setting otel envs');
   setOtelEnvs();
 
   const stopOnTerminationSignals =
@@ -106,7 +105,7 @@ export const initSDK = (config: SDKConfig) => {
     console.warn(`${LOG_PREFIX} HYPERDX_API_KEY is not set`);
   }
 
-  hdx('Initializing OpenTelemetry SDK');
+  diag.debug('Initializing OpenTelemetry SDK');
   let consoleInstrumentationEnabled =
     config.consoleCapture ?? DEFAULT_HDX_NODE_CONSOLE_CAPTURE;
   if (DEFAULT_OTEL_LOG_LEVEL === DiagLogLevel.DEBUG) {
@@ -183,8 +182,10 @@ export const initSDK = (config: SDKConfig) => {
           advancedNetworkCapture: defaultAdvancedNetworkCapture,
           betaMode: defaultBetaMode,
           consoleCapture: consoleInstrumentationEnabled,
+          distroVersion: PKG_VERSION,
           endpoint: DEFAULT_OTEL_TRACES_EXPORTER_URL,
           logLevel: DEFAULT_OTEL_LOG_LEVEL,
+          programmaticImports: config.programmaticImports,
           propagators: env.OTEL_PROPAGATORS,
           resourceAttributes: env.OTEL_RESOURCE_ATTRIBUTES,
           resourceDetectors: env.OTEL_NODE_RESOURCE_DETECTORS,
@@ -192,7 +193,6 @@ export const initSDK = (config: SDKConfig) => {
           samplerArg: DEFAULT_OTEL_TRACES_SAMPLER_ARG,
           serviceName: DEFAULT_SERVICE_NAME,
           stopOnTerminationSignals,
-          programmaticImports: config.programmaticImports,
         },
         null,
         2,
@@ -200,14 +200,14 @@ export const initSDK = (config: SDKConfig) => {
     );
 
     if (consoleInstrumentationEnabled) {
-      hdx('Enabling console instrumentation');
+      diag.debug('Enabling console instrumentation');
       hdxConsoleInstrumentation.enable();
     }
-    hdx('Starting opentelemetry SDK');
+    diag.debug('Starting opentelemetry SDK');
     sdk.start();
 
     if (defaultBetaMode) {
-      hdx(`Beta mode enabled, starting global context`);
+      diag.debug(`Beta mode enabled, starting global context`);
       hyperDXGlobalContext.start();
     }
   } else {
@@ -216,14 +216,14 @@ export const initSDK = (config: SDKConfig) => {
     );
   }
 
-  hdx(
+  diag.debug(
     stopOnTerminationSignals
       ? 'stopOnTerminationSignals enabled'
       : 'stopOnTerminationSignals disabled (user is responsible for graceful shutdown on termination signals)',
   );
 
   function handleTerminationSignal(signal: string) {
-    hdx(`${signal} received, shutting down...`);
+    diag.debug(`${signal} received, shutting down...`);
     _shutdown().finally(() => process.exit());
   }
 
@@ -359,6 +359,6 @@ const _shutdown = () => {
 };
 
 export const shutdown = () => {
-  hdx('shutdown() called');
+  diag.debug('shutdown() called');
   return _shutdown();
 };

@@ -2,10 +2,8 @@ import * as http from 'http';
 import zlib from 'zlib';
 import { PassThrough, Readable } from 'stream';
 
-import { Span } from '@opentelemetry/api';
+import { Span, diag } from '@opentelemetry/api';
 import { headerCapture } from '@opentelemetry/instrumentation-http';
-
-import hdx from '../debug';
 
 const SENSITIVE_DATA_SUBSTITUTE = '[Filtered]';
 // https://github.com/getsentry/sentry-python/blob/1.18.0/sentry_sdk/scrubber.py#L17
@@ -91,7 +89,7 @@ export const _handleHttpOutgoingClientRequest = (
       request.getHeader(header),
     );
   } catch (e) {
-    hdx(`error parsing outgoing-request headers in requestHook: ${e}`);
+    diag.debug(`error parsing outgoing-request headers in requestHook: ${e}`);
   }
 
   /* Capture Body */
@@ -105,7 +103,7 @@ export const _handleHttpOutgoingClientRequest = (
         chunks.push(data);
       }
     } catch (e) {
-      hdx(`error in request.write: ${e}`);
+      diag.debug(`error in request.write: ${e}`);
     }
     return oldWrite(data);
   };
@@ -128,7 +126,7 @@ export const _handleHttpOutgoingClientRequest = (
         }
       }
     } catch (e) {
-      hdx(`error in request.end: ${e}`);
+      diag.debug(`error in request.end: ${e}`);
     }
     return oldEnd(data);
   };
@@ -150,7 +148,7 @@ export const _handleHttpIncomingServerRequest = (
       (header) => headers[header],
     );
   } catch (e) {
-    hdx(`error parsing incoming-request headers in requestHook: ${e}`);
+    diag.debug(`error parsing incoming-request headers in requestHook: ${e}`);
   }
 
   /* Capture Body */
@@ -164,7 +162,7 @@ export const _handleHttpIncomingServerRequest = (
         chunks.push(chunk);
       }
     } catch (e) {
-      hdx(`error in request.on('data'): ${e}`);
+      diag.debug(`error in request.on('data'): ${e}`);
     }
   }).on('end', () => {
     try {
@@ -177,7 +175,7 @@ export const _handleHttpIncomingServerRequest = (
         }
       }
     } catch (e) {
-      hdx(`error in request.on('end'): ${e}`);
+      diag.debug(`error in request.on('end'): ${e}`);
     }
   });
   interceptReadableStream(request, pt);
@@ -200,7 +198,7 @@ export const _handleHttpIncomingServerResponse = (
         chunks.push(data);
       }
     } catch (e) {
-      hdx(`error in response.write: ${e}`);
+      diag.debug(`error in response.write: ${e}`);
     }
     return oldWrite(data);
   };
@@ -228,7 +226,7 @@ export const _handleHttpIncomingServerResponse = (
         }
       }
     } catch (e) {
-      hdx(`error in response.end: ${e}`);
+      diag.debug(`error in response.end: ${e}`);
     }
 
     /* Capture Headers */
@@ -240,7 +238,9 @@ export const _handleHttpIncomingServerResponse = (
         response.getHeader(header),
       );
     } catch (e) {
-      hdx(`error parsing incoming-response headers in responseHook: ${e}`);
+      diag.debug(
+        `error parsing incoming-response headers in responseHook: ${e}`,
+      );
     }
     return oldEnd(data);
   };
@@ -262,7 +262,7 @@ export const _handleHttpOutgoingClientResponse = (
       (header) => headers[header],
     );
   } catch (e) {
-    hdx(`error parsing outgoing-response headers in responseHook: ${e}`);
+    diag.debug(`error parsing outgoing-response headers in responseHook: ${e}`);
   }
 
   /* Capture Body */
@@ -276,7 +276,7 @@ export const _handleHttpOutgoingClientResponse = (
         chunks.push(chunk);
       }
     } catch (e) {
-      hdx(`error in response.on('data'): ${e}`);
+      diag.debug(`error in response.on('data'): ${e}`);
     }
   }).on('end', () => {
     try {
@@ -294,7 +294,7 @@ export const _handleHttpOutgoingClientResponse = (
         }
       }
     } catch (e) {
-      hdx(`error in response.on('end'): ${e}`);
+      diag.debug(`error in response.on('end'): ${e}`);
     }
   });
   interceptReadableStream(response, pt);

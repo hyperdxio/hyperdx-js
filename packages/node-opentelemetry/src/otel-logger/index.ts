@@ -1,4 +1,4 @@
-import { Attributes } from '@opentelemetry/api';
+import { Attributes, diag } from '@opentelemetry/api';
 import {
   BatchLogRecordProcessor,
   LoggerProvider,
@@ -23,10 +23,9 @@ import {
   DEFAULT_SEND_INTERVAL_MS,
   DEFAULT_SERVICE_NAME,
 } from '../constants';
-import hdx, { LOG_PREFIX as _LOG_PREFIX } from '../debug';
 import { version as PKG_VERSION } from '../../package.json';
 
-const LOG_PREFIX = `⚠️  ${_LOG_PREFIX}`;
+const LOG_PREFIX = `⚠️  [LOGGER]`;
 
 export type LoggerOptions = {
   baseUrl?: string;
@@ -120,17 +119,17 @@ export class Logger {
   }
 
   shutdown() {
-    hdx('Shutting down HyperDX node logger...');
+    diag.debug('Shutting down HyperDX node logger...');
     return this.processor.shutdown();
   }
 
   forceFlush() {
-    hdx('Forcing flush of HyperDX node logger...');
+    diag.debug('Forcing flush of HyperDX node logger...');
     return this.processor.forceFlush();
   }
 
   postMessage(level: string, body: string, attributes: Attributes = {}): void {
-    hdx('Emitting log from HyperDX node logger...');
+    diag.debug('Emitting log from HyperDX node logger...');
     this.logger.emit({
       // TODO: should map to otel severity number
       severityNumber: 0,

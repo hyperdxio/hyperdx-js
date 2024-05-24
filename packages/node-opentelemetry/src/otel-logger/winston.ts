@@ -1,9 +1,8 @@
 import Transport from 'winston-transport';
 import isPlainObject from 'lodash.isplainobject';
 import isString from 'lodash.isstring';
-import { Attributes } from '@opentelemetry/api';
+import { Attributes, diag } from '@opentelemetry/api';
 
-import hdx from '../debug';
 import { Logger } from './';
 import { jsonToString } from '../utils';
 
@@ -52,7 +51,7 @@ export default class HyperDXWinston extends Transport {
     apiKey,
     ...options
   }: HyperDXWinstonOptions) {
-    hdx('Initializing HyperDX winston transport...');
+    diag.debug('Initializing HyperDX winston transport...');
     super({ level: maxLevel ?? 'info' });
     this.getCustomMeta = getCustomMeta;
     this.logger = new Logger({
@@ -63,7 +62,7 @@ export default class HyperDXWinston extends Transport {
       }),
       ...options,
     });
-    hdx(`HyperDX winston transport initialized!`);
+    diag.debug(`HyperDX winston transport initialized!`);
   }
 
   log(
@@ -74,25 +73,25 @@ export default class HyperDXWinston extends Transport {
       this.emit('logged', info);
     });
 
-    hdx('Received log from winston');
+    diag.debug('Received log from winston');
 
     const { level, message, meta } = parseWinstonLog(info);
-    hdx('Sending log to HyperDX');
+    diag.debug('Sending log to HyperDX');
     this.logger.postMessage(level, message, {
       ...this.getCustomMeta?.(),
       ...meta,
     });
-    hdx('Log sent to HyperDX');
+    diag.debug('Log sent to HyperDX');
 
     callback();
   }
 
   close() {
-    hdx('Closing HyperDX winston transport...');
+    diag.debug('Closing HyperDX winston transport...');
     this.logger
       .shutdown()
       .then(() => {
-        hdx('HyperDX winston transport closed!');
+        diag.debug('HyperDX winston transport closed!');
         this.emit('finish');
         this.emit('close');
       })

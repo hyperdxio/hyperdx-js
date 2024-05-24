@@ -1,4 +1,4 @@
-import opentelemetry from '@opentelemetry/api';
+import opentelemetry, { diag } from '@opentelemetry/api';
 
 import HyperDXWinston from './otel-logger/winston';
 
@@ -6,7 +6,6 @@ import type { HyperDXPinoOptions } from './otel-logger/pino';
 import type { HyperDXWinstonOptions } from './otel-logger/winston';
 
 import { DEFAULT_SERVICE_NAME } from './constants';
-import hdx from './debug';
 import { hyperDXGlobalContext } from './context';
 import { stringToBoolean } from './utils';
 
@@ -36,7 +35,7 @@ export const getWinstonTransport = (
   maxLevel = 'info',
   options: WinstonTransportOptions = {},
 ) => {
-  hdx('Initializing winston transport');
+  diag.debug('Initializing winston transport');
   return new HyperDXWinston({
     ...(HYPERDX_API_KEY && {
       headers: {

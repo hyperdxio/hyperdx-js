@@ -1,9 +1,8 @@
 import * as shimmer from 'shimmer';
 import isObject from 'lodash.isobject';
 import isPlainObject from 'lodash.isplainobject';
-import opentelemetry, { Attributes } from '@opentelemetry/api';
+import opentelemetry, { Attributes, diag } from '@opentelemetry/api';
 
-import hdx from '../debug';
 import { Logger, LoggerOptions } from '../otel-logger';
 import { hyperDXGlobalContext } from '../context';
 import { parseWinstonLog } from '../otel-logger/winston';
@@ -76,7 +75,7 @@ export default class HyperDXConsoleInstrumentation {
       }
       this._logger.postMessage(parsedLog.level, parsedLog.message, meta);
     } catch (e) {
-      hdx(`error in _patchConsole: ${e}`);
+      diag.debug('error in _patchConsole', e);
     }
   }
 
