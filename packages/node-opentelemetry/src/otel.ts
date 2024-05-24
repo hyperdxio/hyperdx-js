@@ -25,6 +25,7 @@ import {
   DEFAULT_HDX_NODE_ADVANCED_NETWORK_CAPTURE,
   DEFAULT_HDX_NODE_BETA_MODE,
   DEFAULT_HDX_NODE_CONSOLE_CAPTURE,
+  DEFAULT_HDX_NODE_ENABLE_INTERNAL_PROFILING,
   DEFAULT_HDX_NODE_EXPERIMENTAL_EXCEPTION_CAPTURE,
   DEFAULT_HDX_NODE_STOP_ON_TERMINATION_SIGNALS,
   DEFAULT_OTEL_EXPORTER_OTLP_TRACES_TIMEOUT,
@@ -214,43 +215,50 @@ export const initSDK = (config: SDKConfig) => {
       hdxConsoleInstrumentation.enable();
     }
 
-    for (const instrumentation of allInstrumentations) {
-      const modules = (instrumentation as any)
-        ._modules as InstrumentationModuleDefinition[];
-      for (const module of modules) {
-        if (typeof module.patch === 'function') {
-          // benchmark when patch gets called
-          wrap(module, 'patch', (original) => {
-            return (...args: any[]) => {
-              const start = process.hrtime();
-              // @ts-ignore
-              const result = original.apply(this, args);
-              const end = process.hrtime(start);
-              diag.info(
-                `🚄🚄🚄 Patched ${module.name} in ${
-                  end[0] * 1e3 + end[1] / 1e6
-                } ms 🚄🚄🚄`,
-              );
-              return result;
-            };
-          });
-        }
-        for (const file of module.files) {
-          if (typeof file.patch === 'function') {
-            wrap(file, 'patch', (original) => {
+    if (DEFAULT_HDX_NODE_ENABLE_INTERNAL_PROFILING) {
+      diag.debug('Enabling internal profiling');
+      for (const instrumentation of allInstrumentations) {
+        const modules = (instrumentation as any)
+          ._modules as InstrumentationModuleDefinition[];
+        for (const module of modules) {
+          if (typeof module.patch === 'function') {
+            // benchmark when patch gets called
+            wrap(module, 'patch', (original) => {
               return (...args: any[]) => {
                 const start = process.hrtime();
                 // @ts-ignore
                 const result = original.apply(this, args);
                 const end = process.hrtime(start);
                 diag.info(
-                  `🚄🚄🚄 Patched ${module.name} file ${file.name} in ${
-                    end[0] * 1e3 + end[1] / 1e6
-                  } ms 🚄🚄🚄`,
+                  `🚄🚄🚄 Patched ${module.name}${
+                    module.moduleVersion ? ` [v${module.moduleVersion}] ` : ' '
+                  }in ${end[0] * 1e3 + end[1] / 1e6} ms 🚄🚄🚄`,
                 );
                 return result;
               };
             });
+          }
+          for (const file of module.files) {
+            if (typeof file.patch === 'function') {
+              wrap(file, 'patch', (original) => {
+                return (...args: any[]) => {
+                  const start = process.hrtime();
+                  // @ts-ignore
+                  const result = original.apply(this, args);
+                  const end = process.hrtime(start);
+                  diag.info(
+                    `🚄🚄🚄 Patched ${module.name}${
+                      module.moduleVersion
+                        ? ` [v${module.moduleVersion}] `
+                        : ' '
+                    }file ${file.name} in ${
+                      end[0] * 1e3 + end[1] / 1e6
+                    } ms 🚄🚄🚄`,
+                  );
+                  return result;
+                };
+              });
+            }
           }
         }
       }
