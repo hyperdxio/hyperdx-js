@@ -99,6 +99,21 @@ const isSupported = (
   });
 };
 
+const hrtimeToMs = (hrtime: [number, number]) => {
+  return hrtime[0] * 1e3 + hrtime[1] / 1e6;
+};
+
+const pickPerformanceIndicator = (hrt: [number, number]) => {
+  const speedInMs = hrtimeToMs(hrt);
+  if (speedInMs < 0.1) {
+    return '🚀'.repeat(3);
+  } else if (speedInMs < 0.5) {
+    return '🐌'.repeat(3);
+  } else {
+    return '🐢'.repeat(3);
+  }
+};
+
 export const initSDK = (config: SDKConfig) => {
   diag.debug('Setting otel envs');
   setOtelEnvs();
@@ -168,10 +183,11 @@ export const initSDK = (config: SDKConfig) => {
   ];
   const t1 = process.hrtime(_t);
   if (DEFAULT_HDX_NODE_ENABLE_INTERNAL_PROFILING) {
+    const indicator = pickPerformanceIndicator(t1);
     console.info(
-      `🚀🚀🚀 Initialized instrumentations in ${
-        t1[0] * 1e3 + t1[1] / 1e6
-      } ms 🚀🚀🚀`,
+      `${indicator} Initialized instrumentations in ${hrtimeToMs(
+        t1,
+      )} ms ${indicator}`,
     );
   }
 
@@ -197,8 +213,9 @@ export const initSDK = (config: SDKConfig) => {
   });
   const t2 = process.hrtime(_t);
   if (DEFAULT_HDX_NODE_ENABLE_INTERNAL_PROFILING) {
+    const indicator = pickPerformanceIndicator(t2);
     console.info(
-      `🚀🚀🚀 Initialized NodeSDK in ${t2[0] * 1e3 + t2[1] / 1e6} ms 🚀🚀🚀`,
+      `${indicator} Initialized NodeSDK in ${hrtimeToMs(t2)} ms ${indicator}`,
     );
   }
 
@@ -240,10 +257,11 @@ export const initSDK = (config: SDKConfig) => {
           // @ts-ignore
           const result = _originalEnable.apply(this, args);
           const end = process.hrtime(start);
+          const indicator = pickPerformanceIndicator(end);
           console.info(
-            `🚀🚀🚀 Enabled instrumentation ${
+            `${indicator} Enabled instrumentation ${
               instrumentation.constructor.name
-            } in ${end[0] * 1e3 + end[1] / 1e6} ms 🚀🚀🚀`,
+            } in ${hrtimeToMs(end)} ms ${indicator}`,
           );
           return result;
         };
@@ -259,10 +277,11 @@ export const initSDK = (config: SDKConfig) => {
                 // @ts-ignore
                 const result = original.apply(this, args);
                 const end = process.hrtime(start);
+                const indicator = pickPerformanceIndicator(end);
                 console.info(
-                  `🐌🐌🐌 Patched ${module.name}${
+                  `${indicator} Patched ${module.name}${
                     module.moduleVersion ? ` [v${module.moduleVersion}] ` : ' '
-                  }in ${end[0] * 1e3 + end[1] / 1e6} ms 🐌🐌🐌`,
+                  }in ${hrtimeToMs(end)} ms ${indicator}`,
                 );
                 return result;
               };
@@ -276,14 +295,13 @@ export const initSDK = (config: SDKConfig) => {
                   // @ts-ignore
                   const result = original.apply(this, args);
                   const end = process.hrtime(start);
+                  const indicator = pickPerformanceIndicator(end);
                   console.info(
-                    `🐌🐌🐌 Patched ${module.name}${
+                    `${indicator} Patched ${module.name}${
                       module.moduleVersion
                         ? ` [v${module.moduleVersion}] `
                         : ' '
-                    }file ${file.name} in ${
-                      end[0] * 1e3 + end[1] / 1e6
-                    } ms 🐌🐌🐌`,
+                    }file ${file.name} in ${hrtimeToMs(end)} ms ${indicator}`,
                   );
                   return result;
                 };
