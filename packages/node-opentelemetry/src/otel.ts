@@ -16,7 +16,6 @@ import {
   InstrumentationConfigMap,
   getNodeAutoInstrumentations,
 } from '@opentelemetry/auto-instrumentations-node';
-import { Hook, OnRequireFn } from 'require-in-the-middle';
 
 import HyperDXConsoleInstrumentation from './instrumentations/console';
 import HyperDXSpanProcessor from './spanProcessor';
@@ -42,14 +41,6 @@ import { version as PKG_VERSION } from '../package.json';
 const LOG_PREFIX = `⚠️  [INSTRUMENTOR]`;
 
 const env = process.env;
-
-// https://github.com/open-telemetry/opentelemetry-js/blob/e49c4c7f42c6c444da3f802687cfa4f2d6983f46/experimental/packages/opentelemetry-instrumentation/src/platform/node/instrumentation.ts#L49
-type InstrumentationHook =
-  | {
-      moduleName: string;
-      onRequire: OnRequireFn;
-    }
-  | Hook;
 
 export type SDKConfig = {
   additionalInstrumentations?: InstrumentationBase[];
