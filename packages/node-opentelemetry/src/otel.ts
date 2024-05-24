@@ -96,9 +96,9 @@ const hrtimeToMs = (hrtime: [number, number]) => {
 
 const pickPerformanceIndicator = (hrt: [number, number]) => {
   const speedInMs = hrtimeToMs(hrt);
-  if (speedInMs < 0.1) {
+  if (speedInMs < 0.5) {
     return '🚀'.repeat(3);
-  } else if (speedInMs < 0.5) {
+  } else if (speedInMs < 1) {
     return '🐌'.repeat(3);
   } else {
     return '🐢'.repeat(3);
