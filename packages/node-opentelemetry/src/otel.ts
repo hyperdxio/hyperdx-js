@@ -230,9 +230,9 @@ export const initSDK = (config: SDKConfig) => {
                 const result = original.apply(this, args);
                 const end = process.hrtime(start);
                 diag.info(
-                  `🚄🚄🚄 Patched ${module.name}${
+                  `🐌🐌🐌 Patched ${module.name}${
                     module.moduleVersion ? ` [v${module.moduleVersion}] ` : ' '
-                  }in ${end[0] * 1e3 + end[1] / 1e6} ms 🚄🚄🚄`,
+                  }in ${end[0] * 1e3 + end[1] / 1e6} ms 🐌🐌🐌`,
                 );
                 return result;
               };
@@ -247,13 +247,13 @@ export const initSDK = (config: SDKConfig) => {
                   const result = original.apply(this, args);
                   const end = process.hrtime(start);
                   diag.info(
-                    `🚄🚄🚄 Patched ${module.name}${
+                    `🐌🐌🐌 Patched ${module.name}${
                       module.moduleVersion
                         ? ` [v${module.moduleVersion}] `
                         : ' '
                     }file ${file.name} in ${
                       end[0] * 1e3 + end[1] / 1e6
-                    } ms 🚄🚄🚄`,
+                    } ms 🐌🐌🐌`,
                   );
                   return result;
                 };
