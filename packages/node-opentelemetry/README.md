@@ -117,7 +117,7 @@ npx ts-node -r './instrument.ts' index.ts
 
 ### Troubleshooting
 
-If you are having trouble getting events to show up in HyperDX, you can enable verbose logging by setting the environment variable `DEBUG=hyperdx`. This will print out additional debug logging to isolate any issues.
+If you are having trouble getting events to show up in HyperDX, you can enable verbose logging by setting the environment variable `OTEL_LOG_LEVEL=debug`. This will print out additional debug logging to isolate any issues.
 
 If you're pointing to a self-hosted collector, ensure the `OTEL_EXPORTER_OTLP_ENDPOINT` environment variable is set to the correct endpoint (ex. `http://localhost:4318`) and is reachable (ex. `curl http://localhost:4318/v1/traces` should return a HTTP 405).
 

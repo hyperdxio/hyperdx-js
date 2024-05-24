@@ -1,5 +1,5 @@
 ---
-'@hyperdx/node-opentelemetry': patch
+'@hyperdx/node-opentelemetry': minor
 ---
 
 style: deprecate hyperdx debug flag
