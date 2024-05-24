@@ -142,6 +142,7 @@ export const initSDK = (config: SDKConfig) => {
     config.experimentalExceptionCapture ??
     DEFAULT_HDX_NODE_EXPERIMENTAL_EXCEPTION_CAPTURE;
 
+  let _t = process.hrtime();
   const allInstrumentations = [
     ...getNodeAutoInstrumentations({
       '@opentelemetry/instrumentation-http': defaultAdvancedNetworkCapture
@@ -165,7 +166,16 @@ export const initSDK = (config: SDKConfig) => {
     ...(defaultExceptionCapture ? [new ExceptionInstrumentation()] : []),
     ...(config.additionalInstrumentations ?? []),
   ];
+  const t1 = process.hrtime(_t);
+  if (DEFAULT_HDX_NODE_ENABLE_INTERNAL_PROFILING) {
+    console.info(
+      `🚀🚀🚀 Initialized instrumentations in ${
+        t1[0] * 1e3 + t1[1] / 1e6
+      } ms 🚀🚀🚀`,
+    );
+  }
 
+  _t = process.hrtime();
   sdk = new NodeSDK({
     resource: new Resource({
       // https://opentelemetry.io/docs/specs/semconv/resource/#telemetry-sdk-experimental
@@ -185,6 +195,12 @@ export const initSDK = (config: SDKConfig) => {
     ],
     instrumentations: allInstrumentations,
   });
+  const t2 = process.hrtime(_t);
+  if (DEFAULT_HDX_NODE_ENABLE_INTERNAL_PROFILING) {
+    console.info(
+      `🚀🚀🚀 Initialized NodeSDK in ${t2[0] * 1e3 + t2[1] / 1e6} ms 🚀🚀🚀`,
+    );
+  }
 
   if (env.OTEL_EXPORTER_OTLP_HEADERS || env.HYPERDX_API_KEY) {
     console.warn(
@@ -218,6 +234,20 @@ export const initSDK = (config: SDKConfig) => {
     if (DEFAULT_HDX_NODE_ENABLE_INTERNAL_PROFILING) {
       diag.debug('Enabling internal profiling');
       for (const instrumentation of allInstrumentations) {
+        const _originalEnable = instrumentation.enable;
+        instrumentation.enable = function (...args: any[]) {
+          const start = process.hrtime();
+          // @ts-ignore
+          const result = _originalEnable.apply(this, args);
+          const end = process.hrtime(start);
+          console.info(
+            `🚀🚀🚀 Enabled instrumentation ${
+              instrumentation.constructor.name
+            } in ${end[0] * 1e3 + end[1] / 1e6} ms 🚀🚀🚀`,
+          );
+          return result;
+        };
+
         const modules = (instrumentation as any)
           ._modules as InstrumentationModuleDefinition[];
         for (const module of modules) {
@@ -229,7 +259,7 @@ export const initSDK = (config: SDKConfig) => {
                 // @ts-ignore
                 const result = original.apply(this, args);
                 const end = process.hrtime(start);
-                diag.info(
+                console.info(
                   `🐌🐌🐌 Patched ${module.name}${
                     module.moduleVersion ? ` [v${module.moduleVersion}] ` : ' '
                   }in ${end[0] * 1e3 + end[1] / 1e6} ms 🐌🐌🐌`,
@@ -246,7 +276,7 @@ export const initSDK = (config: SDKConfig) => {
                   // @ts-ignore
                   const result = original.apply(this, args);
                   const end = process.hrtime(start);
-                  diag.info(
+                  console.info(
                     `🐌🐌🐌 Patched ${module.name}${
                       module.moduleVersion
                         ? ` [v${module.moduleVersion}] `
