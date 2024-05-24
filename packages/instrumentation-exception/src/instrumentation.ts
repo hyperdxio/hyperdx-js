@@ -11,6 +11,7 @@ import {
   SEMATTRS_HTTP_STATUS_CODE,
   SEMATTRS_HTTP_RESPONSE_CONTENT_LENGTH,
 } from '@opentelemetry/semantic-conventions';
+import Sentry from '@sentry/node';
 import { Event, EventHint, Exception, EventProcessor } from '@sentry/types';
 
 import { ExceptionInstrumentationConfig } from './types';
@@ -26,6 +27,8 @@ const SEMATTRS_EXCEPTION_MODULE = 'exception.module';
 
 /** Exception instrumentation for OpenTelemetry */
 export class ExceptionInstrumentation extends InstrumentationBase {
+  private _hasRegisteredEventProcessor = false;
+
   constructor(config: ExceptionInstrumentationConfig = {}) {
     super(PKG_NAME, PKG_VERSION, config);
   }
@@ -43,7 +46,7 @@ export class ExceptionInstrumentation extends InstrumentationBase {
       new InstrumentationNodeModuleDefinition(
         '@sentry/node',
         ['^7.0.0', '^8.0.0'],
-        (moduleExports) => {
+        (moduleExports: typeof Sentry) => {
           diag.debug(
             `Detected Sentry installed with SDK version: ${moduleExports.SDK_VERSION}`,
           );
@@ -53,15 +56,22 @@ export class ExceptionInstrumentation extends InstrumentationBase {
             // TODO: initialize Sentry SDK ??
           }
 
+          if (this._hasRegisteredEventProcessor) {
+            diag.debug('Sentry event processor already registered');
+            return moduleExports;
+          }
+
           if (typeof moduleExports.addGlobalEventProcessor === 'function') {
             diag.debug('Sentry.addGlobalEventProcessor is available');
             moduleExports.addGlobalEventProcessor(this._registerEventProcessor);
+            this._hasRegisteredEventProcessor = true;
             diag.debug('Registered Sentry event hooks');
             return moduleExports;
           }
           if (typeof moduleExports.addEventProcessor === 'function') {
             diag.debug('Sentry.addEventProcessor is available');
             moduleExports.addEventProcessor(this._registerEventProcessor);
+            this._hasRegisteredEventProcessor = true;
             diag.debug('Registered Sentry event hooks');
             return moduleExports;
           }
