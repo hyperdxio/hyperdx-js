@@ -123,8 +123,16 @@ export const initSDK = (config: SDKConfig) => {
 
   diag.debug('Initializing OpenTelemetry SDK');
 
-  const defaultConsoleCapture =
+  let defaultConsoleCapture =
     config.consoleCapture ?? DEFAULT_HDX_NODE_CONSOLE_CAPTURE;
+  if (DEFAULT_OTEL_LOG_LEVEL === DiagLogLevel.DEBUG) {
+    // FIXME: better to disable console instrumentation if otel log is enabled
+    defaultConsoleCapture = false;
+    console.warn(
+      `${LOG_PREFIX} OTEL_LOG_LEVEL is set to 'debug', disabling console instrumentation`,
+    );
+  }
+
   const defaultBetaMode = config.betaMode ?? DEFAULT_HDX_NODE_BETA_MODE;
   const defaultAdvancedNetworkCapture =
     config.advancedNetworkCapture ?? DEFAULT_HDX_NODE_ADVANCED_NETWORK_CAPTURE;
@@ -154,18 +162,19 @@ export const initSDK = (config: SDKConfig) => {
       },
       ...config.instrumentations,
     }),
-    new HyperDXConsoleInstrumentation({
-      enabled: defaultExceptionCapture,
-      betaMode: defaultBetaMode,
-      loggerOptions: {
-        baseUrl: DEFAULT_OTEL_LOGS_EXPORTER_URL,
-        service: DEFAULT_SERVICE_NAME,
-        headers: exporterHeaders,
-      },
-    }),
-    new ExceptionInstrumentation({
-      enabled: defaultExceptionCapture,
-    }),
+    ...(defaultConsoleCapture
+      ? [
+          new HyperDXConsoleInstrumentation({
+            betaMode: defaultBetaMode,
+            loggerOptions: {
+              baseUrl: DEFAULT_OTEL_LOGS_EXPORTER_URL,
+              service: DEFAULT_SERVICE_NAME,
+              headers: exporterHeaders,
+            },
+          }),
+        ]
+      : []),
+    ...(defaultExceptionCapture ? [new ExceptionInstrumentation()] : []),
     ...(config.additionalInstrumentations ?? []),
   ];
   const t1 = process.hrtime(_t);

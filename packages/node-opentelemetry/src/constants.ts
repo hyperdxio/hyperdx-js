@@ -1,5 +1,5 @@
 import { defaultServiceName } from '@opentelemetry/resources';
-import { getEnvWithoutDefaults } from '@opentelemetry/core';
+import { getEnvWithoutDefaults, getEnv } from '@opentelemetry/core';
 
 import { stringToBoolean } from './utils';
 
@@ -7,6 +7,7 @@ const env = process.env;
 
 // enable otel debug mode if HDX_DEBUG_MODE_ENABLED is set
 const otelEnv = getEnvWithoutDefaults();
+const otelEnvWithDefaults = getEnv();
 
 // TO EXTRACT ENV VARS [https://github.com/open-telemetry/opentelemetry-js/blob/3ab4f765d8d696327b7d139ae6a45e7bd7edd924/experimental/packages/sdk-logs/src/export/BatchLogRecordProcessorBase.ts#L50]
 // TO EXTRACT DEFAULTS [https://github.com/open-telemetry/opentelemetry-js/blob/3ab4f765d8d696327b7d139ae6a45e7bd7edd924/experimental/packages/sdk-logs/src/types.ts#L49]
@@ -35,7 +36,7 @@ export const DEFAULT_OTEL_TRACES_SAMPLER_ARG =
   otelEnv.OTEL_TRACES_SAMPLER_ARG ?? '1';
 export const DEFAULT_OTEL_EXPORTER_OTLP_TRACES_TIMEOUT =
   otelEnv.OTEL_EXPORTER_OTLP_TRACES_TIMEOUT ?? 60000;
-export const DEFAULT_OTEL_LOG_LEVEL = otelEnv.OTEL_LOG_LEVEL;
+export const DEFAULT_OTEL_LOG_LEVEL = otelEnvWithDefaults.OTEL_LOG_LEVEL;
 
 // HyperDX SDK specific configuration
 export const DEFAULT_HDX_NODE_BETA_MODE =
