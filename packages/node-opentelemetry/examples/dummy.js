@@ -36,6 +36,7 @@ const { initSDK, setTraceAttributes, shutdown } = require('../build/src');
 
 initSDK({
   programmaticImports: true,
+  consoleCapture: true,
 });
 
 Sentry.init({

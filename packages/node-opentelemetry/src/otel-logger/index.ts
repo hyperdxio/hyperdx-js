@@ -129,7 +129,6 @@ export class Logger {
   }
 
   postMessage(level: string, body: string, attributes: Attributes = {}): void {
-    diag.debug('Emitting log from HyperDX node logger...');
     this.logger.emit({
       // TODO: should map to otel severity number
       severityNumber: 0,
