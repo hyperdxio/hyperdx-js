@@ -19,11 +19,12 @@ import { jsonToString } from './utils';
 import { name as PKG_NAME, version as PKG_VERSION } from '../package.json';
 
 // CUSTOM SEMANTIC CONVENTIONS
+const SEMATTRS_EXCEPTION_MECHANISM = 'exception.mechanism';
+const SEMATTRS_EXCEPTION_MODULE = 'exception.module';
 const SEMATTRS_EXCEPTION_MODULES = 'exception.modules';
 const SEMATTRS_EXCEPTION_TAGS = 'exception.tags';
-const SEMATTRS_EXCEPTION_MECHANISM = 'exception.mechanism';
 const SEMATTRS_EXCEPTION_THREAD_ID = 'exception.thread_id';
-const SEMATTRS_EXCEPTION_MODULE = 'exception.module';
+const SEMATTRS_SENTRY_VERSION = 'sentry.version';
 
 /** Sentry instrumentation for OpenTelemetry */
 export class SentryNodeInstrumentation extends InstrumentationBase {
@@ -62,14 +63,18 @@ export class SentryNodeInstrumentation extends InstrumentationBase {
 
           if (typeof moduleExports.addGlobalEventProcessor === 'function') {
             diag.debug('Sentry.addGlobalEventProcessor is available');
-            moduleExports.addGlobalEventProcessor(this._registerEventProcessor);
+            moduleExports.addGlobalEventProcessor(
+              this._registerEventProcessor(moduleExports),
+            );
             this._hasRegisteredEventProcessor = true;
             diag.debug('Registered Sentry event hooks');
             return moduleExports;
           }
           if (typeof moduleExports.addEventProcessor === 'function') {
             diag.debug('Sentry.addEventProcessor is available');
-            moduleExports.addEventProcessor(this._registerEventProcessor);
+            moduleExports.addEventProcessor(
+              this._registerEventProcessor(moduleExports),
+            );
             this._hasRegisteredEventProcessor = true;
             diag.debug('Registered Sentry event hooks');
             return moduleExports;
@@ -84,18 +89,19 @@ export class SentryNodeInstrumentation extends InstrumentationBase {
     ];
   }
 
-  private _registerEventProcessor = (event: Event, hint: EventHint) => {
-    try {
-      diag.debug('Received Sentry event', event);
-      if (this._isSentryEventAnException(event)) {
-        this._startOtelSpanFromSentryEvent(event, hint);
+  private _registerEventProcessor =
+    (moduleExports: typeof Sentry) => (event: Event, hint: EventHint) => {
+      try {
+        diag.debug('Received Sentry event', event);
+        if (this._isSentryEventAnException(event)) {
+          this._startOtelSpanFromSentryEvent(moduleExports, event, hint);
+        }
+      } catch (e) {
+        diag.debug(`Error processing event: ${e}`);
       }
-    } catch (e) {
-      diag.debug(`Error processing event: ${e}`);
-    }
-    // WARNING: always return the event
-    return event;
-  };
+      // WARNING: always return the event
+      return event;
+    };
 
   // https://github.com/open-telemetry/opentelemetry-js/blob/ca027b5eed282b4e81e098ca885db9ce27fdd562/packages/opentelemetry-sdk-trace-base/src/Span.ts#L299
   private _recordException = (span: Span, exception: Exception) => {
@@ -122,7 +128,11 @@ export class SentryNodeInstrumentation extends InstrumentationBase {
   private _buildSingleSpanName = (event: Event) =>
     [event.exception?.values[0].type, event.transaction].join(' ');
 
-  private _startOtelSpanFromSentryEvent = (event: Event, hint: EventHint) => {
+  private _startOtelSpanFromSentryEvent = (
+    moduleExports: typeof Sentry,
+    event: Event,
+    hint: EventHint,
+  ) => {
     const instrumentation = this;
     // FIXME: can't attach to the active span
     // since Sentry would overwrite the active span
@@ -131,6 +141,9 @@ export class SentryNodeInstrumentation extends InstrumentationBase {
     let isRootSpan = false;
     const startTime = event.timestamp * 1000;
     const attributes = {
+      ...(moduleExports.SDK_VERSION && {
+        [SEMATTRS_SENTRY_VERSION]: moduleExports.SDK_VERSION,
+      }),
       ...(event.modules && {
         [SEMATTRS_EXCEPTION_MODULES]: jsonToString(event.modules),
       }),
