@@ -63,7 +63,6 @@ const setOtelEnvs = () => {
 };
 
 let sdk: NodeSDK;
-let hdxConsoleInstrumentation: HyperDXConsoleInstrumentation;
 
 const getModuleId = (moduleName: string) => {
   try {
@@ -123,11 +122,12 @@ export const initSDK = (config: SDKConfig) => {
   }
 
   diag.debug('Initializing OpenTelemetry SDK');
-  let consoleInstrumentationEnabled =
+
+  let defaultConsoleCapture =
     config.consoleCapture ?? DEFAULT_HDX_NODE_CONSOLE_CAPTURE;
   if (DEFAULT_OTEL_LOG_LEVEL === DiagLogLevel.DEBUG) {
     // FIXME: better to disable console instrumentation if otel log is enabled
-    consoleInstrumentationEnabled = false;
+    defaultConsoleCapture = false;
     console.warn(
       `${LOG_PREFIX} OTEL_LOG_LEVEL is set to 'debug', disabling console instrumentation`,
     );
@@ -136,13 +136,6 @@ export const initSDK = (config: SDKConfig) => {
   const defaultBetaMode = config.betaMode ?? DEFAULT_HDX_NODE_BETA_MODE;
   const defaultAdvancedNetworkCapture =
     config.advancedNetworkCapture ?? DEFAULT_HDX_NODE_ADVANCED_NETWORK_CAPTURE;
-
-  hdxConsoleInstrumentation = new HyperDXConsoleInstrumentation({
-    baseUrl: DEFAULT_OTEL_LOGS_EXPORTER_URL,
-    betaMode: defaultBetaMode,
-    service: DEFAULT_SERVICE_NAME,
-    headers: exporterHeaders,
-  });
 
   const defaultExceptionCapture =
     config.experimentalExceptionCapture ??
@@ -169,6 +162,18 @@ export const initSDK = (config: SDKConfig) => {
       },
       ...config.instrumentations,
     }),
+    ...(defaultConsoleCapture
+      ? [
+          new HyperDXConsoleInstrumentation({
+            betaMode: defaultBetaMode,
+            loggerOptions: {
+              baseUrl: DEFAULT_OTEL_LOGS_EXPORTER_URL,
+              service: DEFAULT_SERVICE_NAME,
+              headers: exporterHeaders,
+            },
+          }),
+        ]
+      : []),
     ...(defaultExceptionCapture ? [new ExceptionInstrumentation()] : []),
     ...(config.additionalInstrumentations ?? []),
   ];
@@ -216,7 +221,7 @@ export const initSDK = (config: SDKConfig) => {
         {
           advancedNetworkCapture: defaultAdvancedNetworkCapture,
           betaMode: defaultBetaMode,
-          consoleCapture: consoleInstrumentationEnabled,
+          consoleCapture: defaultConsoleCapture,
           distroVersion: PKG_VERSION,
           endpoint: DEFAULT_OTEL_TRACES_EXPORTER_URL,
           logLevel: DEFAULT_OTEL_LOG_LEVEL,
@@ -233,11 +238,6 @@ export const initSDK = (config: SDKConfig) => {
         2,
       )})...`,
     );
-
-    if (consoleInstrumentationEnabled) {
-      diag.debug('Enabling console instrumentation');
-      hdxConsoleInstrumentation.enable();
-    }
 
     if (DEFAULT_HDX_NODE_ENABLE_INTERNAL_PROFILING) {
       diag.debug('Enabling internal profiling');
@@ -453,7 +453,6 @@ export const initSDK = (config: SDKConfig) => {
 };
 
 const _shutdown = () => {
-  hdxConsoleInstrumentation?.disable();
   hyperDXGlobalContext?.shutdown();
   return (
     sdk?.shutdown()?.then(
