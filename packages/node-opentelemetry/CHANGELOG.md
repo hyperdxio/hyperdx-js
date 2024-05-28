@@ -1,5 +1,12 @@
 # @hyperdx/node-opentelemetry
 
+## 0.8.0-next.4
+
+### Patch Changes
+
+- 511a488: feat: install @hyperdx/instrumentation-sentry-node
+- f47620f: feat: instrument console in the otel way
+
 ## 0.8.0-next.3
 
 ### Minor Changes

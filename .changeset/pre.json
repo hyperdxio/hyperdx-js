@@ -6,7 +6,8 @@
     "@hyperdx/deno": "0.0.2",
     "@hyperdx/node-logger": "0.4.0",
     "@hyperdx/node-opentelemetry": "0.7.0",
-    "@hyperdx/instrumentation-exception": "0.0.0"
+    "@hyperdx/instrumentation-exception": "0.0.0",
+    "@hyperdx/instrumentation-sentry-node": "0.0.0"
   },
   "changesets": [
     "clever-points-rhyme",
@@ -19,6 +20,8 @@
     "orange-poems-peel",
     "slow-days-reflect",
     "small-zebras-sniff",
-    "strong-months-act"
+    "strong-months-act",
+    "three-sheep-approve",
+    "witty-pots-raise"
   ]
 }
