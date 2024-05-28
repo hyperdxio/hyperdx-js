@@ -9,7 +9,7 @@ export interface EventCustomAttributeFunction {
 /**
  * Options available for the Exception Instrumentation (see [documentation]())
  */
-export interface SentryInstrumentationConfig extends InstrumentationConfig {
+export interface SentryNodeInstrumentationConfig extends InstrumentationConfig {
   /** Function for adding custom attributes on event hook */
   eventHook?: EventCustomAttributeFunction;
 }

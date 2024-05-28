@@ -14,7 +14,7 @@ import {
 import Sentry from '@sentry/node';
 import { Event, EventHint, Exception, EventProcessor } from '@sentry/types';
 
-import { SentryInstrumentationConfig } from './types';
+import { SentryNodeInstrumentationConfig } from './types';
 import { jsonToString } from './utils';
 import { name as PKG_NAME, version as PKG_VERSION } from '../package.json';
 
@@ -26,19 +26,19 @@ const SEMATTRS_EXCEPTION_THREAD_ID = 'exception.thread_id';
 const SEMATTRS_EXCEPTION_MODULE = 'exception.module';
 
 /** Sentry instrumentation for OpenTelemetry */
-export class SentryInstrumentation extends InstrumentationBase {
+export class SentryNodeInstrumentation extends InstrumentationBase {
   private _hasRegisteredEventProcessor = false;
 
-  constructor(config: SentryInstrumentationConfig = {}) {
+  constructor(config: SentryNodeInstrumentationConfig = {}) {
     super(PKG_NAME, PKG_VERSION, config);
   }
 
-  override setConfig(config: SentryInstrumentationConfig = {}) {
+  override setConfig(config: SentryNodeInstrumentationConfig = {}) {
     this._config = Object.assign({}, config);
   }
 
-  override getConfig(): SentryInstrumentationConfig {
-    return this._config as SentryInstrumentationConfig;
+  override getConfig(): SentryNodeInstrumentationConfig {
+    return this._config as SentryNodeInstrumentationConfig;
   }
 
   init() {
