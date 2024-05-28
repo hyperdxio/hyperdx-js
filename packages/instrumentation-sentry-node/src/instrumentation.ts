@@ -1,4 +1,4 @@
-import api, { Span, SpanKind, diag } from '@opentelemetry/api';
+import api, { Span, SpanKind, Tracer, diag } from '@opentelemetry/api';
 import { ExceptionEventName } from '@opentelemetry/sdk-trace-base/build/src/enums';
 import {
   InstrumentationBase,
@@ -18,7 +18,7 @@ import { SentryNodeInstrumentationConfig } from './types';
 import { jsonToString } from './utils';
 import { name as PKG_NAME, version as PKG_VERSION } from '../package.json';
 
-const tracer = api.trace.getTracer(PKG_NAME, PKG_VERSION);
+const defaultTracer = api.trace.getTracer(PKG_NAME, PKG_VERSION);
 
 // CUSTOM SEMANTIC CONVENTIONS
 const SEMATTRS_EXCEPTION_MECHANISM = 'exception.mechanism';
@@ -53,12 +53,17 @@ const _isSentryEventAnException = (event: Event) =>
 const _buildSingleSpanName = (event: Event) =>
   [event.exception?.values[0].type, event.transaction].join(' ');
 
-const _startOtelSpanFromSentryEvent = (
-  event: Event,
-  hint: EventHint,
-  sentryVersion?: string,
-) => {
-  const instrumentation = this;
+const _startOtelSpanFromSentryEvent = ({
+  event,
+  hint,
+  sentryVersion,
+  tracer,
+}: {
+  event: Event;
+  hint: EventHint;
+  sentryVersion?: string;
+  tracer: Tracer;
+}) => {
   // FIXME: can't attach to the active span
   // since Sentry would overwrite the active span
   // let span = api.trace.getActiveSpan();
@@ -189,11 +194,22 @@ const _startOtelSpanFromSentryEvent = (
 
 // in case Sentry instrumentation doesn't work
 export const getEventProcessor =
-  (sentryVersion?: string) => (event: Event, hint: EventHint) => {
+  (tracer?: Tracer, sentryVersion?: string) =>
+  (event: Event, hint: EventHint) => {
     try {
       diag.debug('Received Sentry event', event);
       if (_isSentryEventAnException(event)) {
-        _startOtelSpanFromSentryEvent(event, hint, sentryVersion);
+        let _tracer = tracer;
+        if (_tracer == null) {
+          _tracer = defaultTracer;
+          diag.debug('Using default tracer');
+        }
+        _startOtelSpanFromSentryEvent({
+          event,
+          hint,
+          sentryVersion,
+          tracer: _tracer,
+        });
       }
     } catch (e) {
       diag.debug(`Error processing event: ${e}`);
@@ -237,10 +253,15 @@ export class SentryNodeInstrumentation extends InstrumentationBase {
             return moduleExports;
           }
 
+          const instrumentation = this;
+
           if (typeof moduleExports.addGlobalEventProcessor === 'function') {
             diag.debug('Sentry.addGlobalEventProcessor is available');
             moduleExports.addGlobalEventProcessor(
-              getEventProcessor(moduleExports.SDK_VERSION),
+              getEventProcessor(
+                instrumentation.tracer,
+                moduleExports.SDK_VERSION,
+              ),
             );
             this._hasRegisteredEventProcessor = true;
             diag.debug('Registered Sentry event hooks');
@@ -249,7 +270,10 @@ export class SentryNodeInstrumentation extends InstrumentationBase {
           if (typeof moduleExports.addEventProcessor === 'function') {
             diag.debug('Sentry.addEventProcessor is available');
             moduleExports.addEventProcessor(
-              getEventProcessor(moduleExports.SDK_VERSION),
+              getEventProcessor(
+                instrumentation.tracer,
+                moduleExports.SDK_VERSION,
+              ),
             );
             this._hasRegisteredEventProcessor = true;
             diag.debug('Registered Sentry event hooks');
