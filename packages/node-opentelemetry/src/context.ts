@@ -19,7 +19,7 @@ class HyperDXContext {
 
   private started = false;
 
-  private refreshInterval: NodeJS.Timer | undefined;
+  private refreshInterval: ReturnType<typeof setInterval> | undefined;
 
   start(): void {
     this.started = true;
