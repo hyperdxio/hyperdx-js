@@ -14,7 +14,7 @@ import {
 import Sentry from '@sentry/node';
 import { Event, EventHint, Exception, EventProcessor } from '@sentry/types';
 
-import { ExceptionInstrumentationConfig } from './types';
+import { SentryInstrumentationConfig } from './types';
 import { jsonToString } from './utils';
 import { name as PKG_NAME, version as PKG_VERSION } from '../package.json';
 
@@ -25,20 +25,20 @@ const SEMATTRS_EXCEPTION_MECHANISM = 'exception.mechanism';
 const SEMATTRS_EXCEPTION_THREAD_ID = 'exception.thread_id';
 const SEMATTRS_EXCEPTION_MODULE = 'exception.module';
 
-/** Exception instrumentation for OpenTelemetry */
-export class ExceptionInstrumentation extends InstrumentationBase {
+/** Sentry instrumentation for OpenTelemetry */
+export class SentryInstrumentation extends InstrumentationBase {
   private _hasRegisteredEventProcessor = false;
 
-  constructor(config: ExceptionInstrumentationConfig = {}) {
+  constructor(config: SentryInstrumentationConfig = {}) {
     super(PKG_NAME, PKG_VERSION, config);
   }
 
-  override setConfig(config: ExceptionInstrumentationConfig = {}) {
+  override setConfig(config: SentryInstrumentationConfig = {}) {
     this._config = Object.assign({}, config);
   }
 
-  override getConfig(): ExceptionInstrumentationConfig {
-    return this._config as ExceptionInstrumentationConfig;
+  override getConfig(): SentryInstrumentationConfig {
+    return this._config as SentryInstrumentationConfig;
   }
 
   init() {
@@ -53,7 +53,6 @@ export class ExceptionInstrumentation extends InstrumentationBase {
           const client = moduleExports.getCurrentHub()?.getClient();
           if (!client) {
             diag.info('Sentry client not found');
-            // TODO: initialize Sentry SDK ??
           }
 
           if (this._hasRegisteredEventProcessor) {
