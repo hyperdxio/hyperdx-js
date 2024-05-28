@@ -12,7 +12,7 @@ const {
 } = require('@opentelemetry/instrumentation-express');
 const { HttpInstrumentation } = require('@opentelemetry/instrumentation-http');
 
-const { ExceptionInstrumentation } = require('../build/src');
+const { SentryNodeInstrumentation } = require('../build/src');
 
 const collectorOptions = {
   url: 'http://localhost:4318/v1/traces', // url is optional and can be omitted - default is http://localhost:4318/v1/traces
@@ -41,7 +41,7 @@ provider.register();
 
 registerInstrumentations({
   instrumentations: [
-    new ExceptionInstrumentation(),
+    new SentryNodeInstrumentation(),
     new HttpInstrumentation(),
     new ExpressInstrumentation(),
   ],
