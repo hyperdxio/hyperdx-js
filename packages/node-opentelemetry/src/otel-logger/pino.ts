@@ -48,7 +48,11 @@ export type HyperDXPinoOptions = LoggerOptions & {
   getCustomMeta?: () => Attributes;
 };
 
-export default ({ apiKey, getCustomMeta, ...options }: HyperDXPinoOptions) => {
+export default async ({
+  apiKey,
+  getCustomMeta,
+  ...options
+}: HyperDXPinoOptions) => {
   try {
     diag.debug('Initializing HyperDX pino transport...');
     const logger = new Logger({

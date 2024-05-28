@@ -52,7 +52,7 @@
     "lodash.isobject": "^3.0.2",
     "lodash.isplainobject": "^4.0.6",
     "lodash.isstring": "^4.0.1",
-    "pino-abstract-transport": "^1.0.0",
+    "pino-abstract-transport": "^1.2.0",
     "semver": "^7.6.2",
     "shimmer": "^1.2.1",
     "tslib": "^2.5.3",
