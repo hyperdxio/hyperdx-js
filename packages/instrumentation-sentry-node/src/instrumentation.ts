@@ -1,4 +1,4 @@
-import { Span, SpanKind, diag } from '@opentelemetry/api';
+import api, { Span, SpanKind, diag } from '@opentelemetry/api';
 import { ExceptionEventName } from '@opentelemetry/sdk-trace-base/build/src/enums';
 import {
   InstrumentationBase,
@@ -18,6 +18,8 @@ import { SentryNodeInstrumentationConfig } from './types';
 import { jsonToString } from './utils';
 import { name as PKG_NAME, version as PKG_VERSION } from '../package.json';
 
+const tracer = api.trace.getTracer(PKG_NAME, PKG_VERSION);
+
 // CUSTOM SEMANTIC CONVENTIONS
 const SEMATTRS_EXCEPTION_MECHANISM = 'exception.mechanism';
 const SEMATTRS_EXCEPTION_MODULE = 'exception.module';
@@ -26,75 +28,13 @@ const SEMATTRS_EXCEPTION_TAGS = 'exception.tags';
 const SEMATTRS_EXCEPTION_THREAD_ID = 'exception.thread_id';
 const SEMATTRS_SENTRY_VERSION = 'sentry.version';
 
-/** Sentry instrumentation for OpenTelemetry */
-export class SentryNodeInstrumentation extends InstrumentationBase {
-  private _hasRegisteredEventProcessor = false;
-
-  constructor(config: SentryNodeInstrumentationConfig = {}) {
-    super(PKG_NAME, PKG_VERSION, config);
-  }
-
-  override setConfig(config: SentryNodeInstrumentationConfig = {}) {
-    this._config = Object.assign({}, config);
-  }
-
-  override getConfig(): SentryNodeInstrumentationConfig {
-    return this._config as SentryNodeInstrumentationConfig;
-  }
-
-  init() {
-    return [
-      new InstrumentationNodeModuleDefinition(
-        '@sentry/node',
-        ['^7.0.0', '^8.0.0'],
-        (moduleExports: typeof Sentry) => {
-          diag.debug(
-            `Detected Sentry installed with SDK version: ${moduleExports.SDK_VERSION}`,
-          );
-          const client = moduleExports.getCurrentHub()?.getClient();
-          if (!client) {
-            diag.info('Sentry client not found');
-          }
-
-          if (this._hasRegisteredEventProcessor) {
-            diag.debug('Sentry event processor already registered');
-            return moduleExports;
-          }
-
-          if (typeof moduleExports.addGlobalEventProcessor === 'function') {
-            diag.debug('Sentry.addGlobalEventProcessor is available');
-            moduleExports.addGlobalEventProcessor(
-              this._registerEventProcessor(moduleExports),
-            );
-            this._hasRegisteredEventProcessor = true;
-            diag.debug('Registered Sentry event hooks');
-            return moduleExports;
-          }
-          if (typeof moduleExports.addEventProcessor === 'function') {
-            diag.debug('Sentry.addEventProcessor is available');
-            moduleExports.addEventProcessor(
-              this._registerEventProcessor(moduleExports),
-            );
-            this._hasRegisteredEventProcessor = true;
-            diag.debug('Registered Sentry event hooks');
-            return moduleExports;
-          }
-          diag.error('Sentry event processor not found');
-          return moduleExports;
-        },
-        (moduleExports) => {
-          // TODO: do we need to remove the event processor?
-        },
-      ),
-    ];
-  }
-
-  private _registerEventProcessor =
-    (moduleExports: typeof Sentry) => (event: Event, hint: EventHint) => {
+class SentryEventProcessor {
+  getEventProcessor =
+    (sentryVersion?: string) => (event: Event, hint: EventHint) => {
       try {
         diag.debug('Received Sentry event', event);
         if (this._isSentryEventAnException(event)) {
-          this._startOtelSpanFromSentryEvent(moduleExports, event, hint);
+          this._startOtelSpanFromSentryEvent(event, hint, sentryVersion);
         }
       } catch (e) {
         diag.debug(`Error processing event: ${e}`);
@@ -129,9 +69,9 @@ export class SentryNodeInstrumentation extends InstrumentationBase {
     [event.exception?.values[0].type, event.transaction].join(' ');
 
   private _startOtelSpanFromSentryEvent = (
-    moduleExports: typeof Sentry,
     event: Event,
     hint: EventHint,
+    sentryVersion?: string,
   ) => {
     const instrumentation = this;
     // FIXME: can't attach to the active span
@@ -141,8 +81,8 @@ export class SentryNodeInstrumentation extends InstrumentationBase {
     let isRootSpan = false;
     const startTime = event.timestamp * 1000;
     const attributes = {
-      ...(moduleExports.SDK_VERSION && {
-        [SEMATTRS_SENTRY_VERSION]: moduleExports.SDK_VERSION,
+      ...(sentryVersion && {
+        [SEMATTRS_SENTRY_VERSION]: sentryVersion,
       }),
       ...(event.modules && {
         [SEMATTRS_EXCEPTION_MODULES]: jsonToString(event.modules),
@@ -247,14 +187,11 @@ export class SentryNodeInstrumentation extends InstrumentationBase {
     };
     if (span == null) {
       isRootSpan = true;
-      span = instrumentation.tracer.startSpan(
-        this._buildSingleSpanName(event),
-        {
-          attributes,
-          startTime,
-          kind: SpanKind.INTERNAL,
-        },
-      );
+      span = tracer.startSpan(this._buildSingleSpanName(event), {
+        attributes,
+        startTime,
+        kind: SpanKind.INTERNAL,
+      });
     }
     // record exceptions
     for (const exception of event.exception?.values ?? []) {
@@ -265,4 +202,77 @@ export class SentryNodeInstrumentation extends InstrumentationBase {
       span.end(startTime);
     }
   };
+}
+
+const globalSentryEventProcessor = new SentryEventProcessor();
+
+// in case Sentry instrumentation doesn't work
+export const getEventProcessor = globalSentryEventProcessor.getEventProcessor;
+
+/** Sentry instrumentation for OpenTelemetry */
+export class SentryNodeInstrumentation extends InstrumentationBase {
+  private _hasRegisteredEventProcessor = false;
+
+  constructor(config: SentryNodeInstrumentationConfig = {}) {
+    super(PKG_NAME, PKG_VERSION, config);
+  }
+
+  override setConfig(config: SentryNodeInstrumentationConfig = {}) {
+    this._config = Object.assign({}, config);
+  }
+
+  override getConfig(): SentryNodeInstrumentationConfig {
+    return this._config as SentryNodeInstrumentationConfig;
+  }
+
+  init() {
+    return [
+      new InstrumentationNodeModuleDefinition(
+        '@sentry/node',
+        ['^7.0.0', '^8.0.0'],
+        (moduleExports: typeof Sentry) => {
+          diag.debug(
+            `Detected Sentry installed with SDK version: ${moduleExports.SDK_VERSION}`,
+          );
+          const client = moduleExports.getCurrentHub()?.getClient();
+          if (!client) {
+            diag.info('Sentry client not found');
+          }
+
+          if (this._hasRegisteredEventProcessor) {
+            diag.debug('Sentry event processor already registered');
+            return moduleExports;
+          }
+
+          if (typeof moduleExports.addGlobalEventProcessor === 'function') {
+            diag.debug('Sentry.addGlobalEventProcessor is available');
+            moduleExports.addGlobalEventProcessor(
+              globalSentryEventProcessor.getEventProcessor(
+                moduleExports.SDK_VERSION,
+              ),
+            );
+            this._hasRegisteredEventProcessor = true;
+            diag.debug('Registered Sentry event hooks');
+            return moduleExports;
+          }
+          if (typeof moduleExports.addEventProcessor === 'function') {
+            diag.debug('Sentry.addEventProcessor is available');
+            moduleExports.addEventProcessor(
+              globalSentryEventProcessor.getEventProcessor(
+                moduleExports.SDK_VERSION,
+              ),
+            );
+            this._hasRegisteredEventProcessor = true;
+            diag.debug('Registered Sentry event hooks');
+            return moduleExports;
+          }
+          diag.error('Sentry event processor not found');
+          return moduleExports;
+        },
+        (moduleExports) => {
+          // TODO: do we need to remove the event processor?
+        },
+      ),
+    ];
+  }
 }
