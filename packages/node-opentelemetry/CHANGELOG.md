@@ -1,5 +1,11 @@
 # @hyperdx/node-opentelemetry
 
+## 0.8.0-next.5
+
+### Patch Changes
+
+- c7e012c: chore: bump pino-abstract-transport to v1.2.0
+
 ## 0.8.0-next.4
 
 ### Patch Changes
