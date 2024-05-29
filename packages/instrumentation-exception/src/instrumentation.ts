@@ -48,6 +48,10 @@ export class ExceptionInstrumentation extends InstrumentationBase {
         new Sentry.Integrations.ContextLines(),
         new Sentry.Integrations.LocalVariables(),
       ],
+      beforeSend(event) {
+        // drop events so it doesn't get sent to Sentry
+        return null;
+      },
     });
     Sentry.addEventProcessor(
       getEventProcessor(this.tracer, Sentry.SDK_VERSION),
