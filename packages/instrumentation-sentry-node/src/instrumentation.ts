@@ -20,6 +20,9 @@ import { name as PKG_NAME, version as PKG_VERSION } from '../package.json';
 
 const defaultTracer = api.trace.getTracer(PKG_NAME, PKG_VERSION);
 
+// To prevent from adding the same event processor multiple times
+const REGISTERED_EVENT_PROCESSOR_VERSIONS = new Set<string>();
+
 // CUSTOM SEMANTIC CONVENTIONS
 const SEMATTRS_EXCEPTION_MECHANISM = 'exception.mechanism';
 const SEMATTRS_EXCEPTION_MODULE = 'exception.module';
@@ -193,12 +196,20 @@ const _startOtelSpanFromSentryEvent = ({
 };
 
 // in case Sentry instrumentation doesn't work
-export const getEventProcessor =
-  (tracer?: Tracer, sentryVersion?: string) =>
-  (event: Event, hint: EventHint) => {
+export const getEventProcessor = (tracer?: Tracer, sentryVersion?: string) => {
+  let _alreadyRegistered = false;
+  if (sentryVersion) {
+    if (REGISTERED_EVENT_PROCESSOR_VERSIONS.has(sentryVersion)) {
+      _alreadyRegistered = true;
+      diag.debug('Sentry event processor already registered, skipping');
+    } else {
+      REGISTERED_EVENT_PROCESSOR_VERSIONS.add(sentryVersion);
+    }
+  }
+  return (event: Event, hint: EventHint) => {
     try {
       diag.debug('Received Sentry event', event);
-      if (_isSentryEventAnException(event)) {
+      if (!_alreadyRegistered && _isSentryEventAnException(event)) {
         let _tracer = tracer;
         if (_tracer == null) {
           _tracer = defaultTracer;
@@ -217,6 +228,7 @@ export const getEventProcessor =
     // WARNING: always return the event
     return event;
   };
+};
 
 /** Sentry instrumentation for OpenTelemetry */
 export class SentryNodeInstrumentation extends InstrumentationBase {
