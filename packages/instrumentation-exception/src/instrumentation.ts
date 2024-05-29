@@ -25,6 +25,13 @@ export class ExceptionInstrumentation extends InstrumentationBase {
   }
 
   override enable() {
+    if (Sentry.isInitialized()) {
+      diag.warn(
+        'Sentry is already initialized. Skipping initialization. Please use @hyperdx/instrumentation-sentry-node instead.',
+      );
+      return;
+    }
+
     Sentry.init({
       dsn: 'http://public@localhost:5000/1',
       enableTracing: false,
