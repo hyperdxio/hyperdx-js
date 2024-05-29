@@ -12,11 +12,7 @@ const {
 } = require('@opentelemetry/instrumentation-express');
 const { HttpInstrumentation } = require('@opentelemetry/instrumentation-http');
 
-const {
-  ExceptionInstrumentation,
-  Handlers,
-  captureException,
-} = require('../build/src');
+const HyperDX = require('../build/src');
 
 const collectorOptions = {
   url: 'http://localhost:4318/v1/traces', // url is optional and can be omitted - default is http://localhost:4318/v1/traces
@@ -47,7 +43,7 @@ registerInstrumentations({
   instrumentations: [
     new HttpInstrumentation(),
     new ExpressInstrumentation(),
-    new ExceptionInstrumentation(),
+    new HyperDX.ExceptionInstrumentation(),
   ],
 });
 
@@ -57,21 +53,21 @@ const express = require('express');
 const PORT = parseInt(process.env.PORT || '7788');
 const app = express();
 
-app.use(Handlers.requestHandler());
+app.use(HyperDX.Handlers.requestHandler());
 
 app.use(compression());
 app.use(express.json());
 
 app.get('/error', (req, res) => {
-  captureException('This is a test for capturing exception in text');
-  captureException({
+  HyperDX.captureException('This is a test for capturing exception in text');
+  HyperDX.captureException({
     message: 'This is a test for capturing exception in object',
     foo: 'bar',
   });
   throw new RangeError('This is a test error');
 });
 
-app.use(Handlers.errorHandler());
+app.use(HyperDX.Handlers.errorHandler());
 
 app.listen(PORT, () => {
   console.log(`Listening for requests on http://localhost:${PORT}`);
