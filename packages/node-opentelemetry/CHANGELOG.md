@@ -1,5 +1,13 @@
 # @hyperdx/node-opentelemetry
 
+## 0.8.0-next.6
+
+### Patch Changes
+
+- 8a46140: feat: expose getEventProcessor api
+- Updated dependencies [8a46140]
+  - @hyperdx/instrumentation-sentry-node@0.0.1-next.0
+
 ## 0.8.0-next.5
 
 ### Patch Changes
