@@ -193,7 +193,7 @@ const _startOtelSpanFromSentryEvent = ({
   }
   // record exceptions
   for (const exception of event.exception?.values ?? []) {
-    _recordException(span, exception);
+    _recordException(_span, exception);
   }
 
   if (isRootSpan) {
