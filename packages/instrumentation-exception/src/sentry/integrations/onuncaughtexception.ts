@@ -3,7 +3,7 @@ import { diag } from '@opentelemetry/api';
 
 import { logAndExitProcess } from '../utils/errorhandling';
 
-type OnFatalErrorHandler = (firstError: Error, secondError?: Error) => void;
+type OnFatalErrorHandler = typeof logAndExitProcess;
 
 type TaggedListener = NodeJS.UncaughtExceptionListener & {
   tag?: string;
@@ -27,9 +27,11 @@ interface OnUncaughtExceptionOptions {
    * `onFatalError` itself threw, or because an independent error happened somewhere else while `onFatalError`
    * was running.
    */
-  onFatalError?(this: void, firstError: Error, secondError?: Error): void;
+  // onFatalError?(this: void, firstError: Error, secondError?: Error): void;
 
   captureException: (e: any, hint?: any) => void;
+
+  forceFlush: () => Promise<void>;
 }
 
 const INTEGRATION_NAME = 'OnUncaughtException';
@@ -51,6 +53,7 @@ export const onUncaughtExceptionIntegration = defineIntegration(
           'uncaughtException',
           makeErrorHandler(optionsWithDefaults),
         );
+        diag.debug('Registered global error handler for uncaught exceptions');
       },
     };
   },
@@ -70,11 +73,7 @@ export function makeErrorHandler(
 
   return Object.assign(
     (error: Error): void => {
-      let onFatalError: OnFatalErrorHandler = logAndExitProcess;
-
-      if (options.onFatalError) {
-        onFatalError = options.onFatalError;
-      }
+      const onFatalError: OnFatalErrorHandler = logAndExitProcess;
 
       // Attaching a listener to `uncaughtException` will prevent the node process from exiting. We generally do not
       // want to alter this behaviour so we check for other listeners that users may have attached themselves and adjust
@@ -119,7 +118,7 @@ export function makeErrorHandler(
 
         if (!calledFatalError && shouldApplyFatalHandlingLogic) {
           calledFatalError = true;
-          onFatalError(error);
+          onFatalError(error, options.forceFlush);
         }
       } else {
         if (shouldApplyFatalHandlingLogic) {
@@ -128,7 +127,7 @@ export function makeErrorHandler(
             diag.warn(
               'uncaught exception after calling fatal error shutdown callback - this is bad! forcing shutdown',
             );
-            logAndExitProcess(error);
+            logAndExitProcess(error, options.forceFlush);
           } else if (!caughtSecondError) {
             // two cases for how we can hit this branch:
             //   - capturing of first error blew up and we just caught the exception from that
@@ -149,7 +148,7 @@ export function makeErrorHandler(
               if (!calledFatalError) {
                 // it was probably case 1, let's treat err as the sendErr and call onFatalError
                 calledFatalError = true;
-                onFatalError(firstError, error);
+                onFatalError(firstError, options.forceFlush);
               } else {
                 // it was probably case 2, our first error finished capturing while we waited, cool, do nothing
               }

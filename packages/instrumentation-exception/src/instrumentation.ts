@@ -3,7 +3,7 @@ import {
   InstrumentationNodeModuleDefinition,
   InstrumentationBase,
 } from '@opentelemetry/instrumentation';
-import api, { diag, trace } from '@opentelemetry/api';
+import { TracerProvider, diag, trace } from '@opentelemetry/api';
 import { getEventProcessor } from '@hyperdx/instrumentation-sentry-node';
 
 import { ExceptionInstrumentationConfig } from './types';
@@ -19,7 +19,7 @@ export const captureException = async (e: any, hint?: EventHint) => {
     const event = await buildEventFromException(e, hint);
     const eventProcessor = getEventProcessor(defaultTracer, SENTRY_SDK_VERSION);
     eventProcessor(
-      event as any,
+      event,
       hint ?? {
         mechanism: {
           type: 'generic',
@@ -34,6 +34,8 @@ export const captureException = async (e: any, hint?: EventHint) => {
 
 /** Exception instrumentation for OpenTelemetry */
 export class ExceptionInstrumentation extends InstrumentationBase {
+  private _traceForceFlusher?: () => Promise<void>;
+
   constructor(config: ExceptionInstrumentationConfig = {}) {
     super(PKG_NAME, PKG_VERSION, config);
   }
@@ -50,14 +52,52 @@ export class ExceptionInstrumentation extends InstrumentationBase {
     // nothing to do here
   }
 
+  override setTracerProvider(tracerProvider: TracerProvider) {
+    super.setTracerProvider(tracerProvider);
+    this._traceForceFlusher = this._traceForceFlush(tracerProvider);
+  }
+
+  private _traceForceFlush(tracerProvider: TracerProvider) {
+    if (!tracerProvider) return undefined;
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let currentProvider: any = tracerProvider;
+
+    if (typeof currentProvider.getDelegate === 'function') {
+      currentProvider = currentProvider.getDelegate();
+    }
+
+    if (typeof currentProvider.forceFlush === 'function') {
+      return currentProvider.forceFlush.bind(currentProvider);
+    }
+
+    return undefined;
+  }
+
+  private async forceFlush() {
+    const flushers = [];
+    if (this._traceForceFlusher) {
+      flushers.push(this._traceForceFlusher());
+      // TODO: a hack to make sure we flush all
+      flushers.push(new Promise((resolve) => setTimeout(resolve, 2000)));
+    } else {
+      diag.error(
+        'Spans may not be exported for the lambda function because we are not force flushing before callback.',
+      );
+    }
+    await Promise.all(flushers);
+  }
+
   override enable() {
     onUncaughtExceptionIntegration({
       exitEvenIfOtherHandlersAreRegistered: true,
       captureException,
+      forceFlush: () => this.forceFlush(),
     }).setup({} as any);
     onUnhandledRejectionIntegration({
       mode: 'warn',
       captureException,
+      forceFlush: () => this.forceFlush(),
     }).setup({} as any);
   }
 

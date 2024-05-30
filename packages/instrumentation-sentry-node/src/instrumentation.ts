@@ -56,23 +56,27 @@ const _isSentryEventAnException = (event: Event) =>
 
 // TODO: enrich span with more info
 const _buildSingleSpanName = (event: Event) =>
-  [event.exception?.values[0].type, event.transaction].join(' ');
+  event.message
+    ? event.message
+    : [event.exception?.values[0].type, event.transaction].join(' ');
 
 const _startOtelSpanFromSentryEvent = ({
   event,
   hint,
   sentryVersion,
+  span,
   tracer,
 }: {
   event: Event;
   hint: EventHint;
   sentryVersion?: string;
+  span?: Span;
   tracer: Tracer;
 }) => {
   // FIXME: can't attach to the active span
   // since Sentry would overwrite the active span
   // let span = api.trace.getActiveSpan();
-  let span = null;
+  let _span = span;
   let isRootSpan = false;
   const startTime = event.timestamp * 1000;
   const attributes = {
@@ -179,9 +183,9 @@ const _startOtelSpanFromSentryEvent = ({
       'host.name': event.server_name,
     }),
   };
-  if (span == null) {
+  if (_span == null) {
     isRootSpan = true;
-    span = tracer.startSpan(_buildSingleSpanName(event), {
+    _span = tracer.startSpan(_buildSingleSpanName(event), {
       attributes,
       startTime,
       kind: SpanKind.INTERNAL,
@@ -193,7 +197,7 @@ const _startOtelSpanFromSentryEvent = ({
   }
 
   if (isRootSpan) {
-    span.end(startTime);
+    _span.end(startTime);
   }
 };
 

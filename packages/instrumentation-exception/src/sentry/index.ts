@@ -1,9 +1,14 @@
 import type { Client, Event, EventHint, Integration } from '@sentry/types';
-import { SDK_VERSION } from '@sentry/core';
-import { eventFromUnknownInput, timestampInSeconds } from '@sentry/utils';
+import { SDK_VERSION, inboundFiltersIntegration } from '@sentry/core';
+import {
+  eventFromUnknownInput,
+  timestampInSeconds,
+  uuid4,
+} from '@sentry/utils';
 
 import { contextLinesIntegration } from './integrations/contextlines';
 import { defaultStackParser } from './sdk/api';
+import { hyperdxIntegration } from './integrations/hyperdx';
 import { isCjs } from './utils/commonjs';
 import { localVariablesIntegration } from './integrations/local-variables';
 import { modulesIntegration } from './integrations/modules';
@@ -14,6 +19,8 @@ function getCjsOnlyIntegrations(): Integration[] {
 }
 
 const defaultIntegrations = [
+  hyperdxIntegration(),
+  inboundFiltersIntegration(),
   contextLinesIntegration(),
   localVariablesIntegration(),
   modulesIntegration(),
@@ -39,6 +46,7 @@ export const applyIntegrations = async (event: Event, hint?: EventHint) => {
   return event;
 };
 
+//
 export const SENTRY_SDK_VERSION = SDK_VERSION;
 
 export const buildEventFromException = async (
@@ -51,8 +59,5 @@ export const buildEventFromException = async (
     exception,
     hint,
   );
-  // attach timestamp
-  event.timestamp = timestampInSeconds();
-
   return applyIntegrations(event, hint);
 };

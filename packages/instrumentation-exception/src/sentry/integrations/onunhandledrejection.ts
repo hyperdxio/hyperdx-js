@@ -1,6 +1,7 @@
 import type { IntegrationFn } from '@sentry/types';
 import { consoleSandbox } from '@sentry/utils';
 import { defineIntegration } from '@sentry/core';
+import { diag } from '@opentelemetry/api';
 
 import { logAndExitProcess } from '../utils/errorhandling';
 
@@ -14,6 +15,8 @@ interface OnUnhandledRejectionOptions {
   mode: UnhandledRejectionMode;
 
   captureException: (e: any, hint?: any) => void;
+
+  forceFlush: () => Promise<void>;
 }
 
 const INTEGRATION_NAME = 'OnUnhandledRejection';
@@ -31,7 +34,11 @@ const _onUnhandledRejectionIntegration = ((
         makeUnhandledPromiseHandler({
           mode,
           captureException: options.captureException,
+          forceFlush: options.forceFlush,
         }),
+      );
+      diag.debug(
+        'Registered global error handler for unhandled promise rejections',
       );
     },
   };
@@ -100,7 +107,7 @@ function handleRejection(
     consoleSandbox(() => {
       console.warn(rejectionWarning);
     });
-    logAndExitProcess(reason);
+    logAndExitProcess(reason, options.forceFlush);
   }
   /* eslint-enable no-console */
 }
