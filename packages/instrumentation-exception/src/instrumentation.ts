@@ -14,7 +14,7 @@ import { onUnhandledRejectionIntegration } from './sentry/integrations/onunhandl
 
 const defaultTracer = trace.getTracer(PKG_NAME, PKG_VERSION);
 
-export const captureException = async (e: any, hint?: EventHint) => {
+export const recordException = async (e: any, hint?: EventHint) => {
   try {
     const event = await buildEventFromException(e, hint);
     const eventProcessor = getEventProcessor(defaultTracer, SENTRY_SDK_VERSION);
@@ -91,12 +91,12 @@ export class ExceptionInstrumentation extends InstrumentationBase {
   override enable() {
     onUncaughtExceptionIntegration({
       exitEvenIfOtherHandlersAreRegistered: true,
-      captureException,
+      recordException,
       forceFlush: () => this.forceFlush(),
     }).setup({} as any);
     onUnhandledRejectionIntegration({
       mode: 'warn',
-      captureException,
+      recordException,
       forceFlush: () => this.forceFlush(),
     }).setup({} as any);
   }

@@ -29,7 +29,7 @@ interface OnUncaughtExceptionOptions {
    */
   // onFatalError?(this: void, firstError: Error, secondError?: Error): void;
 
-  captureException: (e: any, hint?: any) => void;
+  recordException: (e: any, hint?: any) => void;
 
   forceFlush: () => Promise<void>;
 }
@@ -105,7 +105,7 @@ export function makeErrorHandler(
         firstError = error;
         caughtFirstError = true;
 
-        options.captureException(error, {
+        options.recordException(error, {
           originalException: error,
           captureContext: {
             level: 'fatal',

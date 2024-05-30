@@ -14,7 +14,7 @@ interface OnUnhandledRejectionOptions {
    */
   mode: UnhandledRejectionMode;
 
-  captureException: (e: any, hint?: any) => void;
+  recordException: (e: any, hint?: any) => void;
 
   forceFlush: () => Promise<void>;
 }
@@ -33,7 +33,7 @@ const _onUnhandledRejectionIntegration = ((
         'unhandledRejection',
         makeUnhandledPromiseHandler({
           mode,
-          captureException: options.captureException,
+          recordException: options.recordException,
           forceFlush: options.forceFlush,
         }),
       );
@@ -65,7 +65,7 @@ export function makeUnhandledPromiseHandler(
     reason: unknown,
     promise: unknown,
   ): void {
-    options.captureException(reason, {
+    options.recordException(reason, {
       originalException: promise,
       captureContext: {
         extra: { unhandledPromiseRejection: true },
