@@ -12,7 +12,12 @@ import {
   SEMATTRS_HTTP_RESPONSE_CONTENT_LENGTH,
 } from '@opentelemetry/semantic-conventions';
 import Sentry from '@sentry/node';
-import { Event, EventHint, Exception, EventProcessor } from '@sentry/types';
+import * as SentryTypesV7 from '@sentry/types-v7';
+import * as SentryTypesV8 from '@sentry/types-v8';
+
+export type Event = SentryTypesV7.Event | SentryTypesV8.Event;
+export type EventHint = SentryTypesV7.EventHint | SentryTypesV8.EventHint;
+export type Exception = SentryTypesV7.Exception | SentryTypesV8.Exception;
 
 import { SentryNodeInstrumentationConfig } from './types';
 import { jsonToString } from './utils';
@@ -194,7 +199,7 @@ const _startOtelSpanFromSentryEvent = ({
 
 // in case Sentry instrumentation doesn't work
 export const getEventProcessor =
-  (tracer?: Tracer, sentryVersion?: string) =>
+  (tracer?: Tracer, sentryVersion?: string): any =>
   (event: Event, hint: EventHint) => {
     try {
       diag.debug('Received Sentry event', event);
