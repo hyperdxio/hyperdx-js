@@ -91,12 +91,10 @@ export class ExceptionInstrumentation extends InstrumentationBase {
   override enable() {
     onUncaughtExceptionIntegration({
       exitEvenIfOtherHandlersAreRegistered: true,
-      recordException,
       forceFlush: () => this.forceFlush(),
     }).setup({} as any);
     onUnhandledRejectionIntegration({
       mode: 'warn',
-      recordException,
       forceFlush: () => this.forceFlush(),
     }).setup({} as any);
   }

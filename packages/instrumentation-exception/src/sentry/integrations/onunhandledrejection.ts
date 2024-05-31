@@ -4,6 +4,7 @@ import { defineIntegration } from '@sentry/core';
 import { diag } from '@opentelemetry/api';
 
 import { logAndExitProcess } from '../utils/errorhandling';
+import { recordException } from '../../instrumentation';
 
 type UnhandledRejectionMode = 'none' | 'warn' | 'strict';
 
@@ -13,8 +14,6 @@ interface OnUnhandledRejectionOptions {
    * that mimicks behavior of node's --unhandled-rejection flag.
    */
   mode: UnhandledRejectionMode;
-
-  recordException: (e: any, hint?: any) => void;
 
   forceFlush: () => Promise<void>;
 }
@@ -33,7 +32,6 @@ const _onUnhandledRejectionIntegration = ((
         'unhandledRejection',
         makeUnhandledPromiseHandler({
           mode,
-          recordException: options.recordException,
           forceFlush: options.forceFlush,
         }),
       );
@@ -65,7 +63,7 @@ export function makeUnhandledPromiseHandler(
     reason: unknown,
     promise: unknown,
   ): void {
-    options.recordException(reason, {
+    recordException(reason, {
       originalException: promise,
       captureContext: {
         extra: { unhandledPromiseRejection: true },

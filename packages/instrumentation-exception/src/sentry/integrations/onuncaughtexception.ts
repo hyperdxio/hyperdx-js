@@ -2,6 +2,7 @@ import { defineIntegration } from '@sentry/core';
 import { diag } from '@opentelemetry/api';
 
 import { logAndExitProcess } from '../utils/errorhandling';
+import { recordException } from '../../instrumentation';
 
 type OnFatalErrorHandler = typeof logAndExitProcess;
 
@@ -28,8 +29,6 @@ interface OnUncaughtExceptionOptions {
    * was running.
    */
   // onFatalError?(this: void, firstError: Error, secondError?: Error): void;
-
-  recordException: (e: any, hint?: any) => void;
 
   forceFlush: () => Promise<void>;
 }
@@ -105,7 +104,7 @@ export function makeErrorHandler(
         firstError = error;
         caughtFirstError = true;
 
-        options.recordException(error, {
+        recordException(error, {
           originalException: error,
           captureContext: {
             level: 'fatal',
