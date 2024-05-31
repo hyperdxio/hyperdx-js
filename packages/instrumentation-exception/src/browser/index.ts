@@ -14,11 +14,12 @@ import {
 import { diag, trace, Tracer } from '@opentelemetry/api';
 import { getEventProcessor } from '@hyperdx/instrumentation-sentry-node';
 
+import { browserApiErrorsIntegration } from './integrations/browserapierrors';
 import { defaultStackParser } from './stack-parsers';
 import { eventFromUnknownInput } from './eventbuilder';
-import { browserApiErrorsIntegration } from './integrations/browserapierrors';
 import { globalHandlersIntegration } from './integrations/globalhandlers';
 import { httpContextIntegration } from './integrations/httpcontext';
+import { hyperdxIntegration } from './integrations/hyperdx';
 import { linkedErrorsIntegration } from './integrations/linkederrors';
 import { name as PKG_NAME, version as PKG_VERSION } from '../../package.json';
 
@@ -26,6 +27,7 @@ import { name as PKG_NAME, version as PKG_VERSION } from '../../package.json';
 const defaultTracer = trace.getTracer(PKG_NAME, PKG_VERSION);
 
 const defaultIntegrations = [
+  hyperdxIntegration(),
   inboundFiltersIntegration(),
   // functionToStringIntegration(),
   browserApiErrorsIntegration(),
