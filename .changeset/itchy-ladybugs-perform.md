@@ -1,6 +1,6 @@
 ---
-'@hyperdx/instrumentation-sentry-node': patch
-'@hyperdx/instrumentation-exception': patch
+'@hyperdx/instrumentation-sentry-node': minor
+'@hyperdx/instrumentation-exception': minor
 ---
 
 feat: introduce recordException api + handle uncaughtException + unhandledRejection
