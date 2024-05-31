@@ -12,7 +12,7 @@ const {
 } = require('@opentelemetry/instrumentation-express');
 const { HttpInstrumentation } = require('@opentelemetry/instrumentation-http');
 
-const { ExceptionInstrumentation } = require('../build/src');
+const { ExceptionInstrumentation, recordException } = require('../build/src');
 
 const collectorOptions = {
   url: 'http://localhost:4318/v1/traces', // url is optional and can be omitted - default is http://localhost:4318/v1/traces
@@ -49,43 +49,26 @@ registerInstrumentations({
 
 const compression = require('compression');
 const express = require('express');
-const Sentry = require('@sentry/node');
-
-Sentry.init({
-  dsn: 'http://public@localhost:5000/1',
-  integrations: [
-    // Common
-    new Sentry.Integrations.InboundFilters(),
-    new Sentry.Integrations.FunctionToString(),
-    new Sentry.Integrations.LinkedErrors(),
-    new Sentry.Integrations.RequestData(),
-    // Global Handlers
-    new Sentry.Integrations.OnUnhandledRejection(),
-    new Sentry.Integrations.OnUncaughtException(),
-    // Event Info
-    new Sentry.Integrations.ContextLines(),
-    new Sentry.Integrations.LocalVariables(),
-  ],
-});
 
 const PORT = parseInt(process.env.PORT || '7788');
 const app = express();
-
-app.use(Sentry.Handlers.requestHandler());
 
 app.use(compression());
 app.use(express.json());
 
 app.get('/error', (req, res) => {
-  Sentry.captureException('This is a test for capturing exception in text');
-  Sentry.captureException({
+  recordException('This is a test for capturing exception in text');
+  recordException({
     message: 'This is a test for capturing exception in object',
     foo: 'bar',
   });
   throw new RangeError('This is a test error');
 });
 
-app.use(Sentry.Handlers.errorHandler());
+app.use((err, req, res, next) => {
+  recordException(err);
+  res.status(500).send('Something broke!');
+});
 
 app.listen(PORT, () => {
   console.log(`Listening for requests on http://localhost:${PORT}`);

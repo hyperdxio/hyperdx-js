@@ -8,11 +8,19 @@ import {
   SEMATTRS_EXCEPTION_MESSAGE,
   SEMATTRS_EXCEPTION_STACKTRACE,
   SEMATTRS_EXCEPTION_TYPE,
-  SEMATTRS_HTTP_STATUS_CODE,
+  SEMATTRS_HTTP_REQUEST_CONTENT_LENGTH,
   SEMATTRS_HTTP_RESPONSE_CONTENT_LENGTH,
+  SEMATTRS_HTTP_STATUS_CODE,
+  SEMATTRS_HTTP_URL,
+  SEMATTRS_HTTP_USER_AGENT,
 } from '@opentelemetry/semantic-conventions';
 import Sentry from '@sentry/node';
-import { Event, EventHint, Exception, EventProcessor } from '@sentry/types';
+import * as SentryTypesV7 from '@sentry/types-v7';
+import * as SentryTypesV8 from '@sentry/types-v8';
+
+export type Event = SentryTypesV7.Event | SentryTypesV8.Event;
+export type EventHint = SentryTypesV7.EventHint | SentryTypesV8.EventHint;
+export type Exception = SentryTypesV7.Exception | SentryTypesV8.Exception;
 
 import { SentryNodeInstrumentationConfig } from './types';
 import { jsonToString } from './utils';
@@ -51,23 +59,27 @@ const _isSentryEventAnException = (event: Event) =>
 
 // TODO: enrich span with more info
 const _buildSingleSpanName = (event: Event) =>
-  [event.exception?.values[0].type, event.transaction].join(' ');
+  event.message
+    ? event.message
+    : [event.exception?.values[0].type, event.transaction].join(' ');
 
 const _startOtelSpanFromSentryEvent = ({
   event,
   hint,
   sentryVersion,
+  span,
   tracer,
 }: {
   event: Event;
   hint: EventHint;
   sentryVersion?: string;
+  span?: Span;
   tracer: Tracer;
 }) => {
   // FIXME: can't attach to the active span
   // since Sentry would overwrite the active span
   // let span = api.trace.getActiveSpan();
-  let span = null;
+  let _span = span;
   let isRootSpan = false;
   const startTime = event.timestamp * 1000;
   const attributes = {
@@ -173,10 +185,14 @@ const _startOtelSpanFromSentryEvent = ({
     ...(event.server_name && {
       'host.name': event.server_name,
     }),
+    ...(event.request && {
+      [SEMATTRS_HTTP_URL]: event.request.url,
+      [SEMATTRS_HTTP_USER_AGENT]: event.request.headers?.['User-Agent'],
+    }),
   };
-  if (span == null) {
+  if (_span == null) {
     isRootSpan = true;
-    span = tracer.startSpan(_buildSingleSpanName(event), {
+    _span = tracer.startSpan(_buildSingleSpanName(event), {
       attributes,
       startTime,
       kind: SpanKind.INTERNAL,
@@ -184,18 +200,18 @@ const _startOtelSpanFromSentryEvent = ({
   }
   // record exceptions
   for (const exception of event.exception?.values ?? []) {
-    _recordException(span, exception);
+    _recordException(_span, exception);
   }
 
   if (isRootSpan) {
-    span.end(startTime);
+    _span.end(startTime);
   }
 };
 
 // in case Sentry instrumentation doesn't work
 export const getEventProcessor =
-  (tracer?: Tracer, sentryVersion?: string) =>
-  (event: Event, hint: EventHint) => {
+  (tracer?: Tracer, sentryVersion?: string): any =>
+  (event: Event, hint: EventHint, span?: Span) => {
     try {
       diag.debug('Received Sentry event', event);
       if (_isSentryEventAnException(event)) {
@@ -208,6 +224,7 @@ export const getEventProcessor =
           event,
           hint,
           sentryVersion,
+          span,
           tracer: _tracer,
         });
       }
