@@ -1,6 +1,5 @@
-import type { Event, StackFrame, IntegrationFn } from '@sentry/types';
+import type { Event, IntegrationFn } from '@sentry/types';
 import { defineIntegration } from '@sentry/core';
-import { timestampInSeconds, uuid4 } from '@sentry/utils';
 
 import { getSentryRelease } from '../sdk/api';
 
@@ -13,11 +12,8 @@ export const _hyperdxIntegration = ((options: HyperDXOpionts = {}) => {
   return {
     name: INTEGRATION_NAME,
     processEvent(event) {
-      const possibleEventMessages = _getPossibleEventMessages(event);
-
-      event.event_id = uuid4();
       event.release = getRelease();
-      event.timestamp = timestampInSeconds();
+      const possibleEventMessages = _getPossibleEventMessages(event);
       if (possibleEventMessages.length > 0) {
         event.message = possibleEventMessages[possibleEventMessages.length - 1];
       }

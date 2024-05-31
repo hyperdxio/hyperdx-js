@@ -82,17 +82,17 @@ export const recordException = async (
   hint?: EventHint,
   tracer?: Tracer,
 ) => {
+  const _hint = hint ?? {
+    mechanism: {
+      type: 'generic',
+      handled: true,
+    },
+  };
   try {
     const _eventProcessor = getEventProcessor(
       tracer ?? defaultTracer,
       SDK_VERSION,
     );
-    const _hint = hint ?? {
-      mechanism: {
-        type: 'generic',
-        handled: false,
-      },
-    };
     const event = await buildEventFromException(e, _hint);
     _eventProcessor(event, _hint);
   } catch (err) {
