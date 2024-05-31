@@ -13,12 +13,12 @@ import { onUncaughtExceptionIntegration } from './sentry/integrations/onuncaught
 import { onUnhandledRejectionIntegration } from './sentry/integrations/onunhandledrejection';
 
 const defaultTracer = trace.getTracer(PKG_NAME, PKG_VERSION);
+const _eventProcessor = getEventProcessor(defaultTracer, SENTRY_SDK_VERSION);
 
 export const recordException = async (e: any, hint?: EventHint) => {
   try {
     const event = await buildEventFromException(e, hint);
-    const eventProcessor = getEventProcessor(defaultTracer, SENTRY_SDK_VERSION);
-    eventProcessor(
+    _eventProcessor(
       event,
       hint ?? {
         mechanism: {
