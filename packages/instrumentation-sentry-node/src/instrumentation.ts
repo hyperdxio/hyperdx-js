@@ -204,7 +204,7 @@ const _startOtelSpanFromSentryEvent = ({
 // in case Sentry instrumentation doesn't work
 export const getEventProcessor =
   (tracer?: Tracer, sentryVersion?: string): any =>
-  (event: Event, hint: EventHint) => {
+  (event: Event, hint: EventHint, span?: Span) => {
     try {
       diag.debug('Received Sentry event', event);
       if (_isSentryEventAnException(event)) {
@@ -217,6 +217,7 @@ export const getEventProcessor =
           event,
           hint,
           sentryVersion,
+          span,
           tracer: _tracer,
         });
       }
