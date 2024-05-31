@@ -4,7 +4,7 @@ import { defineIntegration } from '@sentry/core';
 import { diag } from '@opentelemetry/api';
 
 import { logAndExitProcess } from '../utils/errorhandling';
-import { recordException } from '../../instrumentation';
+import { recordException } from '..';
 
 type UnhandledRejectionMode = 'none' | 'warn' | 'strict';
 
