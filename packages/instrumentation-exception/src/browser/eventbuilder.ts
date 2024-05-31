@@ -282,7 +282,6 @@ export function eventFromUnknownInput(
       addExceptionTypeValue(event, message);
     }
     if ('code' in domException) {
-      // eslint-disable-next-line deprecation/deprecation
       event.tags = {
         ...event.tags,
         'DOMException.code': `${domException.code}`,

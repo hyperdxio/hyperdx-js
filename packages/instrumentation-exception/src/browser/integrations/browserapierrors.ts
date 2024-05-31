@@ -196,6 +196,7 @@ function _wrapEventTarget(target: string): void {
   if (
     !proto ||
     !proto.hasOwnProperty ||
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, no-prototype-builtins
     !proto.hasOwnProperty('addEventListener')
   ) {
     return;
