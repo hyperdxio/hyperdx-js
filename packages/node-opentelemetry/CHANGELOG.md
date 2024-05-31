@@ -1,5 +1,13 @@
 # @hyperdx/node-opentelemetry
 
+## 0.8.0-next.7
+
+### Patch Changes
+
+- Updated dependencies [feb4ef1]
+- Updated dependencies [feb4ef1]
+  - @hyperdx/instrumentation-sentry-node@0.1.0-next.1
+
 ## 0.8.0-next.6
 
 ### Patch Changes

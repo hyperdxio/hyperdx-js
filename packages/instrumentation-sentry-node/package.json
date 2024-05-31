@@ -2,7 +2,7 @@
   "name": "@hyperdx/instrumentation-sentry-node",
   "author": "Warren <warren@users.noreply.github.com>",
   "license": "Apache-2.0",
-  "version": "0.0.1-next.0",
+  "version": "0.1.0-next.1",
   "homepage": "https://www.hyperdx.io",
   "repository": {
     "type": "git",

@@ -1,5 +1,11 @@
 # @hyperdx/browser
 
+## 0.20.1-next.0
+
+### Patch Changes
+
+- f55af3b: Add ignoreUrls config
+
 ## 0.20.0
 
 ### Minor Changes
