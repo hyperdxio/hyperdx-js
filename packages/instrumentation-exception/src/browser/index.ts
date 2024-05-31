@@ -15,6 +15,7 @@ import { diag, trace, Tracer } from '@opentelemetry/api';
 import { getEventProcessor } from '@hyperdx/instrumentation-sentry-node';
 
 import { browserApiErrorsIntegration } from './integrations/browserapierrors';
+import { contextLinesIntegration } from './integrations/contextlines';
 import { defaultStackParser } from './stack-parsers';
 import { eventFromUnknownInput } from './eventbuilder';
 import { globalHandlersIntegration } from './integrations/globalhandlers';
@@ -29,6 +30,7 @@ const defaultTracer = trace.getTracer(PKG_NAME, PKG_VERSION);
 const defaultIntegrations = [
   hyperdxIntegration(),
   inboundFiltersIntegration(),
+  contextLinesIntegration(),
   // functionToStringIntegration(),
   browserApiErrorsIntegration(),
   // globalHandlersIntegration(), // TODO: need refactoring
@@ -40,6 +42,7 @@ const defaultIntegrations = [
 const DEFAULT_CLIENT_OPTIONS: ClientOptions = {
   integrations: defaultIntegrations,
   stackParser: defaultStackParser,
+  maxValueLength: 250,
   transport: {} as any,
 };
 

@@ -1,8 +1,6 @@
 import { defineIntegration } from '@sentry/core';
 import type { IntegrationFn } from '@sentry/types';
 import { applyAggregateErrorsToEvent } from '@sentry/utils';
-
-import { defaultStackParser } from '../stack-parsers';
 import { exceptionFromError } from '../eventbuilder';
 
 interface LinkedErrorsOptions {
@@ -12,7 +10,6 @@ interface LinkedErrorsOptions {
 
 const DEFAULT_KEY = 'cause';
 const DEFAULT_LIMIT = 5;
-const DEFAULT_MAX_VALUE_LENGTH = 250;
 
 const INTEGRATION_NAME = 'LinkedErrors';
 
@@ -23,11 +20,13 @@ const _linkedErrorsIntegration = ((options: LinkedErrorsOptions = {}) => {
   return {
     name: INTEGRATION_NAME,
     preprocessEvent(event, hint, client) {
+      const options = client.getOptions();
+
       applyAggregateErrorsToEvent(
         // This differs from the LinkedErrors integration in core by using a different exceptionFromError function
         exceptionFromError,
-        defaultStackParser,
-        DEFAULT_MAX_VALUE_LENGTH,
+        options.stackParser,
+        options.maxValueLength,
         key,
         limit,
         event,

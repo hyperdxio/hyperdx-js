@@ -8,8 +8,11 @@ import {
   SEMATTRS_EXCEPTION_MESSAGE,
   SEMATTRS_EXCEPTION_STACKTRACE,
   SEMATTRS_EXCEPTION_TYPE,
-  SEMATTRS_HTTP_STATUS_CODE,
+  SEMATTRS_HTTP_REQUEST_CONTENT_LENGTH,
   SEMATTRS_HTTP_RESPONSE_CONTENT_LENGTH,
+  SEMATTRS_HTTP_STATUS_CODE,
+  SEMATTRS_HTTP_URL,
+  SEMATTRS_HTTP_USER_AGENT,
 } from '@opentelemetry/semantic-conventions';
 import Sentry from '@sentry/node';
 import * as SentryTypesV7 from '@sentry/types-v7';
@@ -181,6 +184,10 @@ const _startOtelSpanFromSentryEvent = ({
     // https://opentelemetry.io/docs/specs/semconv/resource/host/
     ...(event.server_name && {
       'host.name': event.server_name,
+    }),
+    ...(event.request && {
+      [SEMATTRS_HTTP_URL]: event.request.url,
+      [SEMATTRS_HTTP_USER_AGENT]: event.request.headers?.['User-Agent'],
     }),
   };
   if (_span == null) {
