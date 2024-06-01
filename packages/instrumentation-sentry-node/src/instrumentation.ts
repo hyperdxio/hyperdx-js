@@ -1,4 +1,10 @@
-import api, { Span, SpanKind, Tracer, diag } from '@opentelemetry/api';
+import api, {
+  Span,
+  SpanKind,
+  SpanStatusCode,
+  Tracer,
+  diag,
+} from '@opentelemetry/api';
 import { ExceptionEventName } from '@opentelemetry/sdk-trace-base/build/src/enums';
 import {
   InstrumentationBase,
@@ -205,6 +211,9 @@ const _startOtelSpanFromSentryEvent = ({
       ExceptionEventName,
       extractSpanEventsFromException(exception),
     );
+    _span.setStatus({
+      code: SpanStatusCode.ERROR,
+    });
   }
 
   if (isRootSpan) {

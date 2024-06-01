@@ -84,7 +84,6 @@ export const buildEventFromException = async (
   } catch (err) {
     diag.error('Failed to prepare event', err);
   }
-  console.log('pre-event', event);
   return applyIntegrations(event, hint);
 };
 
