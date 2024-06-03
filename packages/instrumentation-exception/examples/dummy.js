@@ -1,4 +1,9 @@
-const { diag, DiagConsoleLogger, DiagLogLevel } = require('@opentelemetry/api');
+const {
+  DiagConsoleLogger,
+  DiagLogLevel,
+  diag,
+  trace,
+} = require('@opentelemetry/api');
 const {
   BatchSpanProcessor,
   NodeTracerProvider,
@@ -56,13 +61,20 @@ const app = express();
 app.use(compression());
 app.use(express.json());
 
-app.get('/error', (req, res) => {
-  recordException('This is a test for capturing exception in text');
+const tracer = trace.getTracer('express-example');
+
+app.get('/error', async (req, res) => {
+  await recordException(
+    new Error('This is a test error with custom attributes'),
+    undefined,
+    undefined,
+    trace.getActiveSpan(),
+  );
   recordException({
     message: 'This is a test for capturing exception in object',
     foo: 'bar',
   });
-  throw new RangeError('This is a test error');
+  res.send('Error sent to the server');
 });
 
 app.use((err, req, res, next) => {
