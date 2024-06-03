@@ -10,7 +10,7 @@ import {
   inboundFiltersIntegration,
   prepareEvent,
 } from '@sentry/core';
-import { Tracer, diag, trace } from '@opentelemetry/api';
+import { Span, Tracer, diag, trace } from '@opentelemetry/api';
 import { eventFromUnknownInput } from '@sentry/utils';
 import { getEventProcessor } from '@hyperdx/instrumentation-sentry-node';
 
@@ -84,7 +84,6 @@ export const buildEventFromException = async (
   } catch (err) {
     diag.error('Failed to prepare event', err);
   }
-  console.log('pre-event', event);
   return applyIntegrations(event, hint);
 };
 
@@ -92,6 +91,7 @@ export const recordException = async (
   e: any,
   hint?: EventHint,
   tracer?: Tracer,
+  span?: Span,
 ) => {
   const _hint = hint ?? {
     mechanism: {
@@ -105,7 +105,7 @@ export const recordException = async (
       SDK_VERSION,
     );
     const event = await buildEventFromException(e, _hint);
-    _eventProcessor(event, _hint);
+    _eventProcessor(event, _hint, span);
   } catch (err) {
     diag.error('Failed to capture exception', err);
   }
