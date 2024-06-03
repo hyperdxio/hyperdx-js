@@ -255,7 +255,7 @@ export const getEventProcessor =
         });
       }
     } catch (e) {
-      diag.debug(`Error processing event: ${e}`);
+      diag.error('Error processing event', e);
     }
     // WARNING: always return the event
     return event;
