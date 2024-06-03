@@ -6,7 +6,7 @@ import {
   inboundFiltersIntegration,
   prepareEvent,
 } from '@sentry/core';
-import { Span, Tracer, diag, trace } from '@opentelemetry/api';
+import { Attributes, Span, Tracer, diag, trace } from '@opentelemetry/api';
 import { getEventProcessor } from '@hyperdx/instrumentation-sentry-node';
 
 import { browserApiErrorsIntegration } from './integrations/browserapierrors';
@@ -82,6 +82,7 @@ export const recordException = async (
   hint?: EventHint,
   tracer?: Tracer,
   span?: Span,
+  attributes?: Attributes,
 ) => {
   const _hint = hint ?? {
     mechanism: {
@@ -95,7 +96,7 @@ export const recordException = async (
       SDK_VERSION,
     );
     const event = await buildEventFromException(e, _hint);
-    _eventProcessor(event, _hint, span);
+    _eventProcessor(event, _hint, span, attributes);
   } catch (err) {
     diag.error('Failed to capture exception', err);
   }

@@ -230,7 +230,12 @@ const _startOtelSpanFromSentryEvent = ({
   }
 };
 
-type EventProcessor = (event: any, hint: any, span?: Span) => any;
+type EventProcessor = (
+  event: any,
+  hint: any,
+  span?: Span,
+  attributes?: Attributes,
+) => any;
 
 // in case Sentry instrumentation doesn't work
 export const getEventProcessor =
