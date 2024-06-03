@@ -1,5 +1,13 @@
 # @hyperdx/instrumentation-exception
 
+## 0.1.0-next.2
+
+### Patch Changes
+
+- eb04eb3: feat: support passing existing span to recordException
+- Updated dependencies [eb04eb3]
+  - @hyperdx/instrumentation-sentry-node@0.1.0-next.2
+
 ## 0.1.0-next.1
 
 ### Minor Changes
