@@ -1,4 +1,4 @@
-const { diag, DiagConsoleLogger, DiagLogLevel } = require('@opentelemetry/api');
+const { DiagConsoleLogger, DiagLogLevel, diag } = require('@opentelemetry/api');
 const {
   BatchSpanProcessor,
   NodeTracerProvider,
@@ -25,7 +25,7 @@ const collectorOptions = {
   concurrencyLimit: 10, // an optional limit on pending requests
 };
 
-diag.setLogger(new DiagConsoleLogger(), DiagLogLevel.DEBUG);
+diag.setLogger(new DiagConsoleLogger(), DiagLogLevel.ERROR);
 const provider = new NodeTracerProvider();
 const exporter = new OTLPTraceExporter(collectorOptions);
 provider.addSpanProcessor(
@@ -69,6 +69,13 @@ Sentry.init({
     new Sentry.Integrations.ContextLines(),
     new Sentry.Integrations.LocalVariables(),
   ],
+  // test for beforeSend
+  // beforeSend: (event) => {
+  //   getEventProcessor(undefined, Sentry.SDK_VERSION)(event, {}, undefined, {
+  //     foo: 'bar',
+  //   });
+  //   return event;
+  // },
 });
 
 const PORT = parseInt(process.env.PORT || '7788');
