@@ -1,6 +1,6 @@
 import isObject from 'lodash.isobject';
 import isPlainObject from 'lodash.isplainobject';
-import opentelemetry, { Attributes, diag } from '@opentelemetry/api';
+import opentelemetry, { Attributes } from '@opentelemetry/api';
 import {
   InstrumentationBase,
   InstrumentationConfig,
