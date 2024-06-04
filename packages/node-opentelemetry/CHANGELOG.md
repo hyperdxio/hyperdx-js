@@ -1,5 +1,16 @@
 # @hyperdx/node-opentelemetry
 
+## 0.8.0-next.8
+
+### Patch Changes
+
+- 1c956d4: fix: missing stacktrace context bug
+- 7c9bd6a: feat: add instrumentation-exception pkg to node-opentelemetry
+- Updated dependencies [1c956d4]
+- Updated dependencies [e36309d]
+  - @hyperdx/instrumentation-sentry-node@0.1.0-next.4
+  - @hyperdx/instrumentation-exception@0.1.0-next.4
+
 ## 0.8.0-next.7
 
 ### Patch Changes

@@ -1,5 +1,14 @@
 # @hyperdx/instrumentation-exception
 
+## 0.1.0-next.4
+
+### Patch Changes
+
+- 1c956d4: fix: missing stacktrace context bug
+- e36309d: feat: export express + koa error handlers
+- Updated dependencies [1c956d4]
+  - @hyperdx/instrumentation-sentry-node@0.1.0-next.4
+
 ## 0.1.0-next.3
 
 ### Patch Changes

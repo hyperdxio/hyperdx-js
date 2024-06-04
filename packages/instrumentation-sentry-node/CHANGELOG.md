@@ -1,5 +1,11 @@
 # @hyperdx/instrumentation-sentry-node
 
+## 0.1.0-next.4
+
+### Patch Changes
+
+- 1c956d4: fix: missing stacktrace context bug
+
 ## 0.1.0-next.3
 
 ### Patch Changes
