@@ -32,12 +32,23 @@ const {
   getPinoTransport,
   getWinstonTransport,
 } = require('../build/src/logger');
-const { initSDK, setTraceAttributes, shutdown } = require('../build/src');
+const {
+  initSDK,
+  recordException,
+  setTraceAttributes,
+  shutdown,
+} = require('../build/src');
 
 initSDK({
-  programmaticImports: true,
   consoleCapture: true,
+  experimentalExceptionCapture: true,
+  programmaticImports: true,
+  sentryIntegrationEnabled: true,
 });
+
+// setTimeout(() => {
+//   throw new Error('👺👺👺👺');
+// }, 2000);
 
 Sentry.init({
   dsn: 'http://public@localhost:5000/1',
@@ -320,7 +331,8 @@ app.get('/logs', async (req, res) => {
 });
 
 app.get('/error', (req, res) => {
-  Sentry.captureException(new Error('This is a test error'));
+  Sentry.captureException(new Error('Sentry error !!!'));
+  recordException(new Error('HyperDX error !!!'));
   throw new RangeError('This is a test error');
 });
 

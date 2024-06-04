@@ -2,6 +2,7 @@ import path from 'path';
 
 import { wrap } from 'shimmer';
 import { satisfies } from 'semver';
+import { ExceptionInstrumentation } from '@hyperdx/instrumentation-exception';
 import { SentryNodeInstrumentation } from '@hyperdx/instrumentation-sentry-node';
 import { DiagLogLevel, diag } from '@opentelemetry/api';
 import {
@@ -26,6 +27,7 @@ import {
   DEFAULT_HDX_NODE_CONSOLE_CAPTURE,
   DEFAULT_HDX_NODE_ENABLE_INTERNAL_PROFILING,
   DEFAULT_HDX_NODE_EXPERIMENTAL_EXCEPTION_CAPTURE,
+  DEFAULT_HDX_NODE_SENTRY_INTEGRATION_ENABLED,
   DEFAULT_HDX_NODE_STOP_ON_TERMINATION_SIGNALS,
   DEFAULT_OTEL_EXPORTER_OTLP_TRACES_TIMEOUT,
   DEFAULT_OTEL_LOGS_EXPORTER_URL,
@@ -50,6 +52,7 @@ export type SDKConfig = {
   experimentalExceptionCapture?: boolean;
   instrumentations?: InstrumentationConfigMap;
   programmaticImports?: boolean; // TEMP
+  sentryIntegrationEnabled?: boolean;
   stopOnTerminationSignals?: boolean;
 };
 
@@ -141,6 +144,10 @@ export const initSDK = (config: SDKConfig) => {
     config.experimentalExceptionCapture ??
     DEFAULT_HDX_NODE_EXPERIMENTAL_EXCEPTION_CAPTURE;
 
+  const defaultSentryIntegrationEnabled =
+    config.sentryIntegrationEnabled ??
+    DEFAULT_HDX_NODE_SENTRY_INTEGRATION_ENABLED;
+
   let _t = process.hrtime();
   const allInstrumentations = [
     ...getNodeAutoInstrumentations({
@@ -174,7 +181,10 @@ export const initSDK = (config: SDKConfig) => {
           }),
         ]
       : []),
-    ...(defaultExceptionCapture ? [new SentryNodeInstrumentation()] : []),
+    ...(defaultSentryIntegrationEnabled
+      ? [new SentryNodeInstrumentation()]
+      : []),
+    ...(defaultExceptionCapture ? [new ExceptionInstrumentation()] : []),
     ...(config.additionalInstrumentations ?? []),
   ];
   const t1 = process.hrtime(_t);
@@ -224,6 +234,7 @@ export const initSDK = (config: SDKConfig) => {
           consoleCapture: defaultConsoleCapture,
           distroVersion: PKG_VERSION,
           endpoint: DEFAULT_OTEL_TRACES_EXPORTER_URL,
+          exceptionCapture: defaultExceptionCapture,
           logLevel: DEFAULT_OTEL_LOG_LEVEL,
           programmaticImports: config.programmaticImports,
           propagators: env.OTEL_PROPAGATORS,
@@ -231,6 +242,7 @@ export const initSDK = (config: SDKConfig) => {
           resourceDetectors: env.OTEL_NODE_RESOURCE_DETECTORS,
           sampler: DEFAULT_OTEL_TRACES_SAMPLER,
           samplerArg: DEFAULT_OTEL_TRACES_SAMPLER_ARG,
+          sentryIntegrationEnabled: defaultSentryIntegrationEnabled,
           serviceName: DEFAULT_SERVICE_NAME,
           stopOnTerminationSignals,
         },
