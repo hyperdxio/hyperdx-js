@@ -27,12 +27,12 @@ import { name as PKG_NAME, version as PKG_VERSION } from '../package.json';
 const defaultTracer = api.trace.getTracer(PKG_NAME, PKG_VERSION);
 
 // CUSTOM SEMANTIC CONVENTIONS
-const SEMATTRS_EXCEPTION_MECHANISM = 'exception.mechanism';
-const SEMATTRS_EXCEPTION_MODULE = 'exception.module';
-const SEMATTRS_EXCEPTION_MODULES = 'exception.modules';
-const SEMATTRS_EXCEPTION_TAGS = 'exception.tags';
-const SEMATTRS_EXCEPTION_THREAD_ID = 'exception.thread_id';
-const SEMATTRS_SENTRY_VERSION = 'sentry.version';
+export const SEMATTRS_EXCEPTION_MECHANISM = 'exception.mechanism';
+export const SEMATTRS_EXCEPTION_MODULE = 'exception.module';
+export const SEMATTRS_EXCEPTION_MODULES = 'exception.modules';
+export const SEMATTRS_EXCEPTION_TAGS = 'exception.tags';
+export const SEMATTRS_EXCEPTION_THREAD_ID = 'exception.thread_id';
+export const SEMATTRS_SENTRY_VERSION = 'sentry.version';
 
 export const extractSemAttrsFromEvent = (
   event: Event,
