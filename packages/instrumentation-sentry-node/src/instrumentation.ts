@@ -1,4 +1,5 @@
 import api, {
+  Attributes,
   Span,
   SpanKind,
   SpanStatusCode,
@@ -177,16 +178,20 @@ export const getSpanNameFromEvent = (event: Event) =>
     : [event.exception?.values[0].type, event.transaction].join(' ');
 
 const _startOtelSpanFromSentryEvent = ({
+  customAttributes,
   event,
   hint,
   sentryVersion,
   span,
+  spanStatus,
   tracer,
 }: {
+  customAttributes?: Attributes;
   event: Event;
   hint: EventHint;
   sentryVersion?: string;
   span?: Span;
+  spanStatus: SpanStatusCode;
   tracer: Tracer;
 }) => {
   // FIXME: can't attach to the active span
@@ -195,15 +200,22 @@ const _startOtelSpanFromSentryEvent = ({
   let _span = span;
   let isRootSpan = false;
   const startTime = event.timestamp * 1000;
-  const attributes = extractSemAttrsFromEvent(event, hint, sentryVersion);
+  const eventAttributes = extractSemAttrsFromEvent(event, hint, sentryVersion);
   if (_span == null) {
     isRootSpan = true;
     _span = tracer.startSpan(getSpanNameFromEvent(event), {
-      attributes,
+      attributes: {
+        ...customAttributes,
+        ...eventAttributes, // event attributes take precedence
+      },
       startTime,
       kind: SpanKind.INTERNAL,
     });
   }
+  // set status
+  _span.setStatus({
+    code: spanStatus,
+  });
   // record exceptions
   for (const exception of event.exception?.values ?? []) {
     // https://github.com/open-telemetry/opentelemetry-js/blob/ca027b5eed282b4e81e098ca885db9ce27fdd562/packages/opentelemetry-sdk-trace-base/src/Span.ts#L299
@@ -211,9 +223,6 @@ const _startOtelSpanFromSentryEvent = ({
       ExceptionEventName,
       extractSpanEventsFromException(exception),
     );
-    _span.setStatus({
-      code: SpanStatusCode.ERROR,
-    });
   }
 
   if (isRootSpan) {
@@ -221,12 +230,17 @@ const _startOtelSpanFromSentryEvent = ({
   }
 };
 
-type EventProcessor = (event: any, hint: any, span?: Span) => any;
+type EventProcessor = (
+  event: any,
+  hint: any,
+  span?: Span,
+  attributes?: Attributes,
+) => any;
 
 // in case Sentry instrumentation doesn't work
 export const getEventProcessor =
   (tracer?: Tracer, sentryVersion?: string): EventProcessor =>
-  (event: Event, hint: EventHint, span?: Span) => {
+  (event: Event, hint: EventHint, span?: Span, attributes?: Attributes) => {
     try {
       diag.debug('Received Sentry event', event);
       if (isSentryEventAnException(event)) {
@@ -236,15 +250,17 @@ export const getEventProcessor =
           diag.debug('Using default tracer');
         }
         _startOtelSpanFromSentryEvent({
+          customAttributes: attributes,
           event,
           hint,
           sentryVersion,
           span,
+          spanStatus: SpanStatusCode.ERROR,
           tracer: _tracer,
         });
       }
     } catch (e) {
-      diag.debug(`Error processing event: ${e}`);
+      diag.error('Error processing event', e);
     }
     // WARNING: always return the event
     return event;
