@@ -17,7 +17,11 @@ const {
 } = require('@opentelemetry/instrumentation-express');
 const { HttpInstrumentation } = require('@opentelemetry/instrumentation-http');
 
-const { ExceptionInstrumentation, recordException } = require('../build/src');
+const {
+  ExceptionInstrumentation,
+  recordException,
+  setupExpressErrorHandler,
+} = require('../build/src');
 
 const collectorOptions = {
   url: 'http://localhost:4318/v1/traces', // url is optional and can be omitted - default is http://localhost:4318/v1/traces
@@ -27,7 +31,7 @@ const collectorOptions = {
   concurrencyLimit: 10, // an optional limit on pending requests
 };
 
-diag.setLogger(new DiagConsoleLogger(), DiagLogLevel.DEBUG);
+diag.setLogger(new DiagConsoleLogger(), DiagLogLevel.ERROR);
 const provider = new NodeTracerProvider();
 const exporter = new OTLPTraceExporter(collectorOptions);
 provider.addSpanProcessor(
@@ -61,10 +65,8 @@ const app = express();
 app.use(compression());
 app.use(express.json());
 
-const tracer = trace.getTracer('express-example');
-
-app.get('/error', async (req, res) => {
-  await recordException(
+app.get('/error', (req, res) => {
+  recordException(
     new Error('This is a test error with custom attributes'),
     undefined,
     undefined,
@@ -74,11 +76,12 @@ app.get('/error', async (req, res) => {
     message: 'This is a test for capturing exception in object',
     foo: 'bar',
   });
-  res.send('Error sent to the server');
+  throw new Error('This should be captured by the exception handler');
 });
 
+setupExpressErrorHandler(app);
+
 app.use((err, req, res, next) => {
-  recordException(err);
   res.status(500).send('Something broke!');
 });
 
