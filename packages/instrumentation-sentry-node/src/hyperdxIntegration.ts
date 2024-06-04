@@ -1,8 +1,9 @@
 import type { IntegrationFn } from '@sentry/types';
-import { defineIntegration } from '@sentry/core';
 
 import type { Event, EventHint } from './types';
 import { getEventProcessor } from './eventProcessor';
+
+const defineIntegration = (fn: any) => fn;
 
 const INTEGRATION_NAME = 'HyperDX';
 
