@@ -2,6 +2,7 @@ import path from 'path';
 
 import { wrap } from 'shimmer';
 import { satisfies } from 'semver';
+import { ExceptionInstrumentation } from '@hyperdx/instrumentation-exception';
 import { SentryNodeInstrumentation } from '@hyperdx/instrumentation-sentry-node';
 import { DiagLogLevel, diag } from '@opentelemetry/api';
 import {
@@ -174,7 +175,9 @@ export const initSDK = (config: SDKConfig) => {
           }),
         ]
       : []),
-    ...(defaultExceptionCapture ? [new SentryNodeInstrumentation()] : []),
+    ...(defaultExceptionCapture
+      ? [new ExceptionInstrumentation(), new SentryNodeInstrumentation()]
+      : []),
     ...(config.additionalInstrumentations ?? []),
   ];
   const t1 = process.hrtime(_t);
