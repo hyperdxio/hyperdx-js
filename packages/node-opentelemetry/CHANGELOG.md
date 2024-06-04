@@ -1,5 +1,14 @@
 # @hyperdx/node-opentelemetry
 
+## 0.8.0-next.9
+
+### Patch Changes
+
+- 5614cc4: fix: remove sentry/core dep
+- Updated dependencies [5614cc4]
+  - @hyperdx/instrumentation-sentry-node@0.1.0-next.5
+  - @hyperdx/instrumentation-exception@0.1.0-next.5
+
 ## 0.8.0-next.8
 
 ### Patch Changes

@@ -1,5 +1,13 @@
 # @hyperdx/instrumentation-exception
 
+## 0.1.0-next.5
+
+### Patch Changes
+
+- 5614cc4: fix: remove sentry/core dep
+- Updated dependencies [5614cc4]
+  - @hyperdx/instrumentation-sentry-node@0.1.0-next.5
+
 ## 0.1.0-next.4
 
 ### Patch Changes
