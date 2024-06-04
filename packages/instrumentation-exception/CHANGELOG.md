@@ -1,5 +1,13 @@
 # @hyperdx/instrumentation-exception
 
+## 0.1.0-next.3
+
+### Patch Changes
+
+- e582ad1: feat: support custom attrs
+- Updated dependencies [e582ad1]
+  - @hyperdx/instrumentation-sentry-node@0.1.0-next.3
+
 ## 0.1.0-next.2
 
 ### Patch Changes
