@@ -41,9 +41,14 @@ const {
 
 initSDK({
   consoleCapture: true,
+  experimentalExceptionCapture: true,
   programmaticImports: true,
   sentryIntegrationEnabled: true,
 });
+
+// setTimeout(() => {
+//   throw new Error('👺👺👺👺');
+// }, 2000);
 
 Sentry.init({
   dsn: 'http://public@localhost:5000/1',
