@@ -27,6 +27,7 @@ import {
   DEFAULT_HDX_NODE_CONSOLE_CAPTURE,
   DEFAULT_HDX_NODE_ENABLE_INTERNAL_PROFILING,
   DEFAULT_HDX_NODE_EXPERIMENTAL_EXCEPTION_CAPTURE,
+  DEFAULT_HDX_NODE_SENTRY_INTEGRATION_ENABLED,
   DEFAULT_HDX_NODE_STOP_ON_TERMINATION_SIGNALS,
   DEFAULT_OTEL_EXPORTER_OTLP_TRACES_TIMEOUT,
   DEFAULT_OTEL_LOGS_EXPORTER_URL,
@@ -51,6 +52,7 @@ export type SDKConfig = {
   experimentalExceptionCapture?: boolean;
   instrumentations?: InstrumentationConfigMap;
   programmaticImports?: boolean; // TEMP
+  sentryIntegrationEnabled?: boolean;
   stopOnTerminationSignals?: boolean;
 };
 
@@ -142,6 +144,10 @@ export const initSDK = (config: SDKConfig) => {
     config.experimentalExceptionCapture ??
     DEFAULT_HDX_NODE_EXPERIMENTAL_EXCEPTION_CAPTURE;
 
+  const defaultSentryIntegrationEnabled =
+    config.sentryIntegrationEnabled ??
+    DEFAULT_HDX_NODE_SENTRY_INTEGRATION_ENABLED;
+
   let _t = process.hrtime();
   const allInstrumentations = [
     ...getNodeAutoInstrumentations({
@@ -175,9 +181,10 @@ export const initSDK = (config: SDKConfig) => {
           }),
         ]
       : []),
-    ...(defaultExceptionCapture
-      ? [new ExceptionInstrumentation(), new SentryNodeInstrumentation()]
+    ...(defaultSentryIntegrationEnabled
+      ? [new SentryNodeInstrumentation()]
       : []),
+    ...(defaultExceptionCapture ? [new ExceptionInstrumentation()] : []),
     ...(config.additionalInstrumentations ?? []),
   ];
   const t1 = process.hrtime(_t);
