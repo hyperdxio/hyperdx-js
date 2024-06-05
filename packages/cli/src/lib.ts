@@ -21,8 +21,8 @@ export const uploadSourcemaps = async ({
   releaseId?: string;
 }) => {
   if (!apiKey || apiKey === '') {
-    if (process.env.HYPERDX_SOURCEMAP_UPLOAD_API_KEY) {
-      apiKey = process.env.HYPERDX_SOURCEMAP_UPLOAD_API_KEY;
+    if (process.env.HYPERDX_API_ACCESS_KEY) {
+      apiKey = process.env.HYPERDX_API_ACCESS_KEY;
     } else {
       throw new Error('api key cannot be empty');
     }
