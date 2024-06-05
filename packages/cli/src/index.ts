@@ -6,10 +6,7 @@ program.name('@hyperdx/cli').description('HyperDX Command Line Interface');
 
 program
   .command('upload-sourcemaps')
-  .requiredOption(
-    '-k, --apiKey <string>',
-    'The HyperDX personal api access key',
-  )
+  .option('-k, --apiKey <string>', 'The HyperDX personal api access key')
   .option(
     '-u, --apiUrl [string]',
     'An optional api url for self-hosted deployments',
