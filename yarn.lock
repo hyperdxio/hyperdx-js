@@ -1373,13 +1373,13 @@
   resolved "https://registry.yarnpkg.com/@humanwhocodes/object-schema/-/object-schema-2.0.3.tgz#4a2868d75d6d6963e423bcf90b7fd1be343409d3"
   integrity sha512-93zYdMES/c1D69yZiKDBj0V24vqNzB/koF26KPaagAfd3P/4gUlh3Dys5ogAK+Exi9QyzlD8x/08Zt7wIKcDcA==
 
-"@hyperdx/otel-web-session-recorder@0.16.2-18":
-  version "0.16.2-18"
-  resolved "https://registry.yarnpkg.com/@hyperdx/otel-web-session-recorder/-/otel-web-session-recorder-0.16.2-18.tgz#4479029a57fd90b37f20c40491e18b612c0b204a"
-  integrity sha512-0Bin3b7C7oE3TvT+4VKiV7jcxpXIJ5S31s9daKs87jktyl5FDJCK83vRJtVRf4+e2UIXp05Cls4HfRrfYhbSJQ==
+"@hyperdx/otel-web-session-recorder@0.16.2-19":
+  version "0.16.2-19"
+  resolved "https://registry.yarnpkg.com/@hyperdx/otel-web-session-recorder/-/otel-web-session-recorder-0.16.2-19.tgz#d1d16e367f663dba5f7629e5c810fa97cc65bbf9"
+  integrity sha512-5JORyTKt2fH/cCJun7c8PVbh0VzPUFWoZiGUzxYxwIIdrNPUJ0NcQY7QoKThra/StD3FReni/PtseB/jA3f4oQ==
   dependencies:
     "@babel/runtime" "~7.18.3"
-    "@opentelemetry/api" "~1.7.0"
+    "@opentelemetry/api" "^1.8.0"
     "@opentelemetry/core" "~1.21.0"
     "@opentelemetry/resources" "~1.21.0"
     fflate "^0.7.4"
@@ -1388,13 +1388,14 @@
     rrweb "^1.1.3"
     type-fest "^3.7.2"
 
-"@hyperdx/otel-web@0.16.2-18":
-  version "0.16.2-18"
-  resolved "https://registry.yarnpkg.com/@hyperdx/otel-web/-/otel-web-0.16.2-18.tgz#5d86494ebe99f9ad8f3a4f8e815deca7e735d1cb"
-  integrity sha512-qQtYF9V6awWllpNpyTnQxP60IWYJZlCy0RyiNUTV7o9ISt0isL14rFFbdl439cm2b5YFEv3qRs2BocwV9BfHvw==
+"@hyperdx/otel-web@0.16.2-19":
+  version "0.16.2-19"
+  resolved "https://registry.yarnpkg.com/@hyperdx/otel-web/-/otel-web-0.16.2-19.tgz#4c5a435d766325025b863359c1c0091471e891b7"
+  integrity sha512-FwIKmdh2T8c8KqxwgPSRLoxNoSpgtOOl40bAfh60dv+VST4IJbrH4YYVDmTnbQ88tro+W4htzJRBtONgYvZBQw==
   dependencies:
     "@babel/runtime" "^7.21.0"
-    "@opentelemetry/api" "~1.7.0"
+    "@hyperdx/instrumentation-exception" "^0.1.0-next.5"
+    "@opentelemetry/api" "^1.8.0"
     "@opentelemetry/core" "~1.21.0"
     "@opentelemetry/exporter-trace-otlp-http" "~0.48.0"
     "@opentelemetry/exporter-zipkin" "~1.21.0"
@@ -1842,11 +1843,6 @@
   version "1.8.0"
   resolved "https://registry.yarnpkg.com/@opentelemetry/api/-/api-1.8.0.tgz#5aa7abb48f23f693068ed2999ae627d2f7d902ec"
   integrity sha512-I/s6F7yKUDdtMsoBWXJe8Qz40Tui5vsuKCWJEWVL+5q9sSWRzzx6v2KeNsOBEwd94j0eWkpWCH4yB6rZg9Mf0w==
-
-"@opentelemetry/api@~1.7.0":
-  version "1.7.0"
-  resolved "https://registry.yarnpkg.com/@opentelemetry/api/-/api-1.7.0.tgz#b139c81999c23e3c8d3c0a7234480e945920fc40"
-  integrity sha512-AdY5wvN0P2vXBi3b29hxZgSFvdhdxPB9+f0B6s//P9Q8nibRWeA3cHm8UmLpio9ABigkVHJ5NMPk+Mz8VCCyrw==
 
 "@opentelemetry/auto-instrumentations-node@^0.46.1":
   version "0.46.1"

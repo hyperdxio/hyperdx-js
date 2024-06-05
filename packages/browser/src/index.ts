@@ -161,6 +161,14 @@ class Browser {
     Rum.addAction(name, attributes);
   }
 
+  recordException(error: any, attributes?: Attributes): void {
+    if (!hasWindow()) {
+      return;
+    }
+
+    Rum.recordException(error, attributes);
+  }
+
   enableAdvancedNetworkCapture(): void {
     this._advancedNetworkCapture = true;
   }
