@@ -64,7 +64,7 @@ export const uploadSourcemaps = async ({
 
   const uploadKeys = fileList.map(({ name }) => ({
     basePath: basePath || '',
-    fileName: name,
+    fullName: name,
     releaseId,
   }));
 
