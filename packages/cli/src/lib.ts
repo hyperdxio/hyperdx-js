@@ -5,6 +5,8 @@ import { readFileSync, statSync } from 'fs';
 import fetch from 'cross-fetch';
 import { globSync } from 'glob';
 
+const pj = require('../package.json');
+
 export const uploadSourcemaps = async ({
   allowNoop,
   apiKey,
@@ -77,6 +79,7 @@ export const uploadSourcemaps = async ({
         Authorization: `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
+        pkgVersion: pj.version,
         keys: uploadKeys,
       }),
     },
