@@ -62,9 +62,11 @@ export const uploadSourcemaps = async ({
     return;
   }
 
-  const s3Keys = fileList.map(({ name }) =>
-    getS3Key(teamId, basePath || '', name, releaseId),
-  );
+  const uploadKeys = fileList.map(({ name }) => ({
+    basePath: basePath || '',
+    fileName: name,
+    releaseId,
+  }));
 
   const urlRes = await fetch(
     join(backend, 'api', 'v1', 'sourcemaps', 'upload-presigned-urls'),
@@ -75,7 +77,7 @@ export const uploadSourcemaps = async ({
         Authorization: `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
-        keys: s3Keys,
+        keys: uploadKeys,
       }),
     },
   )
@@ -163,24 +165,6 @@ async function getAllSourceMapFiles(
   );
 
   return map;
-}
-
-function getS3Key(
-  teamId: string,
-  basePath: string,
-  fileName: string,
-  releaseId?: string,
-) {
-  // Setting up S3 upload parameters
-  if (
-    releaseId === null ||
-    releaseId === undefined ||
-    releaseId === '' ||
-    !releaseId
-  ) {
-    releaseId = 'unversioned';
-  }
-  return `${teamId}/${releaseId}/${basePath}${fileName}`;
 }
 
 async function uploadFile(filePath: string, uploadUrl: string, name: string) {
