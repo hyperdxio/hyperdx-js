@@ -43,7 +43,7 @@ export type HyperDXWinstonOptions = LoggerOptions & {
 export default class HyperDXWinston extends Transport {
   private readonly logger: Logger;
 
-  private readonly getCustomMeta: () => Attributes;
+  private readonly getCustomMeta: (() => Attributes) | undefined;
 
   constructor({
     maxLevel,
