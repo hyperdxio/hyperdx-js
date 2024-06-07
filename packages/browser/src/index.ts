@@ -6,6 +6,8 @@ import { resolveAsyncGlobal } from './utils';
 
 import type { RumOtelWebConfig } from '@hyperdx/otel-web';
 
+type ErrorBoundaryComponent = any; // TODO: Define ErrorBoundary type
+
 type Instrumentations = RumOtelWebConfig['instrumentations'];
 type IgnoreUrls = RumOtelWebConfig['ignoreUrls'];
 
@@ -201,6 +203,28 @@ class Browser {
     return Rum.inited
       ? `${UI_BASE}/sessions?q=process.tag.rum.sessionId%3A"${Rum.getSessionId()}"&sid=${Rum.getSessionId()}&sfrom=${start}&sto=${end}&ts=${now}`
       : undefined;
+  }
+
+  attachToReactErrorBoundary(errorBoundary: ErrorBoundaryComponent) {
+    if (!errorBoundary) {
+      return console.warn(
+        'Attempted to attach to an ErrorBoundary that does not exist.',
+      );
+    }
+
+    const recordException = this.recordException;
+    const originalComponentDidCatch = errorBoundary.prototype.componentDidCatch;
+
+    errorBoundary.prototype.componentDidCatch = function (
+      error: Error,
+      errorInfo: any,
+    ) {
+      const componentStack = errorInfo?.componentStack;
+      recordException(error, {
+        componentStack,
+      });
+      originalComponentDidCatch.call(this, error, errorInfo);
+    };
   }
 }
 
