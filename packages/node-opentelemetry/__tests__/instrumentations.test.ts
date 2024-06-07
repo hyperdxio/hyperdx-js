@@ -102,14 +102,14 @@ describe('instrumentations', () => {
         const pt = new PassThrough();
 
         // interceptor should not affect the original stream
-        const dataFromPT = [];
+        const dataFromPT: string[] = [];
         pt.on('data', (data) => {
           dataFromPT.push(data.toString());
         });
 
         interceptReadableStream(mockEventStream, pt);
 
-        const dataFromDownSreamReader = [];
+        const dataFromDownSreamReader: any[] = [];
         setTimeout(() => {
           mockEventStream.on('data', (data) => {
             dataFromDownSreamReader.push(data);
@@ -156,14 +156,14 @@ describe('instrumentations', () => {
         const pt = new PassThrough();
 
         // interceptor should not affect the original stream
-        const dataFromPT = [];
+        const dataFromPT: any[] = [];
         pt.on('data', (data) => {
           dataFromPT.push(data.toString());
         });
 
         interceptReadableStream(mockEventStream, pt);
 
-        const dataFromDownSreamReader = [];
+        const dataFromDownSreamReader: ReadableStream[] = [];
         setTimeout(async () => {
           for await (const data of mockEventStream) {
             dataFromDownSreamReader.push(data);
@@ -210,14 +210,14 @@ describe('instrumentations', () => {
 
         const pt = new PassThrough();
         // interceptor should not affect the original stream
-        const dataFromPT = [];
+        const dataFromPT: string[] = [];
         pt.on('data', (data) => {
           dataFromPT.push(data.toString());
         });
 
         interceptReadableStream(mockEventStream, pt);
 
-        const dataFromDownSreamReader = [];
+        const dataFromDownSreamReader: any[] = [];
         setTimeout(() => {
           mockEventStream.on('data', (data) => {
             dataFromDownSreamReader.push(data);
@@ -273,14 +273,14 @@ describe('instrumentations', () => {
         const pt = new PassThrough();
 
         // interceptor should not affect the original stream
-        const dataFromPT = [];
+        const dataFromPT: any[] = [];
         pt.on('data', (data) => {
           dataFromPT.push(data.toString());
         });
 
         interceptReadableStream(mockEventStream, pt);
 
-        const dataFromDownSreamReader = [];
+        const dataFromDownSreamReader: any[] = [];
         setTimeout(() => {
           mockEventStream.on('readable', function () {
             let data;
