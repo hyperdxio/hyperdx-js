@@ -4,7 +4,7 @@ import { wrap } from 'shimmer';
 import { satisfies } from 'semver';
 import { ExceptionInstrumentation } from '@hyperdx/instrumentation-exception';
 import { SentryNodeInstrumentation } from '@hyperdx/instrumentation-sentry-node';
-import { DiagLogLevel, diag } from '@opentelemetry/api';
+import { DiagLogLevel, context, diag } from '@opentelemetry/api';
 import {
   InstrumentationBase,
   Instrumentation,
@@ -37,7 +37,7 @@ import {
   DEFAULT_OTEL_TRACES_SAMPLER_ARG,
   DEFAULT_SERVICE_NAME,
 } from './constants';
-import { hyperDXGlobalContext } from './context';
+import { MutableAsyncLocalStorageContextManager } from './MutableAsyncLocalStorageContextManager';
 import { version as PKG_VERSION } from '../package.json';
 
 const LOG_PREFIX = `⚠️  [INSTRUMENTOR]`;
@@ -56,8 +56,6 @@ export type SDKConfig = {
   stopOnTerminationSignals?: boolean;
 };
 
-export const setTraceAttributes = hyperDXGlobalContext.setTraceAttributes;
-
 const setOtelEnvs = () => {
   // set default otel env vars
   env.OTEL_NODE_RESOURCE_DETECTORS = env.OTEL_NODE_RESOURCE_DETECTORS ?? 'all';
@@ -66,6 +64,7 @@ const setOtelEnvs = () => {
 };
 
 let sdk: NodeSDK;
+let contextManager: MutableAsyncLocalStorageContextManager;
 
 const getModuleId = (moduleName: string) => {
   try {
@@ -148,6 +147,8 @@ export const initSDK = (config: SDKConfig) => {
     config.sentryIntegrationEnabled ??
     DEFAULT_HDX_NODE_SENTRY_INTEGRATION_ENABLED;
 
+  contextManager = new MutableAsyncLocalStorageContextManager();
+
   let _t = process.hrtime();
   const allInstrumentations = [
     ...getNodeAutoInstrumentations({
@@ -178,6 +179,7 @@ export const initSDK = (config: SDKConfig) => {
               service: DEFAULT_SERVICE_NAME,
               headers: exporterHeaders,
             },
+            contextManager,
           }),
         ]
       : []),
@@ -213,9 +215,11 @@ export const initSDK = (config: SDKConfig) => {
           headers: exporterHeaders,
         }),
         enableHDXGlobalContext: defaultBetaMode,
+        contextManager,
       }),
     ],
     instrumentations: allInstrumentations,
+    contextManager: contextManager,
   });
   const t2 = process.hrtime(_t);
   if (DEFAULT_HDX_NODE_ENABLE_INTERNAL_PROFILING) {
@@ -431,11 +435,6 @@ export const initSDK = (config: SDKConfig) => {
         }
       }
     }
-
-    if (defaultBetaMode) {
-      diag.debug(`Beta mode enabled, starting global context`);
-      hyperDXGlobalContext.start();
-    }
   } else {
     console.warn(
       `${LOG_PREFIX} HYPERDX_API_KEY or OTEL_EXPORTER_OTLP_HEADERS is not set, tracing is disabled`,
@@ -465,7 +464,6 @@ export const initSDK = (config: SDKConfig) => {
 };
 
 const _shutdown = () => {
-  hyperDXGlobalContext?.shutdown();
   return (
     sdk?.shutdown()?.then(
       () => console.log(`${LOG_PREFIX} otel SDK shut down successfully`),
@@ -477,4 +475,21 @@ const _shutdown = () => {
 export const shutdown = () => {
   diag.debug('shutdown() called');
   return _shutdown();
+};
+
+export const setTraceAttributes = (attributes: Record<string, unknown>) => {
+  if (
+    contextManager &&
+    typeof contextManager.getMutableContext === 'function'
+  ) {
+    const mutableContext = contextManager.getMutableContext();
+    if (mutableContext != null) {
+      if (mutableContext.traceAttributes == null) {
+        mutableContext.traceAttributes = new Map();
+      }
+      for (const [k, v] of Object.entries(attributes)) {
+        mutableContext.traceAttributes.set(k, v);
+      }
+    }
+  }
 };
