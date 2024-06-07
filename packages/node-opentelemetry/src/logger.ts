@@ -28,7 +28,7 @@ type PinotTransportOptions = Omit<
 const getCustomMeta = () => {
   const currentActiveSpan = opentelemetry.trace.getActiveSpan();
   const traceId = currentActiveSpan?.spanContext().traceId;
-  return traceId ? hyperDXGlobalContext.getTraceAttributes(traceId) : {};
+  return traceId ? hyperDXGlobalContext.getTraceAttributes(traceId) ?? {} : {};
 };
 
 export const getWinstonTransport = (

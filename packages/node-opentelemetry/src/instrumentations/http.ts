@@ -93,7 +93,7 @@ export const _handleHttpOutgoingClientRequest = (
   }
 
   /* Capture Body */
-  const chunks = [];
+  const chunks: Buffer[] = [];
   const oldWrite = request.write.bind(request);
   request.write = (data: any) => {
     try {
@@ -152,7 +152,7 @@ export const _handleHttpIncomingServerRequest = (
   }
 
   /* Capture Body */
-  const chunks = [];
+  const chunks: Buffer[] = [];
   const pt = new PassThrough();
   pt.on('data', (chunk) => {
     try {
@@ -188,7 +188,7 @@ export const _handleHttpIncomingServerResponse = (
   httpCaptureHeadersServerResponse?: string,
 ) => {
   /* Capture Body */
-  const chunks = [];
+  const chunks: Buffer[] = [];
   const oldWrite = response.write.bind(response);
   response.write = (data: any) => {
     try {
@@ -266,7 +266,7 @@ export const _handleHttpOutgoingClientResponse = (
   }
 
   /* Capture Body */
-  const chunks = [];
+  const chunks: Buffer[] = [];
   const pt = new PassThrough();
   pt.on('data', (chunk) => {
     try {

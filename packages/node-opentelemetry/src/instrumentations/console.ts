@@ -15,7 +15,7 @@ const PACKAGE_NAME = '@hyperdx/instrumentation-console';
 const PACKAGE_VERSION = '0.1.0';
 
 export const _parseConsoleArgs = (args: any[]) => {
-  const stringifiedArgs = [];
+  const stringifiedArgs: any[] = [];
   let firstJson;
   for (const arg of args) {
     if (isObject(arg)) {
