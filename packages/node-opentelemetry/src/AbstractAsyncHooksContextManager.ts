@@ -1,3 +1,5 @@
+/* eslint-disable */
+// Ref: https://github.com/open-telemetry/opentelemetry-js/blob/main/packages/opentelemetry-context-async-hooks/src/AbstractAsyncHooksContextManager.ts
 /*
  * Copyright The OpenTelemetry Authors
  *

@@ -5,7 +5,9 @@ import type { MutableAsyncLocalStorageContextManager } from './MutableAsyncLocal
 
 export default class HyperDXSpanProcessor extends BatchSpanProcessor {
   private readonly enableHDXGlobalContext: boolean;
-  private readonly contextManager: MutableAsyncLocalStorageContextManager;
+  private readonly contextManager:
+    | MutableAsyncLocalStorageContextManager
+    | undefined;
 
   constructor({
     exporter,
@@ -14,7 +16,7 @@ export default class HyperDXSpanProcessor extends BatchSpanProcessor {
   }: {
     exporter: OTLPTraceExporter;
     enableHDXGlobalContext: boolean;
-    contextManager: MutableAsyncLocalStorageContextManager;
+    contextManager?: MutableAsyncLocalStorageContextManager;
   }) {
     super(exporter);
     this.enableHDXGlobalContext = enableHDXGlobalContext;
@@ -22,7 +24,11 @@ export default class HyperDXSpanProcessor extends BatchSpanProcessor {
   }
 
   onEnd(_span: Span): void {
-    if (this.enableHDXGlobalContext) {
+    if (
+      this.enableHDXGlobalContext &&
+      this.contextManager != null &&
+      typeof this.contextManager.getMutableContext === 'function'
+    ) {
       // Allow us to set attributes on the span after it is ended from the span itself
       // @ts-ignore
       _span._ended = false;

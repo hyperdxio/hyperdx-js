@@ -17,6 +17,7 @@ import {
   InstrumentationConfigMap,
   getNodeAutoInstrumentations,
 } from '@opentelemetry/auto-instrumentations-node';
+import * as semver from 'semver';
 
 import HyperDXConsoleInstrumentation from './instrumentations/console';
 import HyperDXSpanProcessor from './spanProcessor';
@@ -64,7 +65,7 @@ const setOtelEnvs = () => {
 };
 
 let sdk: NodeSDK;
-let contextManager: MutableAsyncLocalStorageContextManager;
+let contextManager: MutableAsyncLocalStorageContextManager | undefined;
 
 const getModuleId = (moduleName: string) => {
   try {
@@ -147,7 +148,11 @@ export const initSDK = (config: SDKConfig) => {
     config.sentryIntegrationEnabled ??
     DEFAULT_HDX_NODE_SENTRY_INTEGRATION_ENABLED;
 
-  contextManager = new MutableAsyncLocalStorageContextManager();
+  // Node 14.8.0+ has AsyncLocalStorage
+  // ref: https://github.com/open-telemetry/opentelemetry-js/blob/fd911fb3a4b5b05250750e0c0773aa0fc1e37706/packages/opentelemetry-sdk-trace-node/src/NodeTracerProvider.ts#L61C30-L61C67
+  contextManager = semver.gte(process.version, '14.8.0')
+    ? new MutableAsyncLocalStorageContextManager()
+    : undefined;
 
   let _t = process.hrtime();
   const allInstrumentations = [

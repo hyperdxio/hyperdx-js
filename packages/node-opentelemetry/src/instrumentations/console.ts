@@ -53,7 +53,9 @@ export interface HyperDXConsoleInstrumentationConfig
 
 export default class HyperDXConsoleInstrumentation extends InstrumentationBase {
   private readonly _hdxLogger: Logger;
-  private readonly _contextManager: MutableAsyncLocalStorageContextManager;
+  private readonly _contextManager:
+    | MutableAsyncLocalStorageContextManager
+    | undefined;
 
   private _patchConsole(type: string, ...args: any[]) {
     const instrumentation = this;
@@ -80,7 +82,10 @@ export default class HyperDXConsoleInstrumentation extends InstrumentationBase {
       };
 
       if (config.betaMode) {
-        if (this._contextManager) {
+        if (
+          this._contextManager != null &&
+          typeof this._contextManager.getMutableContext === 'function'
+        ) {
           meta = {
             ...meta,
             // attach custom attributes
