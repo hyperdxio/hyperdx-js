@@ -66,12 +66,12 @@ app.use(compression());
 app.use(express.json());
 
 app.get('/error', (req, res) => {
-  recordException(
-    new Error('This is a test error with custom attributes'),
-    undefined,
-    undefined,
-    trace.getActiveSpan(),
-  );
+  recordException(new Error('This is a test error with custom attributes'), {
+    mechanism: {
+      type: 'BLABLA',
+      handled: false,
+    },
+  });
   recordException({
     message: 'This is a test for capturing exception in object',
     foo: 'bar',
