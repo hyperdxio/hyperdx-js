@@ -4,7 +4,7 @@ import { wrap } from 'shimmer';
 import { satisfies } from 'semver';
 import { ExceptionInstrumentation } from '@hyperdx/instrumentation-exception';
 import { SentryNodeInstrumentation } from '@hyperdx/instrumentation-sentry-node';
-import { DiagLogLevel, context, diag } from '@opentelemetry/api';
+import { Attributes, DiagLogLevel, context, diag } from '@opentelemetry/api';
 import {
   InstrumentationBase,
   Instrumentation,
@@ -482,7 +482,7 @@ export const shutdown = () => {
   return _shutdown();
 };
 
-export const setTraceAttributes = (attributes: Record<string, unknown>) => {
+export const setTraceAttributes = (attributes: Attributes) => {
   if (
     contextManager &&
     typeof contextManager.getMutableContext === 'function'
