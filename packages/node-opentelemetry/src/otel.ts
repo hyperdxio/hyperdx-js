@@ -1,7 +1,7 @@
 import path from 'path';
 
+import * as semver from 'semver';
 import { wrap } from 'shimmer';
-import { satisfies } from 'semver';
 import { ExceptionInstrumentation } from '@hyperdx/instrumentation-exception';
 import { SentryNodeInstrumentation } from '@hyperdx/instrumentation-sentry-node';
 import { Attributes, DiagLogLevel, context, diag } from '@opentelemetry/api';
@@ -17,7 +17,6 @@ import {
   InstrumentationConfigMap,
   getNodeAutoInstrumentations,
 } from '@opentelemetry/auto-instrumentations-node';
-import * as semver from 'semver';
 
 import HyperDXConsoleInstrumentation from './instrumentations/console';
 import HyperDXSpanProcessor from './spanProcessor';
@@ -88,7 +87,7 @@ const isSupported = (
   }
 
   return supportedVersions.some((supportedVersion) => {
-    return satisfies(version, supportedVersion, { includePrerelease });
+    return semver.satisfies(version, supportedVersion, { includePrerelease });
   });
 };
 
