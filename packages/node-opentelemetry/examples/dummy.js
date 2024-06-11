@@ -44,6 +44,7 @@ initSDK({
   experimentalExceptionCapture: true,
   programmaticImports: true,
   sentryIntegrationEnabled: true,
+  betaMode: true,
 });
 
 // setTimeout(() => {
