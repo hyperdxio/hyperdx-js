@@ -1,5 +1,11 @@
 # @hyperdx/instrumentation-exception
 
+## 0.1.0-next.6
+
+### Patch Changes
+
+- d515c5a: fix: exception mechanism override bug
+
 ## 0.1.0-next.5
 
 ### Patch Changes

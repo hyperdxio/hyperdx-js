@@ -105,7 +105,9 @@ export const recordException = async (
       tracer ?? defaultTracer,
       SDK_VERSION,
     );
-    const event = await buildEventFromException(e, _hint);
+    const event = await buildEventFromException(e, {
+      data: _hint,
+    });
     _eventProcessor(event, _hint, span, attributes);
   } catch (err) {
     diag.error('Failed to capture exception', err);

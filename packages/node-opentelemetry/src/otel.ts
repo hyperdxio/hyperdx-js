@@ -1,10 +1,10 @@
 import path from 'path';
 
+import * as semver from 'semver';
 import { wrap } from 'shimmer';
-import { satisfies } from 'semver';
 import { ExceptionInstrumentation } from '@hyperdx/instrumentation-exception';
 import { SentryNodeInstrumentation } from '@hyperdx/instrumentation-sentry-node';
-import { DiagLogLevel, diag } from '@opentelemetry/api';
+import { Attributes, DiagLogLevel, context, diag } from '@opentelemetry/api';
 import {
   InstrumentationBase,
   Instrumentation,
@@ -37,7 +37,7 @@ import {
   DEFAULT_OTEL_TRACES_SAMPLER_ARG,
   DEFAULT_SERVICE_NAME,
 } from './constants';
-import { hyperDXGlobalContext } from './context';
+import { MutableAsyncLocalStorageContextManager } from './MutableAsyncLocalStorageContextManager';
 import { version as PKG_VERSION } from '../package.json';
 
 const LOG_PREFIX = `⚠️  [INSTRUMENTOR]`;
@@ -56,8 +56,6 @@ export type SDKConfig = {
   stopOnTerminationSignals?: boolean;
 };
 
-export const setTraceAttributes = hyperDXGlobalContext.setTraceAttributes;
-
 const setOtelEnvs = () => {
   // set default otel env vars
   env.OTEL_NODE_RESOURCE_DETECTORS = env.OTEL_NODE_RESOURCE_DETECTORS ?? 'all';
@@ -66,6 +64,7 @@ const setOtelEnvs = () => {
 };
 
 let sdk: NodeSDK;
+let contextManager: MutableAsyncLocalStorageContextManager | undefined;
 
 const getModuleId = (moduleName: string) => {
   try {
@@ -88,7 +87,7 @@ const isSupported = (
   }
 
   return supportedVersions.some((supportedVersion) => {
-    return satisfies(version, supportedVersion, { includePrerelease });
+    return semver.satisfies(version, supportedVersion, { includePrerelease });
   });
 };
 
@@ -148,6 +147,12 @@ export const initSDK = (config: SDKConfig) => {
     config.sentryIntegrationEnabled ??
     DEFAULT_HDX_NODE_SENTRY_INTEGRATION_ENABLED;
 
+  // Node 14.8.0+ has AsyncLocalStorage
+  // ref: https://github.com/open-telemetry/opentelemetry-js/blob/fd911fb3a4b5b05250750e0c0773aa0fc1e37706/packages/opentelemetry-sdk-trace-node/src/NodeTracerProvider.ts#L61C30-L61C67
+  contextManager = semver.gte(process.version, '14.8.0')
+    ? new MutableAsyncLocalStorageContextManager()
+    : undefined;
+
   let _t = process.hrtime();
   const allInstrumentations = [
     ...getNodeAutoInstrumentations({
@@ -178,6 +183,7 @@ export const initSDK = (config: SDKConfig) => {
               service: DEFAULT_SERVICE_NAME,
               headers: exporterHeaders,
             },
+            contextManager,
           }),
         ]
       : []),
@@ -213,9 +219,11 @@ export const initSDK = (config: SDKConfig) => {
           headers: exporterHeaders,
         }),
         enableHDXGlobalContext: defaultBetaMode,
+        contextManager,
       }),
     ],
     instrumentations: allInstrumentations,
+    contextManager: contextManager,
   });
   const t2 = process.hrtime(_t);
   if (DEFAULT_HDX_NODE_ENABLE_INTERNAL_PROFILING) {
@@ -431,11 +439,6 @@ export const initSDK = (config: SDKConfig) => {
         }
       }
     }
-
-    if (defaultBetaMode) {
-      diag.debug(`Beta mode enabled, starting global context`);
-      hyperDXGlobalContext.start();
-    }
   } else {
     console.warn(
       `${LOG_PREFIX} HYPERDX_API_KEY or OTEL_EXPORTER_OTLP_HEADERS is not set, tracing is disabled`,
@@ -471,7 +474,6 @@ export const init = (config?: Omit<SDKConfig, 'programmaticImports'>) =>
   });
 
 const _shutdown = () => {
-  hyperDXGlobalContext?.shutdown();
   return (
     sdk?.shutdown()?.then(
       () => console.log(`${LOG_PREFIX} otel SDK shut down successfully`),
@@ -483,4 +485,21 @@ const _shutdown = () => {
 export const shutdown = () => {
   diag.debug('shutdown() called');
   return _shutdown();
+};
+
+export const setTraceAttributes = (attributes: Attributes) => {
+  if (
+    contextManager &&
+    typeof contextManager.getMutableContext === 'function'
+  ) {
+    const mutableContext = contextManager.getMutableContext();
+    if (mutableContext != null) {
+      if (mutableContext.traceAttributes == null) {
+        mutableContext.traceAttributes = new Map();
+      }
+      for (const [k, v] of Object.entries(attributes)) {
+        mutableContext.traceAttributes.set(k, v);
+      }
+    }
+  }
 };

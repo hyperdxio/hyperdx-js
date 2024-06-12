@@ -7,7 +7,8 @@
     "@hyperdx/node-logger": "0.4.0",
     "@hyperdx/node-opentelemetry": "0.7.0",
     "@hyperdx/instrumentation-exception": "0.0.0",
-    "@hyperdx/instrumentation-sentry-node": "0.0.0"
+    "@hyperdx/instrumentation-sentry-node": "0.0.0",
+    "@hyperdx/cli": "0.0.1"
   },
   "changesets": [
     "clever-points-rhyme",
@@ -20,13 +21,17 @@
     "few-carrots-beg",
     "fifty-gifts-flow",
     "fluffy-cameras-cough",
+    "gentle-dolphins-swim",
     "gentle-sheep-roll",
     "grumpy-lobsters-reply",
     "itchy-ladybugs-perform",
+    "khaki-hornets-compete",
     "kind-pants-act",
     "loud-actors-boil",
+    "modern-weeks-rhyme",
     "orange-poems-peel",
     "shaggy-actors-own",
+    "silly-bulldogs-stare",
     "slow-days-reflect",
     "small-zebras-sniff",
     "smooth-hornets-smash",

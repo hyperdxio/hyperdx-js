@@ -8,8 +8,8 @@ import {
 } from '@opentelemetry/instrumentation';
 
 import { Logger, LoggerOptions } from '../otel-logger';
-import { hyperDXGlobalContext } from '../context';
 import { parseWinstonLog } from '../otel-logger/winston';
+import { MutableAsyncLocalStorageContextManager } from '../MutableAsyncLocalStorageContextManager';
 
 const PACKAGE_NAME = '@hyperdx/instrumentation-console';
 const PACKAGE_VERSION = '0.1.0';
@@ -48,10 +48,14 @@ export interface HyperDXConsoleInstrumentationConfig
   extends InstrumentationConfig {
   betaMode: boolean;
   loggerOptions: LoggerOptions;
+  contextManager?: MutableAsyncLocalStorageContextManager;
 }
 
 export default class HyperDXConsoleInstrumentation extends InstrumentationBase {
   private readonly _hdxLogger: Logger;
+  private readonly _contextManager:
+    | MutableAsyncLocalStorageContextManager
+    | undefined;
 
   private _patchConsole(type: string, ...args: any[]) {
     const instrumentation = this;
@@ -78,14 +82,18 @@ export default class HyperDXConsoleInstrumentation extends InstrumentationBase {
       };
 
       if (config.betaMode) {
-        const attributes = traceId
-          ? hyperDXGlobalContext.getTraceAttributes(traceId)
-          : {};
-        meta = {
-          ...meta,
-          // attach custom attributes
-          ...attributes,
-        };
+        if (
+          this._contextManager != null &&
+          typeof this._contextManager.getMutableContext === 'function'
+        ) {
+          meta = {
+            ...meta,
+            // attach custom attributes
+            ...Object.fromEntries(
+              this._contextManager.getMutableContext()?.traceAttributes ?? [],
+            ),
+          };
+        }
       }
 
       instrumentation._hdxLogger.postMessage(
@@ -158,6 +166,7 @@ export default class HyperDXConsoleInstrumentation extends InstrumentationBase {
   constructor(config: HyperDXConsoleInstrumentationConfig) {
     super(PACKAGE_NAME, PACKAGE_VERSION, config);
     this._hdxLogger = new Logger(config.loggerOptions);
+    this._contextManager = config.contextManager;
   }
 
   init() {

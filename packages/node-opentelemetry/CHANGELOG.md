@@ -1,5 +1,15 @@
 # @hyperdx/node-opentelemetry
 
+## 0.8.0-next.10
+
+### Patch Changes
+
+- d515c5a: fix: exception mechanism override bug
+- c8ecaea: fix: enable strictNullChecks
+- 24dfee2: feat: Add mutable context manager for setTraceAttributes
+- Updated dependencies [d515c5a]
+  - @hyperdx/instrumentation-exception@0.1.0-next.6
+
 ## 0.8.0-next.9
 
 ### Patch Changes

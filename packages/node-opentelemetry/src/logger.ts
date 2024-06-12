@@ -6,7 +6,6 @@ import type { HyperDXPinoOptions } from './otel-logger/pino';
 import type { HyperDXWinstonOptions } from './otel-logger/winston';
 
 import { DEFAULT_SERVICE_NAME } from './constants';
-import { hyperDXGlobalContext } from './context';
 import { stringToBoolean } from './utils';
 
 const env = process.env;
@@ -26,9 +25,16 @@ type PinotTransportOptions = Omit<
 >;
 
 const getCustomMeta = () => {
-  const currentActiveSpan = opentelemetry.trace.getActiveSpan();
-  const traceId = currentActiveSpan?.spanContext().traceId;
-  return traceId ? hyperDXGlobalContext.getTraceAttributes(traceId) ?? {} : {};
+  //@ts-ignore
+  const contextManager = opentelemetry.context?._getContextManager();
+  if (typeof contextManager?.getMutableContext === 'function') {
+    const mutableContext = contextManager.getMutableContext();
+    if (mutableContext?.traceAttributes != null) {
+      return Object.fromEntries(mutableContext.traceAttributes);
+    }
+  }
+
+  return {};
 };
 
 export const getWinstonTransport = (
@@ -65,6 +71,8 @@ export const getPinoTransport = (
     }),
     service: DEFAULT_SERVICE_NAME,
     // getCustomMeta, // FIXME: DOMException [DataCloneError]
+    // this seems to be because pino does not allow functions in transport options
+    // Ref: https://github.com/pinojs/pino/issues/1511
     ...options,
   },
   level: maxLevel,

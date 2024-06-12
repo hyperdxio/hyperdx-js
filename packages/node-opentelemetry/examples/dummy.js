@@ -38,6 +38,7 @@ HyperDX.init({
   consoleCapture: true,
   experimentalExceptionCapture: true,
   sentryIntegrationEnabled: true,
+  betaMode: true,
 });
 
 // setTimeout(() => {
