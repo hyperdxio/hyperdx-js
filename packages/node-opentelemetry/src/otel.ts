@@ -467,6 +467,12 @@ export const initSDK = (config: SDKConfig) => {
   }
 };
 
+export const init = (config?: Omit<SDKConfig, 'programmaticImports'>) =>
+  initSDK({
+    programmaticImports: true,
+    ...config,
+  });
+
 const _shutdown = () => {
   return (
     sdk?.shutdown()?.then(
