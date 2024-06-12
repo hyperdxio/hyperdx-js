@@ -23,7 +23,6 @@ import { name as PKG_NAME, version as PKG_VERSION } from '../../package.json';
 const defaultTracer = trace.getTracer(PKG_NAME, PKG_VERSION);
 
 const defaultIntegrations = [
-  hyperdxIntegration(),
   inboundFiltersIntegration(),
   contextLinesIntegration(),
   // functionToStringIntegration(),
@@ -32,6 +31,7 @@ const defaultIntegrations = [
   linkedErrorsIntegration(),
   // dedupeIntegration(), // broken
   httpContextIntegration(),
+  hyperdxIntegration(), // WARNING: this needs to be the last integration
 ];
 
 const DEFAULT_CLIENT_OPTIONS: ClientOptions = {

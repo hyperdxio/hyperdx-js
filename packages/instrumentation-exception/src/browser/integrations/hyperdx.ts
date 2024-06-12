@@ -15,6 +15,12 @@ export const _hyperdxIntegration = ((options: HyperDXOpionts = {}) => {
       if (possibleEventMessages.length > 0) {
         event.message = possibleEventMessages[possibleEventMessages.length - 1];
       }
+      // filter out useless stack traces
+      const exceptions = event.exception?.values;
+      if (exceptions && exceptions.length > 0) {
+        // IMPLEMENT ME
+      }
+
       return event;
     },
   };
