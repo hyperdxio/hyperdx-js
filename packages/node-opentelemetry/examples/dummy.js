@@ -34,7 +34,11 @@ const {
 } = require('../build/src/logger');
 const HyperDX = require('../build/src');
 
-HyperDX.init({});
+HyperDX.init({
+  consoleCapture: true,
+  experimentalExceptionCapture: true,
+  sentryIntegrationEnabled: true,
+});
 
 // setTimeout(() => {
 //   throw new Error('👺👺👺👺');

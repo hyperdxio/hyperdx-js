@@ -466,11 +466,7 @@ export const initSDK = (config: SDKConfig) => {
 
 export const init = (config?: Omit<SDKConfig, 'programmaticImports'>) =>
   initSDK({
-    betaMode: true,
-    consoleCapture: true,
-    experimentalExceptionCapture: true,
     programmaticImports: true,
-    sentryIntegrationEnabled: true,
     ...config,
   });
 
