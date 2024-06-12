@@ -32,19 +32,9 @@ const {
   getPinoTransport,
   getWinstonTransport,
 } = require('../build/src/logger');
-const {
-  initSDK,
-  recordException,
-  setTraceAttributes,
-  shutdown,
-} = require('../build/src');
+const HyperDX = require('../build/src');
 
-initSDK({
-  consoleCapture: true,
-  experimentalExceptionCapture: true,
-  programmaticImports: true,
-  sentryIntegrationEnabled: true,
-});
+HyperDX.init({});
 
 // setTimeout(() => {
 //   throw new Error('👺👺👺👺');
@@ -68,7 +58,7 @@ Sentry.init({
 });
 
 process.on('SIGINT', async () => {
-  await shutdown();
+  await HyperDX.shutdown();
   process.exit(0);
 });
 
@@ -161,7 +151,7 @@ app.use(compression());
 
 // set custom trace attributes
 app.use((req, res, next) => {
-  setTraceAttributes({
+  HyperDX.setTraceAttributes({
     userId: generateRandomString(8),
   });
   next();
@@ -332,7 +322,11 @@ app.get('/logs', async (req, res) => {
 
 app.get('/error', (req, res) => {
   Sentry.captureException(new Error('Sentry error !!!'));
-  recordException(new Error('HyperDX error !!!'));
+  HyperDX.recordException(new Error('HyperDX error !!!'), {
+    mechanism: {
+      handled: false,
+    },
+  });
   throw new RangeError('This is a test error');
 });
 
