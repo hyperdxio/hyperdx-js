@@ -297,10 +297,10 @@ export const initSDK = (config: SDKConfig) => {
   }
 
   _t = process.hrtime();
-  ui.text = 'Starting OpenTelemetry SDK...';
+  ui.text = 'Starting OpenTelemetry Node SDK...';
   sdk.start();
   const t2 = process.hrtime(_t);
-  ui.succeed(`Started OpenTelemetry SDK in ${hrtimeToMs(t2)} ms`);
+  ui.succeed(`Started OpenTelemetry Node SDK in ${hrtimeToMs(t2)} ms`);
 
   if (config.programmaticImports) {
     _t = process.hrtime();
@@ -469,10 +469,14 @@ export const init = (config?: Omit<SDKConfig, 'programmaticImports'>) =>
   });
 
 const _shutdown = () => {
+  const ui = ora({
+    text: 'Shutting down OpenTelemetry SDK...',
+    spinner: cliSpinners.dots,
+  }).start();
   return (
     sdk?.shutdown()?.then(
-      () => console.log(`${LOG_PREFIX} otel SDK shut down successfully`),
-      (err) => console.log(`${LOG_PREFIX} Error shutting down otel SDK`, err),
+      () => ui.succeed('OpenTelemetry SDK shut down successfully'),
+      (err) => ui.fail(`Error shutting down OpenTeLoader SDK: ${err}`),
     ) ?? Promise.resolve() // in case SDK isn't init'd yet
   );
 };
