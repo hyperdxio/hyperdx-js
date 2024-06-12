@@ -56,7 +56,7 @@ export class Logger {
     timeout,
   }: LoggerOptions) {
     if (!service) {
-      console.warn(
+      diag.warn(
         `${LOG_PREFIX} Service name not found. Use "${DEFAULT_SERVICE_NAME}"`,
       );
     }
@@ -65,7 +65,7 @@ export class Logger {
     const maxExportBatchSize = bufferSize ?? DEFAULT_EXPORTER_BATCH_SIZE;
     let maxQueueSize = queueSize ?? DEFAULT_MAX_QUEUE_SIZE;
     if (maxExportBatchSize > maxQueueSize) {
-      console.error(
+      diag.error(
         `${LOG_PREFIX} bufferSize must be smaller or equal to queueSize. Setting queueSize to ${maxExportBatchSize}`,
       );
       maxQueueSize = maxExportBatchSize;
@@ -79,7 +79,7 @@ export class Logger {
 
     const _url = baseUrl ?? DEFAULT_OTEL_LOGS_EXPORTER_URL;
 
-    console.warn(`${LOG_PREFIX} Sending logs to ${_url}`);
+    diag.warn(`${LOG_PREFIX} Sending logs to ${_url}`);
 
     const exporter = new OTLPLogExporter({
       url: _url,
@@ -106,7 +106,6 @@ export class Logger {
     loggerProvider.addLogRecordProcessor(this.processor);
 
     this.logger = loggerProvider.getLogger('node-logger');
-    console.log(`${LOG_PREFIX} started!`);
   }
 
   private parseTimestamp(meta: Attributes): Date {
