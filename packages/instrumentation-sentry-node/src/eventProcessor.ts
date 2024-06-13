@@ -11,9 +11,7 @@ import api, {
 import { ExceptionEventName } from '@opentelemetry/sdk-trace-base/build/src/enums';
 import {
   SEMATTRS_EXCEPTION_MESSAGE,
-  SEMATTRS_EXCEPTION_STACKTRACE,
   SEMATTRS_EXCEPTION_TYPE,
-  SEMATTRS_HTTP_REQUEST_CONTENT_LENGTH,
   SEMATTRS_HTTP_RESPONSE_CONTENT_LENGTH,
   SEMATTRS_HTTP_STATUS_CODE,
   SEMATTRS_HTTP_URL,
@@ -30,6 +28,8 @@ const defaultTracer = api.trace.getTracer(PKG_NAME, PKG_VERSION);
 export const SEMATTRS_EXCEPTION_MECHANISM = 'exception.mechanism';
 export const SEMATTRS_EXCEPTION_MODULE = 'exception.module';
 export const SEMATTRS_EXCEPTION_MODULES = 'exception.modules';
+export const SEMATTRS_EXCEPTION_PARSED_STACKTRACE =
+  'exception.parsed_stacktrace';
 export const SEMATTRS_EXCEPTION_TAGS = 'exception.tags';
 export const SEMATTRS_EXCEPTION_THREAD_ID = 'exception.thread_id';
 export const SEMATTRS_SENTRY_VERSION = 'sentry.version';
@@ -146,7 +146,7 @@ export const extractSemAttrsFromEvent = (
 
 export const extractSpanEventsFromException = (exception: Exception) => ({
   [SEMATTRS_EXCEPTION_MESSAGE]: exception.value,
-  [SEMATTRS_EXCEPTION_STACKTRACE]: jsonToString(exception.stacktrace),
+  [SEMATTRS_EXCEPTION_PARSED_STACKTRACE]: jsonToString(exception.stacktrace),
   [SEMATTRS_EXCEPTION_TYPE]: exception.type,
   ...(exception.mechanism && {
     [SEMATTRS_EXCEPTION_MECHANISM]: jsonToString(exception.mechanism),
