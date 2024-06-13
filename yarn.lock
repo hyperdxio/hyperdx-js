@@ -1483,10 +1483,10 @@
   resolved "https://registry.yarnpkg.com/@humanwhocodes/object-schema/-/object-schema-2.0.3.tgz#4a2868d75d6d6963e423bcf90b7fd1be343409d3"
   integrity sha512-93zYdMES/c1D69yZiKDBj0V24vqNzB/koF26KPaagAfd3P/4gUlh3Dys5ogAK+Exi9QyzlD8x/08Zt7wIKcDcA==
 
-"@hyperdx/otel-web-session-recorder@0.16.2-19":
-  version "0.16.2-19"
-  resolved "https://registry.yarnpkg.com/@hyperdx/otel-web-session-recorder/-/otel-web-session-recorder-0.16.2-19.tgz#d1d16e367f663dba5f7629e5c810fa97cc65bbf9"
-  integrity sha512-5JORyTKt2fH/cCJun7c8PVbh0VzPUFWoZiGUzxYxwIIdrNPUJ0NcQY7QoKThra/StD3FReni/PtseB/jA3f4oQ==
+"@hyperdx/otel-web-session-recorder@0.16.2-20":
+  version "0.16.2-20"
+  resolved "https://registry.yarnpkg.com/@hyperdx/otel-web-session-recorder/-/otel-web-session-recorder-0.16.2-20.tgz#34a58b7c09a8c6577a933b522694492ca0b35534"
+  integrity sha512-mHD/30+X2CQdtTswafgSjq3Wgo6G4QdpSGUZ6z+lagZHK2719svLe6Pw4x2K/6hw6LOLgZ2nZ265OQj/hfgsHg==
   dependencies:
     "@babel/runtime" "~7.18.3"
     "@opentelemetry/api" "^1.8.0"
@@ -1498,13 +1498,13 @@
     rrweb "^1.1.3"
     type-fest "^3.7.2"
 
-"@hyperdx/otel-web@0.16.2-19":
-  version "0.16.2-19"
-  resolved "https://registry.yarnpkg.com/@hyperdx/otel-web/-/otel-web-0.16.2-19.tgz#4c5a435d766325025b863359c1c0091471e891b7"
-  integrity sha512-FwIKmdh2T8c8KqxwgPSRLoxNoSpgtOOl40bAfh60dv+VST4IJbrH4YYVDmTnbQ88tro+W4htzJRBtONgYvZBQw==
+"@hyperdx/otel-web@0.16.2-20":
+  version "0.16.2-20"
+  resolved "https://registry.yarnpkg.com/@hyperdx/otel-web/-/otel-web-0.16.2-20.tgz#52fecf911826d620347d7fa4bb4c2674ee920782"
+  integrity sha512-r/1RHH0MSZma3W/uGIQMQLx+VyIN8dqdOizzRBhsz8RpwLXL1jozLvYJu87Nb3Pc+9T7exhE2c/QFvJG4yWv6w==
   dependencies:
     "@babel/runtime" "^7.21.0"
-    "@hyperdx/instrumentation-exception" "^0.1.0-next.5"
+    "@hyperdx/instrumentation-exception" "^0.1.0-next.8"
     "@opentelemetry/api" "^1.8.0"
     "@opentelemetry/core" "~1.21.0"
     "@opentelemetry/exporter-trace-otlp-http" "~0.48.0"
@@ -3015,6 +3015,7 @@
     "@sentry/utils" "7.116.0"
 
 "@sentry/types-v7@npm:@sentry/types@7.x", "@sentry/types@7.116.0":
+  name "@sentry/types-v7"
   version "7.116.0"
   resolved "https://registry.yarnpkg.com/@sentry/types/-/types-7.116.0.tgz#0be3434e7e53c86db4993e668af1c3a65bfb7519"
   integrity sha512-QCCvG5QuQrwgKzV11lolNQPP2k67Q6HHD9vllZ/C4dkxkjoIym8Gy+1OgAN3wjsR0f/kG9o5iZyglgNpUVRapQ==
