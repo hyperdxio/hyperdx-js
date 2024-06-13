@@ -1,5 +1,11 @@
 # @hyperdx/instrumentation-exception
 
+## 0.1.0-next.8
+
+### Patch Changes
+
+- e9f867f: feat: Disable fn name minifying + attempt to filter out sdk frames + add HyperDXErrorInstrumentation
+
 ## 0.1.0-next.7
 
 ### Minor Changes
