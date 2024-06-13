@@ -1,5 +1,11 @@
 # @hyperdx/browser
 
+## 0.21.0-next.2
+
+### Patch Changes
+
+- 23e3ef9: chore: bump otel-web + otel-web-session-recorder pkgs to v0.16.2-20
+
 ## 0.21.0-next.1
 
 ### Minor Changes
