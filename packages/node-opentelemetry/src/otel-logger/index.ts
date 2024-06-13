@@ -1,7 +1,9 @@
 import { Attributes, diag } from '@opentelemetry/api';
+import { getEnvWithoutDefaults } from '@opentelemetry/core';
 import {
   BatchLogRecordProcessor,
   LoggerProvider,
+  NoopLogRecordProcessor,
 } from '@opentelemetry/sdk-logs';
 import { Logger as OtelLogger, logs } from '@opentelemetry/api-logs';
 import { OTLPLogExporter } from '@opentelemetry/exporter-logs-otlp-http';
@@ -44,7 +46,7 @@ export class Logger {
 
   private readonly logger: OtelLogger;
 
-  private readonly processor: BatchLogRecordProcessor;
+  private readonly processor: BatchLogRecordProcessor | NoopLogRecordProcessor;
 
   private readonly provider: LoggerProvider;
 
@@ -89,14 +91,17 @@ export class Logger {
       url: this._url,
       ...(headers && { headers }),
     });
-    this.processor = new BatchLogRecordProcessor(exporter, {
-      /** The maximum batch size of every export. It must be smaller or equal to
-       * maxQueueSize. The default value is 512. */
-      maxExportBatchSize,
-      scheduledDelayMillis: sendIntervalMs ?? DEFAULT_SEND_INTERVAL_MS,
-      exportTimeoutMillis: timeout ?? DEFAULT_EXPORTER_TIMEOUT_MS,
-      maxQueueSize,
-    });
+    this.processor =
+      getEnvWithoutDefaults().OTEL_LOGS_EXPORTER === 'none'
+        ? new NoopLogRecordProcessor()
+        : new BatchLogRecordProcessor(exporter, {
+            /** The maximum batch size of every export. It must be smaller or equal to
+             * maxQueueSize. The default value is 512. */
+            maxExportBatchSize,
+            scheduledDelayMillis: sendIntervalMs ?? DEFAULT_SEND_INTERVAL_MS,
+            exportTimeoutMillis: timeout ?? DEFAULT_EXPORTER_TIMEOUT_MS,
+            maxQueueSize,
+          });
     this.provider = new LoggerProvider({
       resource: detectedResource.merge(
         new Resource({
