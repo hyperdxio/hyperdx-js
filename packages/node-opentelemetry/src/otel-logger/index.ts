@@ -3,7 +3,7 @@ import {
   BatchLogRecordProcessor,
   LoggerProvider,
 } from '@opentelemetry/sdk-logs';
-import { Logger as OtelLogger } from '@opentelemetry/api-logs';
+import { Logger as OtelLogger, logs } from '@opentelemetry/api-logs';
 import { OTLPLogExporter } from '@opentelemetry/exporter-logs-otlp-http';
 import {
   Resource,
@@ -43,6 +43,8 @@ export class Logger {
   private readonly logger: OtelLogger;
 
   private readonly processor: BatchLogRecordProcessor;
+
+  private readonly provider: LoggerProvider;
 
   constructor({
     baseUrl,
@@ -93,7 +95,7 @@ export class Logger {
       exportTimeoutMillis: timeout ?? DEFAULT_EXPORTER_TIMEOUT_MS,
       maxQueueSize,
     });
-    const loggerProvider = new LoggerProvider({
+    this.provider = new LoggerProvider({
       resource: detectedResource.merge(
         new Resource({
           // TODO: should use otel semantic conventions
@@ -103,9 +105,9 @@ export class Logger {
         }),
       ),
     });
-    loggerProvider.addLogRecordProcessor(this.processor);
+    this.provider.addLogRecordProcessor(this.processor);
 
-    this.logger = loggerProvider.getLogger('node-logger');
+    this.logger = this.provider.getLogger('node-logger');
   }
 
   private parseTimestamp(meta: Attributes): Date {
@@ -115,6 +117,19 @@ export class Logger {
     }
     // set to current time if not provided
     return new Date();
+  }
+
+  setGlobalLoggerProvider() {
+    diag.debug('Setting global logger provider...');
+    logs.setGlobalLoggerProvider(this.provider);
+  }
+
+  getProvider() {
+    return this.provider;
+  }
+
+  getProcessor() {
+    return this.processor;
   }
 
   shutdown() {

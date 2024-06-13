@@ -4,9 +4,9 @@ import * as semver from 'semver';
 import cliSpinners from 'cli-spinners';
 import ora from 'ora';
 import { wrap } from 'shimmer';
+import { Attributes, DiagLogLevel, context, diag } from '@opentelemetry/api';
 import { ExceptionInstrumentation } from '@hyperdx/instrumentation-exception';
 import { SentryNodeInstrumentation } from '@hyperdx/instrumentation-sentry-node';
-import { Attributes, DiagLogLevel, context, diag } from '@opentelemetry/api';
 import {
   InstrumentationBase,
   Instrumentation,
@@ -22,6 +22,7 @@ import {
 
 import HyperDXConsoleInstrumentation from './instrumentations/console';
 import HyperDXSpanProcessor from './spanProcessor';
+import { Logger as OtelLogger } from './otel-logger';
 import { getHyperDXHTTPInstrumentationConfig } from './instrumentations/http';
 import {
   DEFAULT_HDX_NODE_ADVANCED_NETWORK_CAPTURE,
@@ -42,27 +43,29 @@ import {
 import { MutableAsyncLocalStorageContextManager } from './MutableAsyncLocalStorageContextManager';
 import { version as PKG_VERSION } from '../package.json';
 
-const LOG_PREFIX = `⚠️  [INSTRUMENTOR]`;
-
 const env = process.env;
 
 export type SDKConfig = {
   additionalInstrumentations?: InstrumentationBase[];
   advancedNetworkCapture?: boolean;
+  apiKey?: string;
   betaMode?: boolean;
   consoleCapture?: boolean;
+  detectResources?: boolean;
   experimentalExceptionCapture?: boolean;
   instrumentations?: InstrumentationConfigMap;
   programmaticImports?: boolean; // TEMP
   sentryIntegrationEnabled?: boolean;
+  serviceName?: string;
   stopOnTerminationSignals?: boolean;
 };
 
-const setOtelEnvs = () => {
+const setOtelEnvs = ({ serviceName }: { serviceName: string }) => {
   // set default otel env vars
   env.OTEL_NODE_RESOURCE_DETECTORS = env.OTEL_NODE_RESOURCE_DETECTORS ?? 'all';
   env.OTEL_TRACES_SAMPLER = DEFAULT_OTEL_TRACES_SAMPLER;
   env.OTEL_TRACES_SAMPLER_ARG = DEFAULT_OTEL_TRACES_SAMPLER_ARG;
+  env.OTEL_SERVICE_NAME = serviceName;
 };
 
 let sdk: NodeSDK;
@@ -114,8 +117,14 @@ export const initSDK = (config: SDKConfig) => {
     spinner: cliSpinners.dots,
   }).start();
 
-  if (!env.OTEL_EXPORTER_OTLP_HEADERS && !env.HYPERDX_API_KEY) {
-    ui.fail('HYPERDX_API_KEY or OTEL_EXPORTER_OTLP_HEADERS is not set');
+  const defaultApiKey = config.apiKey ?? env.HYPERDX_API_KEY;
+  const defaultDetectResources = config.detectResources ?? true;
+  const defaultServiceName = config.serviceName ?? DEFAULT_SERVICE_NAME;
+
+  if (!env.OTEL_EXPORTER_OTLP_HEADERS && !defaultApiKey) {
+    ui.fail(
+      'apiKey or HYPERDX_API_KEY or OTEL_EXPORTER_OTLP_HEADERS is not set',
+    );
     ui.stopAndPersist({
       text: 'OpenTelemetry SDK initialization skipped',
       symbol: '🚫',
@@ -124,7 +133,9 @@ export const initSDK = (config: SDKConfig) => {
   }
 
   ui.text = 'Setting otel envs...';
-  setOtelEnvs();
+  setOtelEnvs({
+    serviceName: defaultServiceName,
+  });
   ui.succeed('Set default otel envs');
 
   const stopOnTerminationSignals =
@@ -132,12 +143,12 @@ export const initSDK = (config: SDKConfig) => {
     DEFAULT_HDX_NODE_STOP_ON_TERMINATION_SIGNALS; // Stop by default
 
   let exporterHeaders;
-  if (env.HYPERDX_API_KEY) {
-    ui.text = 'HYPERDX_API_KEY found. Setting up exporter headers...';
+  if (defaultApiKey) {
+    ui.text = 'apiKey or HYPERDX_API_KEY found. Setting up exporter headers...';
     exporterHeaders = {
-      Authorization: env.HYPERDX_API_KEY,
+      Authorization: defaultApiKey,
     };
-    ui.succeed('Set up exporter headers with HYPERDX_API_KEY');
+    ui.succeed('Set up exporter headers with HyperDX api key');
   }
 
   let defaultConsoleCapture =
@@ -149,6 +160,26 @@ export const initSDK = (config: SDKConfig) => {
       `OTEL_LOG_LEVEL is set to 'debug', disabling console instrumentation`,
     );
   }
+
+  //--------------------------------------------------
+  // ---------------- Metrics Meter ------------------
+  //--------------------------------------------------
+
+  //--------------------------------------------------
+
+  //--------------------------------------------------
+  // ------------------- LOGGER ----------------------
+  //--------------------------------------------------
+  let _t = process.hrtime();
+  ui.text = 'Initializing OpenTelemetry Logger...';
+  const _logger = new OtelLogger({
+    detectResources: defaultDetectResources,
+    service: defaultServiceName,
+  });
+  _logger.setGlobalLoggerProvider();
+  const t0 = process.hrtime(_t);
+  ui.succeed(`Initialized OpenTelemetry Logger in ${hrtimeToMs(t0)} ms`);
+  //--------------------------------------------------
 
   const defaultBetaMode = config.betaMode ?? DEFAULT_HDX_NODE_BETA_MODE;
   const defaultAdvancedNetworkCapture =
@@ -169,7 +200,6 @@ export const initSDK = (config: SDKConfig) => {
     : undefined;
 
   ui.text = 'Initializing instrumentations packages...';
-  let _t = process.hrtime();
   const allInstrumentations = [
     ...getNodeAutoInstrumentations({
       '@opentelemetry/instrumentation-http': defaultAdvancedNetworkCapture
@@ -196,7 +226,7 @@ export const initSDK = (config: SDKConfig) => {
             betaMode: defaultBetaMode,
             loggerOptions: {
               baseUrl: DEFAULT_OTEL_LOGS_EXPORTER_URL,
-              service: DEFAULT_SERVICE_NAME,
+              service: defaultServiceName,
               headers: exporterHeaders,
             },
             contextManager,
@@ -235,7 +265,7 @@ export const initSDK = (config: SDKConfig) => {
   ui.succeed(`Initialized instrumentations packages in ${hrtimeToMs(t1)} ms`);
 
   if (DEFAULT_HDX_NODE_ENABLE_INTERNAL_PROFILING) {
-    diag.debug('Enabling internal profiling');
+    ui.text = 'Enabling internal profiling...';
     for (const instrumentation of allInstrumentations) {
       const _originalEnable = instrumentation.enable;
       instrumentation.enable = function (...args: any[]) {
@@ -243,11 +273,10 @@ export const initSDK = (config: SDKConfig) => {
         // @ts-ignore
         const result = _originalEnable.apply(this, args);
         const end = process.hrtime(start);
-        const indicator = pickPerformanceIndicator(end);
-        console.info(
-          `${indicator} Enabled instrumentation ${
+        ui.succeed(
+          `Enabled instrumentation ${
             instrumentation.constructor.name
-          } in ${hrtimeToMs(end)} ms ${indicator}`,
+          } in ${hrtimeToMs(end)} ms`,
         );
         return result;
       };
@@ -263,11 +292,10 @@ export const initSDK = (config: SDKConfig) => {
               // @ts-ignore
               const result = original.apply(this, args);
               const end = process.hrtime(start);
-              const indicator = pickPerformanceIndicator(end);
-              console.info(
-                `${indicator} Patched ${module.name}${
+              ui.succeed(
+                `Patched ${module.name}${
                   module.moduleVersion ? ` [v${module.moduleVersion}] ` : ' '
-                }in ${hrtimeToMs(end)} ms ${indicator}`,
+                }in ${hrtimeToMs(end)} ms`,
               );
               return result;
             };
@@ -281,11 +309,10 @@ export const initSDK = (config: SDKConfig) => {
                 // @ts-ignore
                 const result = original.apply(this, args);
                 const end = process.hrtime(start);
-                const indicator = pickPerformanceIndicator(end);
-                console.info(
-                  `${indicator} Patched ${module.name}${
+                ui.succeed(
+                  `Patched ${module.name}${
                     module.moduleVersion ? ` [v${module.moduleVersion}] ` : ' '
-                  }file ${file.name} in ${hrtimeToMs(end)} ms ${indicator}`,
+                  }file ${file.name} in ${hrtimeToMs(end)} ms`,
                 );
                 return result;
               };
@@ -452,7 +479,7 @@ export const initSDK = (config: SDKConfig) => {
         sampler: DEFAULT_OTEL_TRACES_SAMPLER,
         samplerArg: DEFAULT_OTEL_TRACES_SAMPLER_ARG,
         sentryIntegrationEnabled: defaultSentryIntegrationEnabled,
-        serviceName: DEFAULT_SERVICE_NAME,
+        serviceName: defaultServiceName,
         stopOnTerminationSignals,
       },
       null,
