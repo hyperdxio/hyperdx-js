@@ -3,9 +3,10 @@ import path from 'path';
 
 import * as semver from 'semver';
 import cliSpinners from 'cli-spinners';
+import open from 'open';
 import ora from 'ora';
 import { wrap } from 'shimmer';
-import { Attributes, DiagLogLevel, context, diag } from '@opentelemetry/api';
+import { Attributes, DiagLogLevel, diag } from '@opentelemetry/api';
 import { ExceptionInstrumentation } from '@hyperdx/instrumentation-exception';
 import { SentryNodeInstrumentation } from '@hyperdx/instrumentation-sentry-node';
 import {
@@ -46,6 +47,8 @@ import { version as PKG_VERSION } from '../package.json';
 const UI_LOG_PREFIX = '[⚡HyperDX]';
 
 const env = process.env;
+
+const IS_LOCAL = env.NODE_ENV === 'development' || !env.NODE_ENV;
 
 export type SDKConfig = {
   additionalInstrumentations?: InstrumentationBase[];
@@ -557,22 +560,37 @@ export const initSDK = (config: SDKConfig) => {
     symbol: '🦄',
   });
 
-  setTimeout(() => {
-    ora({
-      color: 'green',
-      isSilent: !DEFAULT_HDX_STARTUP_LOGS,
-      prefixText: UI_LOG_PREFIX,
-      spinner: cliSpinners.arc,
-      text: `
-View your app dashboard here:
-https://hyperdx.io/search?q=${encodeURIComponent(
+  if (DEFAULT_HDX_STARTUP_LOGS) {
+    setTimeout(() => {
+      const _targetUrl = `https://hyperdx.io/search?q=${encodeURIComponent(
         `service:"${defaultServiceName}"`,
-      )}
+      )}`;
+      ui.info(`
 
+View your app dashboard here:
+${_targetUrl}
 To disable these startup logs, set HDX_STARTUP_LOGS=false
-      `,
-    }).start();
-  }, 1000);
+
+`);
+      if (IS_LOCAL) {
+        const _ui = ora({
+          color: 'green',
+          isSilent: !DEFAULT_HDX_STARTUP_LOGS,
+          prefixText: UI_LOG_PREFIX,
+          spinner: cliSpinners.arc,
+          text: `Opening the dashboard...`,
+        }).start();
+
+        open(_targetUrl)
+          .then(() => {
+            _ui.succeed(`Opened dashboard in browser`);
+          })
+          .catch((e) => {
+            _ui.fail(`Error opening browser: ${e}`);
+          });
+      }
+    }, 1000);
+  }
 };
 
 export const init = (config?: Omit<SDKConfig, 'programmaticImports'>) =>
