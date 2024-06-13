@@ -595,6 +595,7 @@ To disable these startup logs, set HDX_STARTUP_LOGS=false
 
 export const init = (config?: Omit<SDKConfig, 'programmaticImports'>) =>
   initSDK({
+    betaMode: true,
     consoleCapture: true,
     experimentalExceptionCapture: true,
     programmaticImports: true,
