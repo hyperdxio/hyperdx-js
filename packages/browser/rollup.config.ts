@@ -41,6 +41,7 @@ export default {
     }),
     terser({
       sourceMap: true,
+      keep_fnames: true,
     }),
     // visualizer({
     //   sourcemap: true,
