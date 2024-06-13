@@ -3,11 +3,10 @@ import { PeriodicExportingMetricReader } from '@opentelemetry/sdk-metrics';
 
 import { DEFAULT_OTEL_METRICS_EXPORTER_URL } from './constants';
 
-export const getHyperDXMetricReader = (headers?: Record<string, unknown>) =>
+export const getHyperDXMetricReader = () =>
   new PeriodicExportingMetricReader({
     exporter: new OTLPMetricExporter({
       url: DEFAULT_OTEL_METRICS_EXPORTER_URL,
-      headers,
     }),
     exportIntervalMillis: 1000,
   });

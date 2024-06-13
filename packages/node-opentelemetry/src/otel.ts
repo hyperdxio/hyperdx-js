@@ -77,11 +77,13 @@ export type SDKConfig = {
 };
 
 const setOtelEnvs = ({
+  apiKey,
   disableLogs,
   disableMetrics,
   disableTracing,
   serviceName,
 }: {
+  apiKey?: string;
   disableLogs: boolean;
   disableMetrics: boolean;
   disableTracing: boolean;
@@ -100,6 +102,13 @@ const setOtelEnvs = ({
   }
   if (disableMetrics) {
     env.OTEL_METRICS_EXPORTER = 'none';
+  }
+  if (apiKey) {
+    if (env.OTEL_EXPORTER_OTLP_HEADERS) {
+      env.OTEL_EXPORTER_OTLP_HEADERS = `${env.OTEL_EXPORTER_OTLP_HEADERS},Authorization=${apiKey}`;
+    } else {
+      env.OTEL_EXPORTER_OTLP_HEADERS = `Authorization=${apiKey}`;
+    }
   }
 };
 
@@ -193,6 +202,7 @@ export const initSDK = (config: SDKConfig) => {
 
   ui.text = 'Setting otel envs...';
   setOtelEnvs({
+    apiKey: defaultApiKey,
     disableLogs: defaultDisableLogs,
     disableMetrics: defaultDisableMetrics,
     disableTracing: defaultDisableTracing,
@@ -203,13 +213,6 @@ export const initSDK = (config: SDKConfig) => {
   const stopOnTerminationSignals =
     config.stopOnTerminationSignals ??
     DEFAULT_HDX_NODE_STOP_ON_TERMINATION_SIGNALS; // Stop by default
-
-  let exporterHeaders;
-  if (defaultApiKey) {
-    exporterHeaders = {
-      Authorization: defaultApiKey,
-    };
-  }
 
   let defaultConsoleCapture =
     config.consoleCapture ?? DEFAULT_HDX_NODE_CONSOLE_CAPTURE;
@@ -222,12 +225,6 @@ export const initSDK = (config: SDKConfig) => {
   }
 
   //--------------------------------------------------
-  // ---------------- Metrics Meter ------------------
-  //--------------------------------------------------
-  // IMPLEMENT ME
-  //--------------------------------------------------
-
-  //--------------------------------------------------
   // ------------------- LOGGER ----------------------
   //--------------------------------------------------
   let _t = process.hrtime();
@@ -236,7 +233,6 @@ export const initSDK = (config: SDKConfig) => {
     detectResources: defaultDetectResources,
     service: defaultServiceName,
   });
-  _logger.setGlobalLoggerProvider();
   const t0 = process.hrtime(_t);
   ui.succeed(`Initialized OpenTelemetry Logger in ${hrtimeToMs(t0)} ms`);
   //--------------------------------------------------
@@ -313,7 +309,6 @@ export const initSDK = (config: SDKConfig) => {
             loggerOptions: {
               baseUrl: _logger.getExporterUrl(),
               service: defaultServiceName,
-              headers: exporterHeaders,
             },
             contextManager,
           }),
@@ -332,11 +327,10 @@ export const initSDK = (config: SDKConfig) => {
       'telemetry.distro.name': 'hyperdx',
       'telemetry.distro.version': PKG_VERSION,
     }),
+    logRecordProcessor: defaultDisableLogs ? undefined : _logger.getProcessor(),
     metricReader:
       config.metricReader ??
-      (defaultDisableMetrics
-        ? undefined
-        : getHyperDXMetricReader(exporterHeaders)),
+      (defaultDisableMetrics ? undefined : getHyperDXMetricReader()),
     spanProcessors: [
       ...(defaultDisableTracing
         ? []
@@ -345,7 +339,6 @@ export const initSDK = (config: SDKConfig) => {
               exporter: new OTLPTraceExporter({
                 timeoutMillis: DEFAULT_OTEL_EXPORTER_OTLP_TRACES_TIMEOUT,
                 url: DEFAULT_OTEL_TRACES_EXPORTER_URL,
-                headers: exporterHeaders,
               }),
               enableHDXGlobalContext: defaultBetaMode,
               contextManager,

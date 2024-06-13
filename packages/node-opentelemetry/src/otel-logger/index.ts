@@ -91,17 +91,16 @@ export class Logger {
       url: this._url,
       ...(headers && { headers }),
     });
-    this.processor =
-      getEnvWithoutDefaults().OTEL_LOGS_EXPORTER === 'none'
-        ? new NoopLogRecordProcessor()
-        : new BatchLogRecordProcessor(exporter, {
-            /** The maximum batch size of every export. It must be smaller or equal to
-             * maxQueueSize. The default value is 512. */
-            maxExportBatchSize,
-            scheduledDelayMillis: sendIntervalMs ?? DEFAULT_SEND_INTERVAL_MS,
-            exportTimeoutMillis: timeout ?? DEFAULT_EXPORTER_TIMEOUT_MS,
-            maxQueueSize,
-          });
+    this.processor = this.isDisabled()
+      ? new NoopLogRecordProcessor()
+      : new BatchLogRecordProcessor(exporter, {
+          /** The maximum batch size of every export. It must be smaller or equal to
+           * maxQueueSize. The default value is 512. */
+          maxExportBatchSize,
+          scheduledDelayMillis: sendIntervalMs ?? DEFAULT_SEND_INTERVAL_MS,
+          exportTimeoutMillis: timeout ?? DEFAULT_EXPORTER_TIMEOUT_MS,
+          maxQueueSize,
+        });
     this.provider = new LoggerProvider({
       resource: detectedResource.merge(
         new Resource({
@@ -124,6 +123,10 @@ export class Logger {
     }
     // set to current time if not provided
     return new Date();
+  }
+
+  isDisabled() {
+    return getEnvWithoutDefaults().OTEL_LOGS_EXPORTER === 'none';
   }
 
   setGlobalLoggerProvider() {
