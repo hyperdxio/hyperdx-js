@@ -4,9 +4,9 @@ import { defineIntegration } from '@sentry/core';
 const INTEGRATION_NAME = 'HyperDX';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-interface HyperDXOpionts {}
+interface HyperDXOptions {}
 
-export const _hyperdxIntegration = ((options: HyperDXOpionts = {}) => {
+export const _hyperdxIntegration = ((options: HyperDXOptions = {}) => {
   return {
     name: INTEGRATION_NAME,
     processEvent(event) {
@@ -15,6 +15,19 @@ export const _hyperdxIntegration = ((options: HyperDXOpionts = {}) => {
       if (possibleEventMessages.length > 0) {
         event.message = possibleEventMessages[possibleEventMessages.length - 1];
       }
+      // filter out useless stack traces
+      const exceptions = event.exception?.values;
+      if (exceptions && exceptions.length > 0) {
+        for (const exception of exceptions) {
+          if (exception.stacktrace?.frames) {
+            exception.stacktrace.frames = exception.stacktrace.frames.filter(
+              (frame) =>
+                frame.filename && !frame.filename.includes('framework-'),
+            );
+          }
+        }
+      }
+
       return event;
     },
   };
