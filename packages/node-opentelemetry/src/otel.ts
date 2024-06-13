@@ -1,3 +1,4 @@
+import fetch from 'node-fetch';
 import path from 'path';
 
 import * as semver from 'semver';
@@ -28,12 +29,11 @@ import {
   DEFAULT_HDX_NODE_ADVANCED_NETWORK_CAPTURE,
   DEFAULT_HDX_NODE_BETA_MODE,
   DEFAULT_HDX_NODE_CONSOLE_CAPTURE,
-  DEFAULT_HDX_NODE_ENABLE_INTERNAL_PROFILING,
   DEFAULT_HDX_NODE_EXPERIMENTAL_EXCEPTION_CAPTURE,
   DEFAULT_HDX_NODE_SENTRY_INTEGRATION_ENABLED,
   DEFAULT_HDX_NODE_STOP_ON_TERMINATION_SIGNALS,
+  DEFAULT_HDX_STARTUP_LOGS,
   DEFAULT_OTEL_EXPORTER_OTLP_TRACES_TIMEOUT,
-  DEFAULT_OTEL_LOGS_EXPORTER_URL,
   DEFAULT_OTEL_LOG_LEVEL,
   DEFAULT_OTEL_TRACES_EXPORTER_URL,
   DEFAULT_OTEL_TRACES_SAMPLER,
@@ -42,6 +42,8 @@ import {
 } from './constants';
 import { MutableAsyncLocalStorageContextManager } from './MutableAsyncLocalStorageContextManager';
 import { version as PKG_VERSION } from '../package.json';
+
+const UI_LOG_PREFIX = '[⚡HyperDX]';
 
 const env = process.env;
 
@@ -52,6 +54,7 @@ export type SDKConfig = {
   betaMode?: boolean;
   consoleCapture?: boolean;
   detectResources?: boolean;
+  enableInternalProfiling?: boolean;
   experimentalExceptionCapture?: boolean;
   instrumentations?: InstrumentationConfigMap;
   programmaticImports?: boolean; // TEMP
@@ -111,15 +114,44 @@ const pickPerformanceIndicator = (hrt: [number, number]) => {
   }
 };
 
+const healthCheckUrl = async (
+  ui: ora.Ora,
+  url: string,
+  requestConfigs: {
+    method: string;
+    headers?: Record<string, string>;
+    body?: string;
+  },
+) => {
+  ui.text = `Checking health of ${url}...`;
+  try {
+    const res = await fetch(url, requestConfigs);
+    if (res.ok) {
+      ui.succeed(`Health check passed for ${url}`);
+    } else {
+      ui.fail(`Health check failed for ${url}`);
+    }
+  } catch (e) {
+    diag.error('Error checking health of url', e);
+    ui.fail(`Health check failed for ${url}`);
+  }
+};
+
 export const initSDK = (config: SDKConfig) => {
   const ui = ora({
-    text: 'Initializing OpenTelemetry SDK...',
+    isSilent: !DEFAULT_HDX_STARTUP_LOGS,
+    prefixText: UI_LOG_PREFIX,
     spinner: cliSpinners.dots,
+    text: 'Initializing OpenTelemetry SDK...',
   }).start();
 
   const defaultApiKey = config.apiKey ?? env.HYPERDX_API_KEY;
   const defaultDetectResources = config.detectResources ?? true;
+  const defaultEnableInternalProfiling =
+    config.enableInternalProfiling ?? false;
   const defaultServiceName = config.serviceName ?? DEFAULT_SERVICE_NAME;
+
+  ui.succeed(`Service name is configured to be "${defaultServiceName}"`);
 
   if (!env.OTEL_EXPORTER_OTLP_HEADERS && !defaultApiKey) {
     ui.fail(
@@ -144,11 +176,9 @@ export const initSDK = (config: SDKConfig) => {
 
   let exporterHeaders;
   if (defaultApiKey) {
-    ui.text = 'apiKey or HYPERDX_API_KEY found. Setting up exporter headers...';
     exporterHeaders = {
       Authorization: defaultApiKey,
     };
-    ui.succeed('Set up exporter headers with HyperDX api key');
   }
 
   let defaultConsoleCapture =
@@ -180,6 +210,24 @@ export const initSDK = (config: SDKConfig) => {
   const t0 = process.hrtime(_t);
   ui.succeed(`Initialized OpenTelemetry Logger in ${hrtimeToMs(t0)} ms`);
   //--------------------------------------------------
+
+  // Health check
+  Promise.all([
+    healthCheckUrl(ui, DEFAULT_OTEL_TRACES_EXPORTER_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({}),
+    }),
+    healthCheckUrl(ui, _logger.getExporterUrl(), {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({}),
+    }),
+  ]);
 
   const defaultBetaMode = config.betaMode ?? DEFAULT_HDX_NODE_BETA_MODE;
   const defaultAdvancedNetworkCapture =
@@ -225,7 +273,7 @@ export const initSDK = (config: SDKConfig) => {
           new HyperDXConsoleInstrumentation({
             betaMode: defaultBetaMode,
             loggerOptions: {
-              baseUrl: DEFAULT_OTEL_LOGS_EXPORTER_URL,
+              baseUrl: _logger.getExporterUrl(),
               service: defaultServiceName,
               headers: exporterHeaders,
             },
@@ -264,7 +312,7 @@ export const initSDK = (config: SDKConfig) => {
   const t1 = process.hrtime(_t);
   ui.succeed(`Initialized instrumentations packages in ${hrtimeToMs(t1)} ms`);
 
-  if (DEFAULT_HDX_NODE_ENABLE_INTERNAL_PROFILING) {
+  if (defaultEnableInternalProfiling) {
     ui.text = 'Enabling internal profiling...';
     for (const instrumentation of allInstrumentations) {
       const _originalEnable = instrumentation.enable;
@@ -293,7 +341,7 @@ export const initSDK = (config: SDKConfig) => {
               const result = original.apply(this, args);
               const end = process.hrtime(start);
               ui.succeed(
-                `Patched ${module.name}${
+                `Instrumented ${module.name}${
                   module.moduleVersion ? ` [v${module.moduleVersion}] ` : ' '
                 }in ${hrtimeToMs(end)} ms`,
               );
@@ -310,7 +358,7 @@ export const initSDK = (config: SDKConfig) => {
                 const result = original.apply(this, args);
                 const end = process.hrtime(start);
                 ui.succeed(
-                  `Patched ${module.name}${
+                  `Instrumented ${module.name}${
                     module.moduleVersion ? ` [v${module.moduleVersion}] ` : ' '
                   }file ${file.name} in ${hrtimeToMs(end)} ms`,
                 );
@@ -484,10 +532,27 @@ export const initSDK = (config: SDKConfig) => {
         tracesExporterEndpoint: DEFAULT_OTEL_TRACES_EXPORTER_URL,
       },
       null,
-      2,
+      8,
     )}`,
-    symbol: '🚀',
+    symbol: '🦄',
   });
+
+  setTimeout(() => {
+    ora({
+      color: 'green',
+      isSilent: !DEFAULT_HDX_STARTUP_LOGS,
+      prefixText: UI_LOG_PREFIX,
+      spinner: cliSpinners.arc,
+      text: `
+View your app dashboard here:
+https://hyperdx.io/search?q=${encodeURIComponent(
+        `service:"${defaultServiceName}"`,
+      )}
+
+To disable these startup logs, set HDX_STARTUP_LOGS=false
+      `,
+    }).start();
+  }, 1000);
 };
 
 export const init = (config?: Omit<SDKConfig, 'programmaticImports'>) =>
@@ -501,8 +566,9 @@ export const init = (config?: Omit<SDKConfig, 'programmaticImports'>) =>
 
 const _shutdown = () => {
   const ui = ora({
-    text: 'Shutting down OpenTelemetry SDK...',
+    isSilent: !DEFAULT_HDX_STARTUP_LOGS,
     spinner: cliSpinners.dots,
+    text: 'Shutting down OpenTelemetry SDK...',
   }).start();
   return (
     sdk?.shutdown()?.then(

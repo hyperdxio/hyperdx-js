@@ -53,3 +53,5 @@ export const DEFAULT_HDX_NODE_SENTRY_INTEGRATION_ENABLED =
   stringToBoolean(env.HDX_NODE_SENTRY_INTEGRATION_ENABLED) ?? false;
 export const DEFAULT_HDX_NODE_ENABLE_INTERNAL_PROFILING =
   stringToBoolean(env.HDX_NODE_ENABLE_INTERNAL_PROFILING) ?? false;
+export const DEFAULT_HDX_STARTUP_LOGS =
+  stringToBoolean(env.HDX_STARTUP_LOGS) ?? true;
