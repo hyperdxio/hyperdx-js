@@ -3,7 +3,6 @@ import path from 'path';
 
 import * as semver from 'semver';
 import cliSpinners from 'cli-spinners';
-import open from 'open';
 import ora from 'ora';
 import { wrap } from 'shimmer';
 import { Attributes, DiagLogLevel, diag } from '@opentelemetry/api';
@@ -572,23 +571,24 @@ ${_targetUrl}
 To disable these startup logs, set HDX_STARTUP_LOGS=false
 
 `);
-      if (IS_LOCAL) {
-        const _ui = ora({
-          color: 'green',
-          isSilent: !DEFAULT_HDX_STARTUP_LOGS,
-          prefixText: UI_LOG_PREFIX,
-          spinner: cliSpinners.arc,
-          text: `Opening the dashboard...`,
-        }).start();
+      // Todo: not sure if this is a good idea...
+      // if (IS_LOCAL) {
+      //   const _ui = ora({
+      //     color: 'green',
+      //     isSilent: !DEFAULT_HDX_STARTUP_LOGS,
+      //     prefixText: UI_LOG_PREFIX,
+      //     spinner: cliSpinners.arc,
+      //     text: `Opening the dashboard...`,
+      //   }).start();
 
-        open(_targetUrl)
-          .then(() => {
-            _ui.succeed(`Opened dashboard in browser`);
-          })
-          .catch((e) => {
-            _ui.fail(`Error opening browser: ${e}`);
-          });
-      }
+      //   open(_targetUrl)
+      //     .then(() => {
+      //       _ui.succeed(`Opened dashboard in browser`);
+      //     })
+      //     .catch((e) => {
+      //       _ui.fail(`Error opening browser: ${e}`);
+      //     });
+      // }
     }, 1000);
   }
 };
