@@ -35,10 +35,7 @@ const {
 const HyperDX = require('../build/src');
 
 HyperDX.init({
-  betaMode: true,
-  consoleCapture: true,
-  experimentalExceptionCapture: true,
-  sentryIntegrationEnabled: true,
+  apiKey: 'blabla',
 });
 
 // setTimeout(() => {

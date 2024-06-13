@@ -1,13 +1,12 @@
-import {
-  MeterProvider,
-  PeriodicExportingMetricReader,
-} from '@opentelemetry/sdk-metrics';
 import { OTLPMetricExporter } from '@opentelemetry/exporter-metrics-otlp-proto';
+import { PeriodicExportingMetricReader } from '@opentelemetry/sdk-metrics';
 
-export const metricReader = new PeriodicExportingMetricReader({
-  exporter: new OTLPMetricExporter(),
-  exportIntervalMillis: 1000,
-});
+import { DEFAULT_OTEL_METRICS_EXPORTER_URL } from './constants';
 
-export const meterProvider = new MeterProvider({});
-meterProvider.addMetricReader(metricReader);
+export const getHyperDXMetricReader = () =>
+  new PeriodicExportingMetricReader({
+    exporter: new OTLPMetricExporter({
+      url: DEFAULT_OTEL_METRICS_EXPORTER_URL,
+    }),
+    exportIntervalMillis: 1000,
+  });
