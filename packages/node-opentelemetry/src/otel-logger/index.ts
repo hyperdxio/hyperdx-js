@@ -40,6 +40,8 @@ export type LoggerOptions = {
 };
 
 export class Logger {
+  private readonly _url: string;
+
   private readonly logger: OtelLogger;
 
   private readonly processor: BatchLogRecordProcessor;
@@ -79,12 +81,12 @@ export class Logger {
         : [],
     });
 
-    const _url = baseUrl ?? DEFAULT_OTEL_LOGS_EXPORTER_URL;
+    this._url = baseUrl ?? DEFAULT_OTEL_LOGS_EXPORTER_URL;
 
-    diag.warn(`${LOG_PREFIX} Sending logs to ${_url}`);
+    diag.warn(`${LOG_PREFIX} Sending logs to ${this._url}`);
 
     const exporter = new OTLPLogExporter({
-      url: _url,
+      url: this._url,
       ...(headers && { headers }),
     });
     this.processor = new BatchLogRecordProcessor(exporter, {
@@ -122,6 +124,10 @@ export class Logger {
   setGlobalLoggerProvider() {
     diag.debug('Setting global logger provider...');
     logs.setGlobalLoggerProvider(this.provider);
+  }
+
+  getExporterUrl() {
+    return this._url;
   }
 
   getProvider() {

@@ -164,7 +164,7 @@ export const initSDK = (config: SDKConfig) => {
   //--------------------------------------------------
   // ---------------- Metrics Meter ------------------
   //--------------------------------------------------
-
+  // IMPLEMENT ME
   //--------------------------------------------------
 
   //--------------------------------------------------
@@ -469,9 +469,9 @@ export const initSDK = (config: SDKConfig) => {
         betaMode: defaultBetaMode,
         consoleCapture: defaultConsoleCapture,
         distroVersion: PKG_VERSION,
-        endpoint: DEFAULT_OTEL_TRACES_EXPORTER_URL,
         exceptionCapture: defaultExceptionCapture,
-        logLevel: DEFAULT_OTEL_LOG_LEVEL,
+        otelLogLevel: DEFAULT_OTEL_LOG_LEVEL,
+        logsExporterEndpoint: _logger.getExporterUrl(),
         programmaticImports: config.programmaticImports,
         propagators: env.OTEL_PROPAGATORS,
         resourceAttributes: env.OTEL_RESOURCE_ATTRIBUTES,
@@ -481,6 +481,7 @@ export const initSDK = (config: SDKConfig) => {
         sentryIntegrationEnabled: defaultSentryIntegrationEnabled,
         serviceName: defaultServiceName,
         stopOnTerminationSignals,
+        tracesExporterEndpoint: DEFAULT_OTEL_TRACES_EXPORTER_URL,
       },
       null,
       2,
