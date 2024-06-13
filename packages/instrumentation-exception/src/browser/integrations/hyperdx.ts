@@ -29,7 +29,12 @@ export const _hyperdxIntegration = ((options: HyperDXOptions = {}) => {
               if (frame.filename?.includes('framework-')) {
                 continue;
                 // remove frames caused by SDK
-              } else if (frame.function?.endsWith('.reportString')) {
+              } else if (
+                frame.function?.endsWith('.reportString') ||
+                frame.function?.endsWith('.reportError') ||
+                frame.function?.endsWith('.reportErrorEvent') ||
+                frame.function?.endsWith('.reportEvent')
+              ) {
                 continue;
                 // console.errors are caught and reported by the SDK in this sequence:
                 // anon fn -> reportString -> report
