@@ -489,12 +489,6 @@ export const initSDK = (config: SDKConfig) => {
     ui.succeed(`Repatched instrumentation packages in ${hrtimeToMs(t3)} ms`);
   }
 
-  diag.debug(
-    stopOnTerminationSignals
-      ? 'stopOnTerminationSignals enabled'
-      : 'stopOnTerminationSignals disabled (user is responsible for graceful shutdown on termination signals)',
-  );
-
   function handleTerminationSignal(signal: string) {
     diag.debug(`${signal} received, shutting down...`);
     _shutdown().finally(() => process.exit());
@@ -510,30 +504,56 @@ export const initSDK = (config: SDKConfig) => {
     });
   }
 
+  // Print out the configuration
+  if (defaultAdvancedNetworkCapture) {
+    ui.succeed(`Enabled Advanced Network Capture`);
+  }
+  if (defaultBetaMode) {
+    ui.succeed(`Enabled Beta Mode`);
+  }
+  if (defaultConsoleCapture) {
+    ui.succeed(`Enabled Console Capture`);
+  }
+  if (defaultDetectResources) {
+    ui.succeed(`Enabled Resource Detection`);
+  }
+  if (defaultExceptionCapture) {
+    ui.succeed(`Enabled Exception Capture`);
+  }
+  if (DEFAULT_OTEL_LOG_LEVEL) {
+    ui.succeed(`Enable SDK Logger with Level "${DEFAULT_OTEL_LOG_LEVEL}"`);
+  }
+  if (config.programmaticImports) {
+    ui.succeed(`Enabled Programmatic Imports`);
+  }
+  if (env.OTEL_PROPAGATORS) {
+    ui.succeed(`Using Propagators: "${env.OTEL_PROPAGATORS}"`);
+  }
+  if (env.OTEL_RESOURCE_ATTRIBUTES) {
+    ui.succeed(`Resource Attributes: "${env.OTEL_RESOURCE_ATTRIBUTES}"`);
+  }
+  if (env.OTEL_NODE_RESOURCE_DETECTORS) {
+    ui.succeed(`Resource Detectors: "${env.OTEL_NODE_RESOURCE_DETECTORS}"`);
+  }
+  if (DEFAULT_OTEL_TRACES_SAMPLER) {
+    ui.succeed(`Traces Sampler: "${DEFAULT_OTEL_TRACES_SAMPLER}"`);
+  }
+  if (defaultSentryIntegrationEnabled) {
+    ui.succeed(`Enabled Sentry Integration`);
+  }
+
+  if (stopOnTerminationSignals) {
+    ui.succeed('Enabled stopOnTerminationSignals');
+  } else {
+    ui.warn(
+      'Disabled stopOnTerminationSignals (user is responsible for graceful shutdown on termination signals)',
+    );
+  }
+  ui.succeed(`Sending traces to "${DEFAULT_OTEL_TRACES_EXPORTER_URL}"`);
+  ui.succeed(`Sending logs to "${_logger.getExporterUrl()}"`);
+
   ui.stopAndPersist({
-    text: `OpenTelemetry SDK initialized successfully with configs: ${JSON.stringify(
-      {
-        advancedNetworkCapture: defaultAdvancedNetworkCapture,
-        betaMode: defaultBetaMode,
-        consoleCapture: defaultConsoleCapture,
-        distroVersion: PKG_VERSION,
-        exceptionCapture: defaultExceptionCapture,
-        otelLogLevel: DEFAULT_OTEL_LOG_LEVEL,
-        logsExporterEndpoint: _logger.getExporterUrl(),
-        programmaticImports: config.programmaticImports,
-        propagators: env.OTEL_PROPAGATORS,
-        resourceAttributes: env.OTEL_RESOURCE_ATTRIBUTES,
-        resourceDetectors: env.OTEL_NODE_RESOURCE_DETECTORS,
-        sampler: DEFAULT_OTEL_TRACES_SAMPLER,
-        samplerArg: DEFAULT_OTEL_TRACES_SAMPLER_ARG,
-        sentryIntegrationEnabled: defaultSentryIntegrationEnabled,
-        serviceName: defaultServiceName,
-        stopOnTerminationSignals,
-        tracesExporterEndpoint: DEFAULT_OTEL_TRACES_EXPORTER_URL,
-      },
-      null,
-      8,
-    )}`,
+    text: `OpenTelemetry SDK initialized successfully`,
     symbol: '🦄',
   });
 
