@@ -1,5 +1,17 @@
 # @hyperdx/instrumentation-exception
 
+## 0.1.0-next.7
+
+### Minor Changes
+
+- 52dca89: fix: introduce exception.parsed_stacktrace semattr
+
+### Patch Changes
+
+- 535410c: feat: add exceptions filtering to hyperdx integration (browser)
+- Updated dependencies [52dca89]
+  - @hyperdx/instrumentation-sentry-node@0.1.0-next.6
+
 ## 0.1.0-next.6
 
 ### Patch Changes

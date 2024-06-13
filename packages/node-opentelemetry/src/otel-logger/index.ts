@@ -1,9 +1,11 @@
 import { Attributes, diag } from '@opentelemetry/api';
+import { getEnvWithoutDefaults } from '@opentelemetry/core';
 import {
   BatchLogRecordProcessor,
   LoggerProvider,
+  NoopLogRecordProcessor,
 } from '@opentelemetry/sdk-logs';
-import { Logger as OtelLogger } from '@opentelemetry/api-logs';
+import { Logger as OtelLogger, logs } from '@opentelemetry/api-logs';
 import { OTLPLogExporter } from '@opentelemetry/exporter-logs-otlp-http';
 import {
   Resource,
@@ -40,9 +42,13 @@ export type LoggerOptions = {
 };
 
 export class Logger {
+  private readonly _url: string;
+
   private readonly logger: OtelLogger;
 
-  private readonly processor: BatchLogRecordProcessor;
+  private readonly processor: BatchLogRecordProcessor | NoopLogRecordProcessor;
+
+  private readonly provider: LoggerProvider;
 
   constructor({
     baseUrl,
@@ -56,7 +62,7 @@ export class Logger {
     timeout,
   }: LoggerOptions) {
     if (!service) {
-      console.warn(
+      diag.warn(
         `${LOG_PREFIX} Service name not found. Use "${DEFAULT_SERVICE_NAME}"`,
       );
     }
@@ -65,7 +71,7 @@ export class Logger {
     const maxExportBatchSize = bufferSize ?? DEFAULT_EXPORTER_BATCH_SIZE;
     let maxQueueSize = queueSize ?? DEFAULT_MAX_QUEUE_SIZE;
     if (maxExportBatchSize > maxQueueSize) {
-      console.error(
+      diag.error(
         `${LOG_PREFIX} bufferSize must be smaller or equal to queueSize. Setting queueSize to ${maxExportBatchSize}`,
       );
       maxQueueSize = maxExportBatchSize;
@@ -77,23 +83,25 @@ export class Logger {
         : [],
     });
 
-    const _url = baseUrl ?? DEFAULT_OTEL_LOGS_EXPORTER_URL;
+    this._url = baseUrl ?? DEFAULT_OTEL_LOGS_EXPORTER_URL;
 
-    console.warn(`${LOG_PREFIX} Sending logs to ${_url}`);
+    diag.warn(`${LOG_PREFIX} Sending logs to ${this._url}`);
 
     const exporter = new OTLPLogExporter({
-      url: _url,
+      url: this._url,
       ...(headers && { headers }),
     });
-    this.processor = new BatchLogRecordProcessor(exporter, {
-      /** The maximum batch size of every export. It must be smaller or equal to
-       * maxQueueSize. The default value is 512. */
-      maxExportBatchSize,
-      scheduledDelayMillis: sendIntervalMs ?? DEFAULT_SEND_INTERVAL_MS,
-      exportTimeoutMillis: timeout ?? DEFAULT_EXPORTER_TIMEOUT_MS,
-      maxQueueSize,
-    });
-    const loggerProvider = new LoggerProvider({
+    this.processor = this.isDisabled()
+      ? new NoopLogRecordProcessor()
+      : new BatchLogRecordProcessor(exporter, {
+          /** The maximum batch size of every export. It must be smaller or equal to
+           * maxQueueSize. The default value is 512. */
+          maxExportBatchSize,
+          scheduledDelayMillis: sendIntervalMs ?? DEFAULT_SEND_INTERVAL_MS,
+          exportTimeoutMillis: timeout ?? DEFAULT_EXPORTER_TIMEOUT_MS,
+          maxQueueSize,
+        });
+    this.provider = new LoggerProvider({
       resource: detectedResource.merge(
         new Resource({
           // TODO: should use otel semantic conventions
@@ -103,10 +111,9 @@ export class Logger {
         }),
       ),
     });
-    loggerProvider.addLogRecordProcessor(this.processor);
+    this.provider.addLogRecordProcessor(this.processor);
 
-    this.logger = loggerProvider.getLogger('node-logger');
-    console.log(`${LOG_PREFIX} started!`);
+    this.logger = this.provider.getLogger('node-logger');
   }
 
   private parseTimestamp(meta: Attributes): Date {
@@ -116,6 +123,27 @@ export class Logger {
     }
     // set to current time if not provided
     return new Date();
+  }
+
+  isDisabled() {
+    return getEnvWithoutDefaults().OTEL_LOGS_EXPORTER === 'none';
+  }
+
+  setGlobalLoggerProvider() {
+    diag.debug('Setting global logger provider...');
+    logs.setGlobalLoggerProvider(this.provider);
+  }
+
+  getExporterUrl() {
+    return this._url;
+  }
+
+  getProvider() {
+    return this.provider;
+  }
+
+  getProcessor() {
+    return this.processor;
   }
 
   shutdown() {
