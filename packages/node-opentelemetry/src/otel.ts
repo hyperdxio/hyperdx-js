@@ -36,15 +36,18 @@ import {
   DEFAULT_HDX_NODE_STOP_ON_TERMINATION_SIGNALS,
   DEFAULT_HDX_STARTUP_LOGS,
   DEFAULT_OTEL_EXPORTER_OTLP_TRACES_TIMEOUT,
+  DEFAULT_OTEL_LOGS_EXPORTER,
   DEFAULT_OTEL_LOG_LEVEL,
+  DEFAULT_OTEL_METRICS_EXPORTER,
   DEFAULT_OTEL_METRICS_EXPORTER_URL,
+  DEFAULT_OTEL_TRACES_EXPORTER,
   DEFAULT_OTEL_TRACES_EXPORTER_URL,
   DEFAULT_OTEL_TRACES_SAMPLER,
   DEFAULT_OTEL_TRACES_SAMPLER_ARG,
   DEFAULT_SERVICE_NAME,
 } from './constants';
 import { MutableAsyncLocalStorageContextManager } from './MutableAsyncLocalStorageContextManager';
-import { hyprdxMetricReader } from './metrics';
+import { getHyperDXMetricReader } from './metrics';
 import { version as PKG_VERSION } from '../package.json';
 
 const UI_LOG_PREFIX = '[⚡HyperDX]';
@@ -165,9 +168,12 @@ export const initSDK = (config: SDKConfig) => {
 
   const defaultApiKey = config.apiKey ?? env.HYPERDX_API_KEY;
   const defaultDetectResources = config.detectResources ?? true;
-  const defaultDisableLogs = config.disableLogs ?? false;
-  const defaultDisableMetrics = config.disableMetrics ?? false;
-  const defaultDisableTracing = config.disableTracing ?? false;
+  const defaultDisableLogs =
+    config.disableLogs ?? DEFAULT_OTEL_LOGS_EXPORTER === 'none';
+  const defaultDisableMetrics =
+    config.disableMetrics ?? DEFAULT_OTEL_METRICS_EXPORTER === 'none';
+  const defaultDisableTracing =
+    config.disableTracing ?? DEFAULT_OTEL_TRACES_EXPORTER === 'none';
   const defaultEnableInternalProfiling =
     config.enableInternalProfiling ?? false;
   const defaultServiceName = config.serviceName ?? DEFAULT_SERVICE_NAME;
@@ -328,7 +334,9 @@ export const initSDK = (config: SDKConfig) => {
     }),
     metricReader:
       config.metricReader ??
-      (defaultDisableMetrics ? undefined : hyprdxMetricReader),
+      (defaultDisableMetrics
+        ? undefined
+        : getHyperDXMetricReader(exporterHeaders)),
     spanProcessors: [
       ...(defaultDisableTracing
         ? []
