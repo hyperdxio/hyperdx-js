@@ -1,4 +1,4 @@
-import type { Event, IntegrationFn } from '@sentry/types';
+import type { Event, IntegrationFn, StackFrame } from '@sentry/types';
 import { defineIntegration } from '@sentry/core';
 
 const INTEGRATION_NAME = 'HyperDX';
@@ -20,10 +20,35 @@ export const _hyperdxIntegration = ((options: HyperDXOptions = {}) => {
       if (exceptions && exceptions.length > 0) {
         for (const exception of exceptions) {
           if (exception.stacktrace?.frames) {
-            exception.stacktrace.frames = exception.stacktrace.frames.filter(
-              (frame) =>
-                frame.filename && !frame.filename.includes('framework-'),
-            );
+            const _filteredFrames: StackFrame[] = [];
+            let shouldRemoveNextFrameIfSameFile: string | null = null;
+
+            for (let i = exception.stacktrace.frames.length - 1; i >= 0; i--) {
+              const frame = exception.stacktrace.frames[i];
+              // remove all frames from framework-*.js (nextjs)
+              if (frame.filename?.includes('framework-')) {
+                continue;
+                // remove frames caused by SDK
+              } else if (frame.function?.endsWith('.reportString')) {
+                continue;
+                // console.errors are caught and reported by the SDK in this sequence:
+                // anon fn -> reportString -> report
+                // this condition removes the anon fn after .reportString ans .report frames
+              } else if (frame.function?.endsWith('.report')) {
+                shouldRemoveNextFrameIfSameFile = frame.filename;
+                continue;
+              } else if (
+                frame.function?.length <= 1 &&
+                shouldRemoveNextFrameIfSameFile &&
+                frame.filename === shouldRemoveNextFrameIfSameFile
+              ) {
+                shouldRemoveNextFrameIfSameFile = null;
+                continue;
+              }
+              _filteredFrames.unshift(frame);
+            }
+
+            exception.stacktrace.frames = _filteredFrames;
           }
         }
       }
