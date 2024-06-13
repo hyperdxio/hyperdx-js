@@ -41,7 +41,7 @@ export default {
     }),
     terser({
       sourceMap: true,
-      keep_fnames: true,
+      keep_fnames: new RegExp('.report'),
     }),
     // visualizer({
     //   sourcemap: true,
