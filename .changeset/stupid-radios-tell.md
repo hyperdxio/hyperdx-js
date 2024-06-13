@@ -1,5 +1,5 @@
 ---
-'@hyperdx/instrumentation-exception': patch
+'@hyperdx/instrumentation-exception': minor
 '@hyperdx/node-opentelemetry': patch
 ---
 
