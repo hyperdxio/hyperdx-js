@@ -30,20 +30,19 @@ export const _hyperdxIntegration = ((options: HyperDXOptions = {}) => {
                 continue;
                 // remove frames caused by SDK
               } else if (
-                frame.function?.endsWith('.reportString') ||
-                frame.function?.endsWith('.reportError') ||
-                frame.function?.endsWith('.reportErrorEvent') ||
-                frame.function?.endsWith('.reportEvent')
+                frame.function?.endsWith('hdxReportString') ||
+                frame.function?.endsWith('hdxReportError') ||
+                frame.function?.endsWith('hdxReportErrorEvent') ||
+                frame.function?.endsWith('hdxReportEvent')
               ) {
                 continue;
                 // console.errors are caught and reported by the SDK in this sequence:
                 // anon fn -> reportString -> report
                 // this condition removes the anon fn after .reportString ans .report frames
-              } else if (frame.function?.endsWith('.report')) {
+              } else if (frame.function?.endsWith('hdxReport')) {
                 shouldRemoveNextFrameIfSameFile = frame.filename;
                 continue;
               } else if (
-                frame.function?.length <= 1 &&
                 shouldRemoveNextFrameIfSameFile &&
                 frame.filename === shouldRemoveNextFrameIfSameFile
               ) {

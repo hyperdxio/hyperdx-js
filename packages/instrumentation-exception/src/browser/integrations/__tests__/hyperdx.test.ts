@@ -55,14 +55,14 @@ describe('hyperdxIntegration', () => {
                 {
                   filename:
                     'https://www.hyperdx.io/_next/static/chunks/somefile.js',
-                  function: 'Lx.report',
+                  function: 'hdxReport',
                   lineno: 1,
                   colno: 88323,
                 },
                 {
                   filename:
                     'https://www.hyperdx.io/_next/static/chunks/somefile.js',
-                  function: 'Lx.reportString',
+                  function: 'hdxReportString',
                   lineno: 1,
                   colno: 88323,
                 },
