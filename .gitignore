@@ -42,3 +42,25 @@ junit.xml
 smoke-tests/collector/data.json
 smoke-tests/collector/data-results/*.json
 smoke-tests/report.xml
+
+artifacts/
+dist/
+build/
+node_modules/
+.idea/
+.vscode/
+.npm/
+.nyc_output/
+.DS_Store
+.rollup.cache/
+
+
+# integration tests
+*.log
+tests_output/
+/.nightwatch_build_id
+/.http-mitm-proxy
+
+# contains secrets
+.env
+.npmrc

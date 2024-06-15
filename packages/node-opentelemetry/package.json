@@ -32,7 +32,7 @@
     "prettier": "prettier --config .prettierrc --write ."
   },
   "dependencies": {
-    "@hyperdx/instrumentation-exception": "^0.1.0-next.7",
+    "@hyperdx/instrumentation-exception": "^0.1.0-next.8",
     "@hyperdx/instrumentation-sentry-node": "^0.1.0-next.6",
     "@opentelemetry/api": "^1.8.0",
     "@opentelemetry/api-logs": "^0.51.1",
