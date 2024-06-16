@@ -3,6 +3,7 @@
   "version": "0.16.2-20",
   "description": "HyperDX distribution OpenTelemetry-based session recording",
   "scripts": {
+    "build": "npm-run-all -s compile:*",
     "compile": "npm-run-all -s compile:*",
     "compile:browser": "rollup -c",
     "compile:tsc": "tsc --build tsconfig.cjs.json tsconfig.esm.json",
