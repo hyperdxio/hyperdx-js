@@ -1,5 +1,5 @@
 # Logs
-logs
+# logs
 *.log
 npm-debug.log*
 
@@ -64,3 +64,5 @@ tests_output/
 # contains secrets
 .env
 .npmrc
+
+deno.lock
