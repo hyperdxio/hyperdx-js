@@ -1,4 +1,4 @@
-import type { IntegrationFn } from '@sentry/types';
+import type { IntegrationFn } from '@sentry/types-v8';
 
 import type { Event, EventHint } from './types';
 import { getEventProcessor } from './eventProcessor';
