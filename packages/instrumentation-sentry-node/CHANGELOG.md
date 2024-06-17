@@ -1,5 +1,11 @@
 # @hyperdx/instrumentation-sentry-node
 
+## 0.1.0-next.6
+
+### Minor Changes
+
+- 52dca89: fix: introduce exception.parsed_stacktrace semattr
+
 ## 0.1.0-next.5
 
 ### Patch Changes

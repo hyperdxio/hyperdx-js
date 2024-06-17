@@ -1,5 +1,19 @@
 # @hyperdx/node-opentelemetry
 
+## 0.8.0-next.11
+
+### Patch Changes
+
+- 24a581e: feat: config logger
+- 8125482: feat: introduce init func for programmatic imports
+- 52dca89: fix: introduce exception.parsed_stacktrace semattr
+- 24a581e: feat: improve CLI UI
+- Updated dependencies [535410c]
+- Updated dependencies [52dca89]
+- Updated dependencies [52dca89]
+  - @hyperdx/instrumentation-exception@0.1.0-next.7
+  - @hyperdx/instrumentation-sentry-node@0.1.0-next.6
+
 ## 0.8.0-next.10
 
 ### Patch Changes

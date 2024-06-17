@@ -39,6 +39,33 @@ describe('hyperdxIntegration', () => {
                   lineno: 1,
                   colno: 88323,
                 },
+                {
+                  filename: '',
+                  function: 'test',
+                  lineno: 1,
+                  colno: 88323,
+                },
+                {
+                  filename:
+                    'https://www.hyperdx.io/_next/static/chunks/somefile.js',
+                  function: '?',
+                  lineno: 1,
+                  colno: 88323,
+                },
+                {
+                  filename:
+                    'https://www.hyperdx.io/_next/static/chunks/somefile.js',
+                  function: 'Lx.report',
+                  lineno: 1,
+                  colno: 88323,
+                },
+                {
+                  filename:
+                    'https://www.hyperdx.io/_next/static/chunks/somefile.js',
+                  function: 'Lx.reportString',
+                  lineno: 1,
+                  colno: 88323,
+                },
               ],
             },
           },
@@ -57,6 +84,12 @@ describe('hyperdxIntegration', () => {
       {
         filename:
           'https://www.hyperdx.io/_next/static/chunks/9524-20fe05d50852a6b9.js',
+        function: 'test',
+        lineno: 1,
+        colno: 88323,
+      },
+      {
+        filename: '',
         function: 'test',
         lineno: 1,
         colno: 88323,
