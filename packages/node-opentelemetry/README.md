@@ -117,11 +117,13 @@ npx ts-node -r './instrument.ts' index.ts
 
 ### Troubleshooting
 
-If you are having trouble getting events to show up in HyperDX, you can enable verbose logging by setting the environment variable `DEBUG=hyperdx`. This will print out additional debug logging to isolate any issues.
+If you are having trouble getting events to show up in HyperDX, you can enable verbose logging by setting the environment variable `OTEL_LOG_LEVEL=debug`. This will print out additional debug logging to isolate any issues.
 
 If you're pointing to a self-hosted collector, ensure the `OTEL_EXPORTER_OTLP_ENDPOINT` environment variable is set to the correct endpoint (ex. `http://localhost:4318`) and is reachable (ex. `curl http://localhost:4318/v1/traces` should return a HTTP 405).
 
 ### (Optional) Attach User Information or Metadata (BETA)
+
+> WARNING: ONLY WORKS WITH NODE 14.8.0+
 
 To easily tag all events related to a given attribute or identifier (ex. user id or email), you can call the `setTraceAttributes` function which will tag every log/span associated with the current trace after the call with the declared attributes. It's recommended to call this function as early as possible within a given request/trace (ex. as early in an Express middleware stack as possible).
 

@@ -1,15 +1,21 @@
-import * as shimmer from 'shimmer';
 import isObject from 'lodash.isobject';
 import isPlainObject from 'lodash.isplainobject';
 import opentelemetry, { Attributes } from '@opentelemetry/api';
+import {
+  InstrumentationBase,
+  InstrumentationConfig,
+  InstrumentationNodeModuleDefinition,
+} from '@opentelemetry/instrumentation';
 
-import hdx from '../debug';
 import { Logger, LoggerOptions } from '../otel-logger';
-import { hyperDXGlobalContext } from '../context';
 import { parseWinstonLog } from '../otel-logger/winston';
+import { MutableAsyncLocalStorageContextManager } from '../MutableAsyncLocalStorageContextManager';
+
+const PACKAGE_NAME = '@hyperdx/instrumentation-console';
+const PACKAGE_VERSION = '0.1.0';
 
 export const _parseConsoleArgs = (args: any[]) => {
-  const stringifiedArgs = [];
+  const stringifiedArgs: any[] = [];
   let firstJson;
   for (const arg of args) {
     if (isObject(arg)) {
@@ -38,12 +44,23 @@ export const _parseConsoleArgs = (args: any[]) => {
     : stringifiedArgs.join(' ');
 };
 
-export default class HyperDXConsoleInstrumentation {
-  private readonly betaMode: boolean;
+export interface HyperDXConsoleInstrumentationConfig
+  extends InstrumentationConfig {
+  betaMode: boolean;
+  loggerOptions: LoggerOptions;
+  contextManager?: MutableAsyncLocalStorageContextManager;
+}
 
-  private readonly _logger: Logger;
+export default class HyperDXConsoleInstrumentation extends InstrumentationBase {
+  private readonly _hdxLogger: Logger;
+  private readonly _contextManager:
+    | MutableAsyncLocalStorageContextManager
+    | undefined;
 
   private _patchConsole(type: string, ...args: any[]) {
+    const instrumentation = this;
+    const config =
+      instrumentation.getConfig() as HyperDXConsoleInstrumentationConfig;
     let level = type;
     if (type === 'log') {
       level = 'info';
@@ -64,101 +81,108 @@ export default class HyperDXConsoleInstrumentation {
         span_id: currentActiveSpan?.spanContext().spanId,
       };
 
-      if (this.betaMode) {
-        const attributes = traceId
-          ? hyperDXGlobalContext.getTraceAttributes(traceId)
-          : {};
-        meta = {
-          ...meta,
-          // attach custom attributes
-          ...attributes,
-        };
+      if (config.betaMode) {
+        if (
+          this._contextManager != null &&
+          typeof this._contextManager.getMutableContext === 'function'
+        ) {
+          meta = {
+            ...meta,
+            // attach custom attributes
+            ...Object.fromEntries(
+              this._contextManager.getMutableContext()?.traceAttributes ?? [],
+            ),
+          };
+        }
       }
-      this._logger.postMessage(parsedLog.level, parsedLog.message, meta);
+
+      instrumentation._hdxLogger.postMessage(
+        parsedLog.level,
+        parsedLog.message,
+        meta,
+      );
     } catch (e) {
-      hdx(`error in _patchConsole: ${e}`);
+      // ignore
     }
   }
 
   private readonly _consoleLogHandler = (original: Console['log']) => {
+    const instrumentation = this;
     return (...args: any[]) => {
-      this._patchConsole('log', ...args);
+      instrumentation._patchConsole('log', ...args);
       return original.apply(this, args);
     };
   };
 
   private readonly _consoleInfoHandler = (original: Console['info']) => {
+    const instrumentation = this;
     return (...args: any[]) => {
-      this._patchConsole('info', ...args);
+      instrumentation._patchConsole('info', ...args);
       return original.apply(this, args);
     };
   };
 
   private readonly _consoleWarnHandler = (original: Console['warn']) => {
+    const instrumentation = this;
     return (...args: any[]) => {
-      this._patchConsole('warn', ...args);
+      instrumentation._patchConsole('warn', ...args);
       return original.apply(this, args);
     };
   };
 
   private readonly _consoleErrorHandler = (original: Console['error']) => {
+    const instrumentation = this;
     return (...args: any[]) => {
-      this._patchConsole('error', ...args);
+      instrumentation._patchConsole('error', ...args);
       return original.apply(this, args);
     };
   };
 
   private readonly _consoleDebugHandler = (original: Console['debug']) => {
+    const instrumentation = this;
     return (...args: any[]) => {
-      this._patchConsole('debug', ...args);
+      instrumentation._patchConsole('debug', ...args);
       return original.apply(this, args);
     };
   };
 
   private _onPatch(moduleExports: Console) {
-    shimmer.wrap(moduleExports, 'debug', this._consoleDebugHandler);
-    shimmer.wrap(moduleExports, 'log', this._consoleLogHandler);
-    shimmer.wrap(moduleExports, 'info', this._consoleInfoHandler);
-    shimmer.wrap(moduleExports, 'warn', this._consoleWarnHandler);
-    shimmer.wrap(moduleExports, 'error', this._consoleErrorHandler);
+    this._wrap(moduleExports, 'debug', this._consoleDebugHandler);
+    this._wrap(moduleExports, 'log', this._consoleLogHandler);
+    this._wrap(moduleExports, 'info', this._consoleInfoHandler);
+    this._wrap(moduleExports, 'warn', this._consoleWarnHandler);
+    this._wrap(moduleExports, 'error', this._consoleErrorHandler);
     return moduleExports;
   }
 
   private _onUnPatch(moduleExports: Console) {
-    shimmer.unwrap(moduleExports, 'debug');
-    shimmer.unwrap(moduleExports, 'log');
-    shimmer.unwrap(moduleExports, 'info');
-    shimmer.unwrap(moduleExports, 'warn');
-    shimmer.unwrap(moduleExports, 'error');
+    this._unwrap(moduleExports, 'debug');
+    this._unwrap(moduleExports, 'log');
+    this._unwrap(moduleExports, 'info');
+    this._unwrap(moduleExports, 'warn');
+    this._unwrap(moduleExports, 'error');
   }
 
-  constructor(config: LoggerOptions & { betaMode: boolean }) {
-    this.betaMode = config.betaMode;
-    this._logger = new Logger(config);
+  constructor(config: HyperDXConsoleInstrumentationConfig) {
+    super(PACKAGE_NAME, PACKAGE_VERSION, config);
+    this._hdxLogger = new Logger(config.loggerOptions);
+    this._contextManager = config.contextManager;
   }
 
-  /**
-   * Init method will be called when the plugin is constructed.
-   * It returns an `InstrumentationNodeModuleDefinition` which describes
-   *   the node module to be instrumented and patched.
-   * It may also return a list of `InstrumentationNodeModuleDefinition`s if
-   *   the plugin should patch multiple modules or versions.
-   */
-  // protected init() {
-  //   const module = new InstrumentationNodeModuleDefinition<Console>(
-  //     'node:console',
-  //     ['*'],
-  //     () => this._onPatch(console),
-  //     () => this._onUnPatch(console),
-  //   );
-  //   return module;
-  // }
-
-  enable() {
-    this._onPatch(console);
-  }
-
-  disable() {
-    this._onUnPatch(console);
+  init() {
+    return [
+      new InstrumentationNodeModuleDefinition(
+        'console',
+        ['*'],
+        (moduleExports: Console) => {
+          this._onPatch(moduleExports);
+          return moduleExports;
+        },
+        (moduleExports: Console) => {
+          this._onUnPatch(moduleExports);
+          return moduleExports;
+        },
+      ),
+    ];
   }
 }

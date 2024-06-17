@@ -1,8 +1,7 @@
 import build from 'pino-abstract-transport';
 import isString from 'lodash.isstring';
-import { Attributes } from '@opentelemetry/api';
+import { Attributes, diag } from '@opentelemetry/api';
 
-import hdx from '../debug';
 import { Logger } from './';
 import { jsonToString } from '../utils';
 
@@ -49,9 +48,13 @@ export type HyperDXPinoOptions = LoggerOptions & {
   getCustomMeta?: () => Attributes;
 };
 
-export default ({ apiKey, getCustomMeta, ...options }: HyperDXPinoOptions) => {
+export default async ({
+  apiKey,
+  getCustomMeta,
+  ...options
+}: HyperDXPinoOptions) => {
   try {
-    hdx('Initializing HyperDX pino transport...');
+    diag.debug('Initializing HyperDX pino transport...');
     const logger = new Logger({
       ...(apiKey && {
         headers: {
@@ -60,24 +63,24 @@ export default ({ apiKey, getCustomMeta, ...options }: HyperDXPinoOptions) => {
       }),
       ...options,
     });
-    hdx(`HyperDX pino transport initialized!`);
+    diag.debug(`HyperDX pino transport initialized!`);
     return build(
       async function (source) {
         for await (const obj of source) {
           const { level, message, meta } = parsePinoLog(obj);
-          hdx('Sending log to HyperDX');
+          diag.debug('Sending log to HyperDX');
           logger.postMessage(PINO_LEVELS[level], message, {
             ...getCustomMeta?.(),
             ...meta,
           });
-          hdx('Log sent to HyperDX');
+          diag.debug('Log sent to HyperDX');
         }
       },
       {
         async close(err) {
-          hdx('Sending and closing HyperDX pino transport...');
+          diag.debug('Sending and closing HyperDX pino transport...');
           await logger.shutdown();
-          hdx('HyperDX pino transport closed!');
+          diag.debug('HyperDX pino transport closed!');
         },
       },
     );

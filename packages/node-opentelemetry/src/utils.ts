@@ -1,12 +1,11 @@
 import stringifySafe from 'json-stringify-safe';
-
-import hdx from './debug';
+import { diag } from '@opentelemetry/api';
 
 export const jsonToString = (json) => {
   try {
     return JSON.stringify(json);
   } catch (ex) {
-    hdx(`Failed to stringify json. e = ${ex}`);
+    diag.debug(`Failed to stringify json. e = ${ex}`);
     return stringifySafe(json);
   }
 };

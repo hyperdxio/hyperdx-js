@@ -58,7 +58,7 @@ export const registerGCPCloudFunctionEventHandler = (
       },
       parentSpanContext
         ? trace.setSpanContext(context.active(), parentSpanContext)
-        : undefined,
+        : context.active(),
       async (span) => {
         try {
           await handler(event);

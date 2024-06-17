@@ -56,3 +56,13 @@ To enable or disable network capture dynamically, simply invoke the `enableAdvan
 ```js
 HyperDX.enableAdvancedNetworkCapture();
 ```
+
+### (Optional) React ErrorBoundary Integration
+
+To enable automatic error tracking with ErrorBoundary, simply attach the HyperDX error handler to the ErrorBoundary component.
+
+```js
+import ErrorBoundary from 'react-error-boundary';
+
+HyperDX.attachToReactErrorBoundary(ErrorBoundary);
+```

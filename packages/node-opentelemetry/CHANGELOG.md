@@ -1,5 +1,101 @@
 # @hyperdx/node-opentelemetry
 
+## 0.8.0-next.11
+
+### Patch Changes
+
+- 24a581e: feat: config logger
+- 8125482: feat: introduce init func for programmatic imports
+- 52dca89: fix: introduce exception.parsed_stacktrace semattr
+- 24a581e: feat: improve CLI UI
+- Updated dependencies [535410c]
+- Updated dependencies [52dca89]
+- Updated dependencies [52dca89]
+  - @hyperdx/instrumentation-exception@0.1.0-next.7
+  - @hyperdx/instrumentation-sentry-node@0.1.0-next.6
+
+## 0.8.0-next.10
+
+### Patch Changes
+
+- d515c5a: fix: exception mechanism override bug
+- c8ecaea: fix: enable strictNullChecks
+- 24dfee2: feat: Add mutable context manager for setTraceAttributes
+- Updated dependencies [d515c5a]
+  - @hyperdx/instrumentation-exception@0.1.0-next.6
+
+## 0.8.0-next.9
+
+### Patch Changes
+
+- 5614cc4: fix: remove sentry/core dep
+- Updated dependencies [5614cc4]
+  - @hyperdx/instrumentation-sentry-node@0.1.0-next.5
+  - @hyperdx/instrumentation-exception@0.1.0-next.5
+
+## 0.8.0-next.8
+
+### Patch Changes
+
+- 1c956d4: fix: missing stacktrace context bug
+- 7c9bd6a: feat: add instrumentation-exception pkg to node-opentelemetry
+- Updated dependencies [1c956d4]
+- Updated dependencies [e36309d]
+  - @hyperdx/instrumentation-sentry-node@0.1.0-next.4
+  - @hyperdx/instrumentation-exception@0.1.0-next.4
+
+## 0.8.0-next.7
+
+### Patch Changes
+
+- Updated dependencies [feb4ef1]
+- Updated dependencies [feb4ef1]
+  - @hyperdx/instrumentation-sentry-node@0.1.0-next.1
+
+## 0.8.0-next.6
+
+### Patch Changes
+
+- 8a46140: feat: expose getEventProcessor api
+- Updated dependencies [8a46140]
+  - @hyperdx/instrumentation-sentry-node@0.0.1-next.0
+
+## 0.8.0-next.5
+
+### Patch Changes
+
+- c7e012c: chore: bump pino-abstract-transport to v1.2.0
+
+## 0.8.0-next.4
+
+### Patch Changes
+
+- 511a488: feat: install @hyperdx/instrumentation-sentry-node
+- f47620f: feat: instrument console in the otel way
+
+## 0.8.0-next.3
+
+### Minor Changes
+
+- 1092fca: style: deprecate hyperdx debug flag
+
+### Patch Changes
+
+- 133dfd7: dx: init sdk programmatically - pt1
+- 6b82cb1: feat: introduce internal profiling
+- aee31d1: style: use HyperDXSpanProcessor
+- 93da1df: feat: import @hyperdx/instrumentation-exception pkg
+- Updated dependencies [a93c519]
+- Updated dependencies [93da1df]
+- Updated dependencies [3bca092]
+  - @hyperdx/instrumentation-exception@0.1.0-next.0
+
+## 0.8.0-next.2
+
+### Patch Changes
+
+- 7ce9e08: feat: add more exception tags
+
 ## 0.8.0-next.1
 
 ### Patch Changes
