@@ -72,7 +72,7 @@ export type SDKConfig = {
   metricReader?: MetricReader;
   programmaticImports?: boolean; // TEMP
   sentryIntegrationEnabled?: boolean;
-  serviceName?: string;
+  service?: string;
   stopOnTerminationSignals?: boolean;
 };
 
@@ -81,19 +81,19 @@ const setOtelEnvs = ({
   disableLogs,
   disableMetrics,
   disableTracing,
-  serviceName,
+  service,
 }: {
   apiKey?: string;
   disableLogs: boolean;
   disableMetrics: boolean;
   disableTracing: boolean;
-  serviceName: string;
+  service: string;
 }) => {
   // set default otel env vars
   env.OTEL_NODE_RESOURCE_DETECTORS = env.OTEL_NODE_RESOURCE_DETECTORS ?? 'all';
   env.OTEL_TRACES_SAMPLER = DEFAULT_OTEL_TRACES_SAMPLER;
   env.OTEL_TRACES_SAMPLER_ARG = DEFAULT_OTEL_TRACES_SAMPLER_ARG;
-  env.OTEL_SERVICE_NAME = serviceName;
+  env.OTEL_SERVICE_NAME = service;
   if (disableLogs) {
     env.OTEL_LOGS_EXPORTER = 'none';
   }
@@ -185,7 +185,7 @@ export const initSDK = (config: SDKConfig) => {
     config.disableTracing ?? DEFAULT_OTEL_TRACES_EXPORTER === 'none';
   const defaultEnableInternalProfiling =
     config.enableInternalProfiling ?? false;
-  const defaultServiceName = config.serviceName ?? DEFAULT_SERVICE_NAME;
+  const defaultServiceName = config.service ?? DEFAULT_SERVICE_NAME;
 
   ui.succeed(`Service name is configured to be "${defaultServiceName}"`);
 
@@ -206,7 +206,7 @@ export const initSDK = (config: SDKConfig) => {
     disableLogs: defaultDisableLogs,
     disableMetrics: defaultDisableMetrics,
     disableTracing: defaultDisableTracing,
-    serviceName: defaultServiceName,
+    service: defaultServiceName,
   });
   ui.succeed('Set default otel envs');
 
@@ -348,6 +348,7 @@ export const initSDK = (config: SDKConfig) => {
     instrumentations: allInstrumentations,
     contextManager: contextManager,
   });
+
   const t1 = process.hrtime(_t);
   ui.succeed(`Initialized instrumentations packages in ${hrtimeToMs(t1)} ms`);
 
@@ -661,8 +662,12 @@ const _shutdown = () => {
   }).start();
   return (
     sdk?.shutdown()?.then(
-      () => ui.succeed('OpenTelemetry SDK shut down successfully'),
-      (err) => ui.fail(`Error shutting down OpenTeLoader SDK: ${err}`),
+      () => {
+        ui.succeed('OpenTelemetry SDK shut down successfully');
+      },
+      (err) => {
+        ui.fail(`Error shutting down OpenTeLoader SDK: ${err}`);
+      },
     ) ?? Promise.resolve() // in case SDK isn't init'd yet
   );
 };

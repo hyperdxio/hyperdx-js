@@ -1,7 +1,4 @@
-import {
-  InstrumentationNodeModuleDefinition,
-  InstrumentationBase,
-} from '@opentelemetry/instrumentation';
+import { InstrumentationBase } from '@opentelemetry/instrumentation';
 import { TracerProvider, diag, trace } from '@opentelemetry/api';
 
 import { ExceptionInstrumentationConfig } from './types';
@@ -55,23 +52,23 @@ export class ExceptionInstrumentation extends InstrumentationBase {
     const flushers = [];
     if (this._traceForceFlusher) {
       flushers.push(this._traceForceFlusher());
-      // TODO: a hack to make sure we flush all
-      flushers.push(new Promise((resolve) => setTimeout(resolve, 2000)));
     } else {
       diag.error(
-        'Spans may not be exported for the lambda function because we are not force flushing before callback.',
+        'Spans may not be exported because we are not force flushing before callback.',
       );
     }
     await Promise.all(flushers);
   }
 
   override enable() {
+    const config = this.getConfig();
     onUncaughtExceptionIntegration({
-      exitEvenIfOtherHandlersAreRegistered: true,
+      exitEvenIfOtherHandlersAreRegistered:
+        config.exitEvenIfOtherHandlersAreRegistered,
       forceFlush: () => this.forceFlush(),
     }).setup({} as any);
     onUnhandledRejectionIntegration({
-      mode: 'warn',
+      mode: config.unhandledRejectionMode,
       forceFlush: () => this.forceFlush(),
     }).setup({} as any);
   }
