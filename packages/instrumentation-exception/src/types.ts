@@ -2,6 +2,8 @@ import { Event } from '@sentry/types';
 import { InstrumentationConfig } from '@opentelemetry/instrumentation';
 import { Span } from '@opentelemetry/api';
 
+import type { UnhandledRejectionMode } from './node/integrations/onunhandledrejection';
+
 export interface EventCustomAttributeFunction {
   (span: Span, event: Event): void;
 }
@@ -18,6 +20,11 @@ export interface ExceptionInstrumentationConfig extends InstrumentationConfig {
    * Default: `false`
    */
   exitEvenIfOtherHandlersAreRegistered?: boolean;
+  /**
+   * Option deciding what to do after capturing unhandledRejection,
+   * that mimicks behavior of node's --unhandled-rejection flag.
+   */
+  unhandledRejectionMode?: UnhandledRejectionMode;
   /** Function for adding custom attributes on event hook */
   eventHook?: EventCustomAttributeFunction;
 }

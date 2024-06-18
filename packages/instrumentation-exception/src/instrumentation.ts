@@ -68,7 +68,7 @@ export class ExceptionInstrumentation extends InstrumentationBase {
       forceFlush: () => this.forceFlush(),
     }).setup({} as any);
     onUnhandledRejectionIntegration({
-      mode: 'warn',
+      mode: config.unhandledRejectionMode,
       forceFlush: () => this.forceFlush(),
     }).setup({} as any);
   }
