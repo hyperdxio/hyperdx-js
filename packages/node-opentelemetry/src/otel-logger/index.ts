@@ -61,10 +61,9 @@ export class Logger {
     service,
     timeout,
   }: LoggerOptions) {
+    const _serviceName = DEFAULT_SERVICE_NAME();
     if (!service) {
-      diag.warn(
-        `${LOG_PREFIX} Service name not found. Use "${DEFAULT_SERVICE_NAME}"`,
-      );
+      diag.warn(`${LOG_PREFIX} Service name not found. Use "${_serviceName}"`);
     }
 
     // sanity check bufferSize and queueSize
@@ -106,7 +105,7 @@ export class Logger {
         new Resource({
           // TODO: should use otel semantic conventions
           'hyperdx.distro.version': PKG_VERSION,
-          [SEMRESATTRS_SERVICE_NAME]: service ?? DEFAULT_SERVICE_NAME,
+          [SEMRESATTRS_SERVICE_NAME]: service ?? _serviceName,
           ...resourceAttributes,
         }),
       ),

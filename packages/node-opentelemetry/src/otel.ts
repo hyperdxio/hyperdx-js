@@ -28,6 +28,7 @@ import HyperDXSpanProcessor from './spanProcessor';
 import { Logger as OtelLogger } from './otel-logger';
 import { getHyperDXHTTPInstrumentationConfig } from './instrumentations/http';
 import {
+  DEFAULT_HDX_API_KEY,
   DEFAULT_HDX_NODE_ADVANCED_NETWORK_CAPTURE,
   DEFAULT_HDX_NODE_BETA_MODE,
   DEFAULT_HDX_NODE_CONSOLE_CAPTURE,
@@ -175,7 +176,7 @@ export const initSDK = (config: SDKConfig) => {
     text: 'Initializing OpenTelemetry SDK...',
   }).start();
 
-  const defaultApiKey = config.apiKey ?? env.HYPERDX_API_KEY;
+  const defaultApiKey = config.apiKey ?? DEFAULT_HDX_API_KEY();
   const defaultDetectResources = config.detectResources ?? true;
   const defaultDisableLogs =
     config.disableLogs ?? DEFAULT_OTEL_LOGS_EXPORTER === 'none';
@@ -185,7 +186,7 @@ export const initSDK = (config: SDKConfig) => {
     config.disableTracing ?? DEFAULT_OTEL_TRACES_EXPORTER === 'none';
   const defaultEnableInternalProfiling =
     config.enableInternalProfiling ?? false;
-  const defaultServiceName = config.service ?? DEFAULT_SERVICE_NAME;
+  const defaultServiceName = config.service ?? DEFAULT_SERVICE_NAME();
 
   ui.succeed(`Service name is configured to be "${defaultServiceName}"`);
 
@@ -262,7 +263,7 @@ export const initSDK = (config: SDKConfig) => {
     }),
   ]);
 
-  const defaultBetaMode = config.betaMode ?? DEFAULT_HDX_NODE_BETA_MODE;
+  const defaultBetaMode = config.betaMode ?? DEFAULT_HDX_NODE_BETA_MODE();
   const defaultAdvancedNetworkCapture =
     config.advancedNetworkCapture ?? DEFAULT_HDX_NODE_ADVANCED_NETWORK_CAPTURE;
 
