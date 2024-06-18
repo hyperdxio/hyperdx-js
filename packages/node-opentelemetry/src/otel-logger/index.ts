@@ -63,7 +63,7 @@ export class Logger {
   }: LoggerOptions) {
     if (!service) {
       diag.warn(
-        `${LOG_PREFIX} Service name not found. Use "${DEFAULT_SERVICE_NAME}"`,
+        `${LOG_PREFIX} Service name not found. Use "${DEFAULT_SERVICE_NAME()}"`,
       );
     }
 
@@ -106,7 +106,7 @@ export class Logger {
         new Resource({
           // TODO: should use otel semantic conventions
           'hyperdx.distro.version': PKG_VERSION,
-          [SEMRESATTRS_SERVICE_NAME]: service ?? DEFAULT_SERVICE_NAME,
+          [SEMRESATTRS_SERVICE_NAME]: service ?? DEFAULT_SERVICE_NAME(),
           ...resourceAttributes,
         }),
       ),
