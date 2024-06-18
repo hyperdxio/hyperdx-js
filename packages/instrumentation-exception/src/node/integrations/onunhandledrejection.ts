@@ -86,7 +86,7 @@ function handleRejection(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   reason: any,
   options: OnUnhandledRejectionOptions,
-  promise?: Promise<void>,
+  pendingPromise?: Promise<void>,
 ): void {
   // https://github.com/nodejs/node/blob/7cf6f9e964aa00772965391c23acda6d71972a9a/lib/internal/process/promises.js#L234-L240
   const rejectionWarning =
@@ -106,7 +106,7 @@ function handleRejection(
     consoleSandbox(() => {
       console.warn(rejectionWarning);
     });
-    (promise ?? Promise.resolve()).finally(() => {
+    (pendingPromise ?? Promise.resolve()).finally(() => {
       console.log('Exiting due to unhandled promise rejection');
       logAndExitProcess(reason, options.forceFlush);
     });
