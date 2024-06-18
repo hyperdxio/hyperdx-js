@@ -10,10 +10,6 @@ import { stringToBoolean } from './utils';
 
 const env = process.env;
 
-const HYPERDX_API_KEY = env.HYPERDX_API_KEY;
-
-const BETA_MODE = stringToBoolean(env.HDX_NODE_BETA_MODE);
-
 type WinstonTransportOptions = Omit<
   HyperDXWinstonOptions,
   'apiKey' | 'getCustomMeta' | 'resourceAttributes'
@@ -41,11 +37,12 @@ export const getWinstonTransport = (
   maxLevel = 'info',
   options: WinstonTransportOptions = {},
 ) => {
+  const BETA_MODE = stringToBoolean(env.HDX_NODE_BETA_MODE);
   diag.debug('Initializing winston transport');
   return new HyperDXWinston({
-    ...(HYPERDX_API_KEY && {
+    ...(env.HYPERDX_API_KEY && {
       headers: {
-        Authorization: HYPERDX_API_KEY,
+        Authorization: env.HYPERDX_API_KEY,
       },
     }),
     maxLevel,
@@ -64,9 +61,9 @@ export const getPinoTransport = (
 ) => ({
   target: '@hyperdx/node-opentelemetry/build/src/otel-logger/pino',
   options: {
-    ...(HYPERDX_API_KEY && {
+    ...(env.HYPERDX_API_KEY && {
       headers: {
-        Authorization: HYPERDX_API_KEY,
+        Authorization: env.HYPERDX_API_KEY,
       },
     }),
     service: DEFAULT_SERVICE_NAME,
