@@ -6,7 +6,7 @@ import { diag } from '@opentelemetry/api';
 import { logAndExitProcess } from '../utils/errorhandling';
 import { recordException } from '..';
 
-type UnhandledRejectionMode = 'none' | 'warn' | 'strict';
+export type UnhandledRejectionMode = 'none' | 'warn' | 'strict';
 
 interface OnUnhandledRejectionOptions {
   /**
@@ -63,7 +63,7 @@ export function makeUnhandledPromiseHandler(
     reason: unknown,
     promise: unknown,
   ): void {
-    recordException(reason, {
+    const p = recordException(reason, {
       originalException: promise,
       captureContext: {
         extra: { unhandledPromiseRejection: true },
@@ -74,7 +74,7 @@ export function makeUnhandledPromiseHandler(
       },
     });
 
-    handleRejection(reason, options);
+    handleRejection(reason, options, p);
   };
 }
 
@@ -86,6 +86,7 @@ function handleRejection(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   reason: any,
   options: OnUnhandledRejectionOptions,
+  promise?: Promise<void>,
 ): void {
   // https://github.com/nodejs/node/blob/7cf6f9e964aa00772965391c23acda6d71972a9a/lib/internal/process/promises.js#L234-L240
   const rejectionWarning =
@@ -105,7 +106,10 @@ function handleRejection(
     consoleSandbox(() => {
       console.warn(rejectionWarning);
     });
-    logAndExitProcess(reason, options.forceFlush);
+    (promise ?? Promise.resolve()).finally(() => {
+      console.log('Exiting due to unhandled promise rejection');
+      logAndExitProcess(reason, options.forceFlush);
+    });
   }
   /* eslint-enable no-console */
 }
