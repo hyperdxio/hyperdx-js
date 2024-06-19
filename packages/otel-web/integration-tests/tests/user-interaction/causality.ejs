@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Mouse events test</title>
+  <!-- Webvitals has an extra click event listener that confuses the tests -->
+  <%- renderAgent({
+    instrumentations: {
+      webvitals: false
+    }
+  }) %>
+</head>
+<body>
+  <h1>Mouse events test</h1>
+
+  <button type="button" id="btn1">Button</button>
+
+  <pre id="scenarioDisplay"></pre>
+  <script id="scenario">
+    btn1.addEventListener('click', function () {
+      window.testing = true;
+      var req = new XMLHttpRequest();
+      req.open('GET', '/some-data');
+      req.setRequestHeader('Content-Type', 'text/plain');
+      req.send();
+      req.addEventListener('loadend', function () {
+        // Otel plugin waits for 300ms for resource timings to appear. This should schedule
+        // testing done to be after that.
+        setTimeout(function () {
+          window.testing = false;
+        }, 301);
+      });
+    });
+  </script>
+  <script>scenarioDisplay.innerHTML = scenario.innerHTML;</script>
+</body>
+</html>

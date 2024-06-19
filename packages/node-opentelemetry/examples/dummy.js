@@ -28,10 +28,6 @@ const pg = require('pg');
 const pino = require('pino');
 const winston = require('winston');
 
-const {
-  getPinoTransport,
-  getWinstonTransport,
-} = require('../build/src/logger');
 const HyperDX = require('../build/src');
 
 HyperDX.init({
@@ -78,7 +74,7 @@ const logger = winston.createLogger({
   level: 'info',
   format: winston.format.json(),
   transports: [
-    getWinstonTransport('info', {
+    HyperDX.getWinstonTransport('info', {
       detectResources: true,
     }), // append this to the existing transports
   ],
@@ -87,7 +83,7 @@ const logger = winston.createLogger({
 const pinoLogger = pino(
   pino.transport({
     targets: [
-      getPinoTransport('info'),
+      HyperDX.getPinoTransport('info'),
       // other transports
     ],
   }),

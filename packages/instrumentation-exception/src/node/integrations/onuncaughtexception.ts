@@ -18,7 +18,7 @@ interface OnUncaughtExceptionOptions {
    *
    * Default: `false`
    */
-  exitEvenIfOtherHandlersAreRegistered: boolean;
+  exitEvenIfOtherHandlersAreRegistered?: boolean;
 
   /**
    * This is called when an uncaught error would cause the process to exit.
@@ -86,8 +86,6 @@ export function makeErrorHandler(
         return (
           // as soon as we're using domains this listener is attached by node itself
           listener.name !== 'domainUncaughtExceptionClear' &&
-          // the handler we register for tracing
-          listener.tag !== 'sentry_tracingErrorCallback' &&
           // the handler we register in this integration
           (listener as ErrorHandler)._errorHandler !== true
         );
@@ -104,7 +102,7 @@ export function makeErrorHandler(
         firstError = error;
         caughtFirstError = true;
 
-        recordException(error, {
+        const p = recordException(error, {
           originalException: error,
           captureContext: {
             level: 'fatal',
@@ -117,7 +115,9 @@ export function makeErrorHandler(
 
         if (!calledFatalError && shouldApplyFatalHandlingLogic) {
           calledFatalError = true;
-          onFatalError(error, options.forceFlush);
+          p.finally(() => {
+            onFatalError(error, options.forceFlush);
+          });
         }
       } else {
         if (shouldApplyFatalHandlingLogic) {

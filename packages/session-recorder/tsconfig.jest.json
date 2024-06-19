@@ -1,0 +1,8 @@
+{
+  "compilerOptions": {
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "types": ["jest"]
+  },
+  "extends": "./tsconfig.base.json"
+}

@@ -43,12 +43,13 @@ export const DEFAULT_OTEL_METRICS_EXPORTER_URL =
   (otelEnv.OTEL_EXPORTER_OTLP_ENDPOINT
     ? `${otelEnv.OTEL_EXPORTER_OTLP_ENDPOINT}/v1/metrics`
     : 'https://in-otel.hyperdx.io/v1/metrics');
-export const DEFAULT_SERVICE_NAME =
-  otelEnv.OTEL_SERVICE_NAME ?? defaultServiceName();
+export const DEFAULT_SERVICE_NAME = () =>
+  getEnvWithoutDefaults().OTEL_SERVICE_NAME ?? defaultServiceName();
 export const DEFAULT_OTEL_LOG_LEVEL = otelEnvWithDefaults.OTEL_LOG_LEVEL;
 
 // HyperDX SDK specific configuration
-export const DEFAULT_HDX_NODE_BETA_MODE =
+export const DEFAULT_HDX_API_KEY = () => env.HYPERDX_API_KEY;
+export const DEFAULT_HDX_NODE_BETA_MODE = () =>
   stringToBoolean(env.HDX_NODE_BETA_MODE) ?? false;
 export const DEFAULT_HDX_NODE_CONSOLE_CAPTURE =
   stringToBoolean(env.HDX_NODE_CONSOLE_CAPTURE) ?? true;
