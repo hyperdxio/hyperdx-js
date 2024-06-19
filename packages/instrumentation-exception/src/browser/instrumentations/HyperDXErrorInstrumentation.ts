@@ -1,4 +1,5 @@
 import * as shimmer from 'shimmer';
+import { Span } from '@opentelemetry/api';
 import {
   InstrumentationBase,
   InstrumentationConfig,
@@ -9,6 +10,7 @@ import { limitLen, getElementXPath } from './utils';
 
 // FIXME take timestamps from events?
 
+const STACK_LIMIT = 4096;
 const MESSAGE_LIMIT = 1024;
 
 function useful(s) {
@@ -21,6 +23,15 @@ function stringifyValue(value: unknown) {
   }
 
   return value.toString();
+}
+
+function addStackIfUseful(span: Span, err: Error) {
+  if (err && err.stack && useful(err.stack)) {
+    span.setAttribute(
+      'error.stack',
+      limitLen(err.stack.toString(), STACK_LIMIT),
+    );
+  }
 }
 
 export const ERROR_INSTRUMENTATION_NAME = 'errors';
@@ -89,7 +100,22 @@ export class HyperDXErrorInstrumentation extends InstrumentationBase {
       return;
     }
 
-    recordException(err, {}, this.tracer);
+    const now = Date.now();
+    const span = this.tracer.startSpan(source, { startTime: now });
+    span.setAttribute('component', 'error');
+    span.setAttribute('error', true);
+    span.setAttribute(
+      'error.object',
+      useful(err.name)
+        ? err.name
+        : err.constructor && err.constructor.name
+        ? err.constructor.name
+        : 'Error',
+    );
+    span.setAttribute('error.message', limitLen(msg, MESSAGE_LIMIT));
+    addStackIfUseful(span, err);
+    recordException(err, {}, this.tracer, span);
+    span.end(now);
   }
 
   protected hdxReportString(
@@ -101,12 +127,18 @@ export class HyperDXErrorInstrumentation extends InstrumentationBase {
       return;
     }
 
-    const e = new Error(limitLen(message, MESSAGE_LIMIT));
-    if (firstError && firstError.stack && useful(firstError.stack)) {
-      e.stack = firstError.stack;
+    const now = Date.now();
+    const span = this.tracer.startSpan(source, { startTime: now });
+    span.setAttribute('component', 'error');
+    span.setAttribute('error', true);
+    span.setAttribute('error.object', 'String');
+    span.setAttribute('error.message', limitLen(message, MESSAGE_LIMIT));
+    if (firstError) {
+      addStackIfUseful(span, firstError);
+      // FIXME: record only the first error?
+      recordException(firstError, {}, this.tracer, span);
     }
-
-    recordException(e, {}, this.tracer);
+    span.end(now);
   }
 
   protected hdxReportErrorEvent(source: string, ev: ErrorEvent): void {
@@ -125,15 +157,16 @@ export class HyperDXErrorInstrumentation extends InstrumentationBase {
 
     const now = Date.now();
     const span = this.tracer.startSpan(source, { startTime: now });
+    span.setAttribute('component', 'error');
+    span.setAttribute('error.type', ev.type);
     if (ev.target) {
       // TODO: find types to match this
       span.setAttribute('target_element', (ev.target as any).tagName);
       span.setAttribute('target_xpath', getElementXPath(ev.target, true));
       span.setAttribute('target_src', (ev.target as any).src);
     }
-    span.end(now);
-
     recordException(ev, {}, this.tracer, span);
+    span.end(now);
   }
 
   public hdxReport(
