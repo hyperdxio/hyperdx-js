@@ -136,7 +136,7 @@ export class HyperDXErrorInstrumentation extends InstrumentationBase {
     recordException(ev, {}, this.tracer, span);
   }
 
-  protected hdxReport(
+  public hdxReport(
     source: string,
     arg: string | Event | ErrorEvent | Array<any>,
   ): void {
