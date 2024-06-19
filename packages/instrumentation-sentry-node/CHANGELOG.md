@@ -1,5 +1,12 @@
 # @hyperdx/instrumentation-sentry-node
 
+## 0.1.0-next.7
+
+### Patch Changes
+
+- 70c8508: fix: revert browser error span changes + remove sentry.version semantic attribute
+- 606dd8e: chore: bump otel core to v1.24.1 + semantic-conventions to v1.24.1
+
 ## 0.1.0-next.6
 
 ### Minor Changes

@@ -1,5 +1,18 @@
 # @hyperdx/instrumentation-exception
 
+## 0.1.0-next.9
+
+### Patch Changes
+
+- a574521: fix: tracer forcecFlush bug (exception)
+- 5f6af95: refactor: Rename error instrumentation fn name for filtering out
+- 70c8508: fix: revert browser error span changes + remove sentry.version semantic attribute
+- 606dd8e: chore: bump otel core to v1.24.1 + semantic-conventions to v1.24.1
+- a574521: feat: support exitEvenIfOtherHandlersAreRegistered + unhandledRejectionMode configs
+- Updated dependencies [70c8508]
+- Updated dependencies [606dd8e]
+  - @hyperdx/instrumentation-sentry-node@0.1.0-next.7
+
 ## 0.1.0-next.8
 
 ### Patch Changes

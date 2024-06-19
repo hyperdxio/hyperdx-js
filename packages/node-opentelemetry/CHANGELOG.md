@@ -1,5 +1,23 @@
 # @hyperdx/node-opentelemetry
 
+## 0.8.0-next.12
+
+### Patch Changes
+
+- a574521: style: rename 'serviceName' to 'service'
+- 67a3a56: fix: read api key before init call (logger transports)
+- 70c8508: fix: revert browser error span changes + remove sentry.version semantic attribute
+- 606dd8e: chore: bump otel core to v1.24.1 + semantic-conventions to v1.24.1
+- 242afb2: fix: attach trace attributes onStart of span as well, dont overwrite attributes
+- ec4c4bb: fix: load api key and service name dynamically
+- Updated dependencies [a574521]
+- Updated dependencies [5f6af95]
+- Updated dependencies [70c8508]
+- Updated dependencies [606dd8e]
+- Updated dependencies [a574521]
+  - @hyperdx/instrumentation-exception@0.1.0-next.9
+  - @hyperdx/instrumentation-sentry-node@0.1.0-next.7
+
 ## 0.8.0-next.11
 
 ### Patch Changes
