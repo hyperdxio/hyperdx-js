@@ -29,7 +29,7 @@
   "dependencies": {
     "@opentelemetry/core": "^1.24.1",
     "@opentelemetry/instrumentation": "^0.51.1",
-    "@opentelemetry/semantic-conventions": "^1.22.0",
+    "@opentelemetry/semantic-conventions": "^1.24.1",
     "json-stringify-safe": "^5.0.1",
     "shimmer": "^1.2.1",
     "tslib": "^2.5.3"

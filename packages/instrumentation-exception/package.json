@@ -32,7 +32,7 @@
     "@hyperdx/instrumentation-sentry-node": "^0.1.0-next.6",
     "@opentelemetry/core": "^1.24.1",
     "@opentelemetry/instrumentation": "^0.51.1",
-    "@opentelemetry/semantic-conventions": "^1.22.0",
+    "@opentelemetry/semantic-conventions": "^1.24.1",
     "@sentry/core": "^8.7.0",
     "@sentry/types": "^8.7.0",
     "@sentry/utils": "^8.7.0",
