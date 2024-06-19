@@ -19,7 +19,7 @@ import {
   SimpleSpanProcessor,
   SpanProcessor,
 } from '@opentelemetry/sdk-trace-base';
-import Rum, { SplunkExporter, ZipkinSpan } from '../src/index';
+import Rum, { ZipkinSpan } from '../src/index';
 
 export class SpanCapturer implements SpanProcessor {
   public readonly spans: ReadableSpan[] = [];
@@ -36,72 +36,6 @@ export class SpanCapturer implements SpanProcessor {
   clear(): void {
     this.spans.length = 0;
   }
-}
-
-export function buildInMemorySplunkExporter(): {
-  exporter: SplunkExporter;
-  getFinishedSpans: () => ZipkinSpan[];
-} {
-  const spans: ZipkinSpan[] = [];
-  const exporter = new SplunkExporter({
-    beaconUrl: null,
-    beaconSender: null,
-    xhrSender: (_, data) => {
-      if (typeof data === 'string') {
-        const newSpans = JSON.parse(data) as ZipkinSpan[];
-        spans.splice(spans.length, 0, ...newSpans);
-      }
-    },
-  });
-
-  return {
-    exporter,
-    getFinishedSpans: () => spans,
-  };
-}
-
-export function initWithDefaultConfig(
-  capturer: SpanCapturer,
-  additionalOptions = {},
-): void {
-  Rum._internalInit({
-    beaconUrl: 'http://127.0.0.1:8888/v1/trace',
-    allowInsecureBeacon: true,
-    applicationName: 'my-app',
-    deploymentEnvironment: 'my-env',
-    version: '1.2-test.3',
-    globalAttributes: { customerType: 'GOLD' },
-    bufferTimeout: 0,
-    rumAccessToken: '123-no-warn-spam-in-console',
-    ...additionalOptions,
-  });
-  Rum.provider.addSpanProcessor(capturer);
-}
-
-export function initWithSyncPipeline(additionalOptions = {}): {
-  forceFlush: () => Promise<void>;
-  getFinishedSpans: () => ZipkinSpan[];
-} {
-  const { exporter, getFinishedSpans } = buildInMemorySplunkExporter();
-  const processor = new SimpleSpanProcessor(exporter);
-
-  Rum._internalInit({
-    beaconUrl: 'http://127.0.0.1:8888/v1/trace',
-    allowInsecureBeacon: true,
-    applicationName: 'my-app',
-    deploymentEnvironment: 'my-env',
-    version: '1.2-test.3',
-    bufferTimeout: 0,
-    rumAccessToken: '123-no-warn-spam-in-console',
-    exporter: { factory: () => exporter },
-    spanProcessor: { factory: () => processor },
-    ...additionalOptions,
-  });
-
-  return {
-    forceFlush: () => processor.forceFlush(),
-    getFinishedSpans,
-  };
 }
 
 export function deinit(): void {
