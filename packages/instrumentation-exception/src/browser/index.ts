@@ -1,6 +1,5 @@
 import type { ClientOptions, Event, EventHint } from '@sentry/types';
 import {
-  SDK_VERSION,
   dedupeIntegration,
   functionToStringIntegration,
   inboundFiltersIntegration,
@@ -91,10 +90,7 @@ export const recordException = async (
     },
   };
   try {
-    const _eventProcessor = getEventProcessor(
-      tracer ?? defaultTracer,
-      SDK_VERSION,
-    );
+    const _eventProcessor = getEventProcessor(tracer ?? defaultTracer);
     const event = await buildEventFromException(e, {
       data: _hint,
     });

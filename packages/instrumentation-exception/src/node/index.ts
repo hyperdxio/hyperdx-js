@@ -5,11 +5,7 @@ import type {
   EventHint,
   Integration,
 } from '@sentry/types';
-import {
-  SDK_VERSION,
-  inboundFiltersIntegration,
-  prepareEvent,
-} from '@sentry/core';
+import { inboundFiltersIntegration, prepareEvent } from '@sentry/core';
 import { Attributes, Span, Tracer, diag, trace } from '@opentelemetry/api';
 import { eventFromUnknownInput } from '@sentry/utils';
 import { getEventProcessor } from '@hyperdx/instrumentation-sentry-node';
@@ -101,10 +97,7 @@ export const recordException = async (
     },
   };
   try {
-    const _eventProcessor = getEventProcessor(
-      tracer ?? defaultTracer,
-      SDK_VERSION,
-    );
+    const _eventProcessor = getEventProcessor(tracer ?? defaultTracer);
     const event = await buildEventFromException(e, {
       data: _hint,
     });
