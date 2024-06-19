@@ -1,5 +1,11 @@
 # @hyperdx/instrumentation-exception
 
+## 0.1.0-next.10
+
+### Patch Changes
+
+- c05e520: fix: end span properly after calling recordException
+
 ## 0.1.0-next.9
 
 ### Patch Changes

@@ -1,5 +1,13 @@
 # @hyperdx/otel-web
 
+## 0.16.2-next.1
+
+### Patch Changes
+
+- c05e520: fix: end span properly after calling recordException
+- Updated dependencies [c05e520]
+  - @hyperdx/instrumentation-exception@0.1.0-next.10
+
 ## 0.16.2-next.0
 
 ### Patch Changes
