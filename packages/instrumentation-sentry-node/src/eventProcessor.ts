@@ -14,8 +14,6 @@ import {
   SEMATTRS_EXCEPTION_TYPE,
   SEMATTRS_HTTP_RESPONSE_CONTENT_LENGTH,
   SEMATTRS_HTTP_STATUS_CODE,
-  SEMATTRS_HTTP_URL,
-  SEMATTRS_HTTP_USER_AGENT,
 } from '@opentelemetry/semantic-conventions';
 
 import type { Event, EventHint, Exception } from './types';
@@ -137,10 +135,6 @@ export const extractSemAttrsFromEvent = (
   // https://opentelemetry.io/docs/specs/semconv/resource/host/
   ...(event.server_name && {
     'host.name': event.server_name,
-  }),
-  ...(event.request && {
-    [SEMATTRS_HTTP_URL]: event.request.url,
-    [SEMATTRS_HTTP_USER_AGENT]: event.request.headers?.['User-Agent'],
   }),
 });
 
