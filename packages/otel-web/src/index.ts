@@ -723,7 +723,7 @@ export const Rum: RumOtelWebType = {
       return;
     }
 
-    _errorInstrumentation.report('Rum.error', args);
+    _errorInstrumentation.hdxReport('Rum.error', args);
   },
 
   addEventListener(name, callback): void {
