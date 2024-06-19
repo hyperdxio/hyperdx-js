@@ -3543,7 +3543,7 @@
     "@opentelemetry/sdk-trace-node" "1.24.1"
     "@opentelemetry/semantic-conventions" "1.24.1"
 
-"@opentelemetry/sdk-trace-base@1.24.1", "@opentelemetry/sdk-trace-base@^1.0.0", "@opentelemetry/sdk-trace-base@^1.24.1":
+"@opentelemetry/sdk-trace-base@1.24.1", "@opentelemetry/sdk-trace-base@^1.0.0", "@opentelemetry/sdk-trace-base@^1.24.1", "@opentelemetry/sdk-trace-base@~1.24.1":
   version "1.24.1"
   resolved "https://registry.yarnpkg.com/@opentelemetry/sdk-trace-base/-/sdk-trace-base-1.24.1.tgz#dc2ab89126e75e442913fb5af98803fde67b2536"
   integrity sha512-zz+N423IcySgjihl2NfjBf0qw1RWe11XIAWVrTNOSSI6dtSPJiVom2zipFB2AEEtJWpv0Iz6DY6+TjnyTV5pWg==
@@ -3573,7 +3573,7 @@
     "@opentelemetry/sdk-trace-base" "1.24.1"
     semver "^7.5.2"
 
-"@opentelemetry/sdk-trace-web@1.24.1", "@opentelemetry/sdk-trace-web@^1.15.0", "@opentelemetry/sdk-trace-web@^1.8.0":
+"@opentelemetry/sdk-trace-web@1.24.1", "@opentelemetry/sdk-trace-web@^1.15.0", "@opentelemetry/sdk-trace-web@^1.8.0", "@opentelemetry/sdk-trace-web@~1.24.1":
   version "1.24.1"
   resolved "https://registry.yarnpkg.com/@opentelemetry/sdk-trace-web/-/sdk-trace-web-1.24.1.tgz#bcc2e750242757f07f95588759e106914b33c84e"
   integrity sha512-0w+aKRai9VREeo3VrtW+hcbrE2Fl/uKL7G+oXgRNf6pI9QLaEGuEzUTX+oxXVPBadzjOd+5dqCHYdX7UeVjzwA==
@@ -3581,15 +3581,6 @@
     "@opentelemetry/core" "1.24.1"
     "@opentelemetry/sdk-trace-base" "1.24.1"
     "@opentelemetry/semantic-conventions" "1.24.1"
-
-"@opentelemetry/sdk-trace-web@^1.24.1":
-  version "1.25.0"
-  resolved "https://registry.yarnpkg.com/@opentelemetry/sdk-trace-web/-/sdk-trace-web-1.25.0.tgz#26774de24d7a3a5da8692938f834a63dabdc3f41"
-  integrity sha512-TAWRDRiVOeliE1A99z8idWb4pwEKKY9Vj5aTpLtrF4cvPOl0mPg3ZczvOw/HnpfRsWY0Ra/J3vS5uFSpoqPwEA==
-  dependencies:
-    "@opentelemetry/core" "1.25.0"
-    "@opentelemetry/sdk-trace-base" "1.25.0"
-    "@opentelemetry/semantic-conventions" "1.25.0"
 
 "@opentelemetry/semantic-conventions@1.24.1", "@opentelemetry/semantic-conventions@^1.0.0", "@opentelemetry/semantic-conventions@^1.22.0", "@opentelemetry/semantic-conventions@^1.24.1", "@opentelemetry/semantic-conventions@~1.24.0":
   version "1.24.1"
@@ -3936,6 +3927,7 @@
     tslib "^1.9.3"
 
 "@sentry/types-v7@npm:@sentry/types@7.x", "@sentry/types@7.116.0":
+  name "@sentry/types-v7"
   version "7.116.0"
   resolved "https://registry.yarnpkg.com/@sentry/types/-/types-7.116.0.tgz#0be3434e7e53c86db4993e668af1c3a65bfb7519"
   integrity sha512-QCCvG5QuQrwgKzV11lolNQPP2k67Q6HHD9vllZ/C4dkxkjoIym8Gy+1OgAN3wjsR0f/kG9o5iZyglgNpUVRapQ==
