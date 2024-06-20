@@ -114,7 +114,10 @@ export class HyperDXErrorInstrumentation extends InstrumentationBase {
     );
     span.setAttribute('error.message', limitLen(msg, MESSAGE_LIMIT));
     addStackIfUseful(span, err);
-    recordException(err, {}, this.tracer, span).finally(() => {
+    recordException(err, {
+      tracer: this.tracer,
+      span,
+    }).finally(() => {
       span.end(now);
     });
   }
@@ -137,7 +140,10 @@ export class HyperDXErrorInstrumentation extends InstrumentationBase {
     if (firstError) {
       addStackIfUseful(span, firstError);
       // FIXME: record only the first error?
-      recordException(firstError, {}, this.tracer, span).finally(() => {
+      recordException(firstError, {
+        tracer: this.tracer,
+        span,
+      }).finally(() => {
         span.end(now);
       });
     } else {
@@ -169,7 +175,10 @@ export class HyperDXErrorInstrumentation extends InstrumentationBase {
       span.setAttribute('target_xpath', getElementXPath(ev.target, true));
       span.setAttribute('target_src', (ev.target as any).src);
     }
-    recordException(ev, {}, this.tracer, span).finally(() => {
+    recordException(ev, {
+      tracer: this.tracer,
+      span,
+    }).finally(() => {
       span.end(now);
     });
   }
