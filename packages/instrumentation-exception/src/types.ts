@@ -12,6 +12,9 @@ export interface EventCustomAttributeFunction {
  * Options available for the Exception Instrumentation (see [documentation]())
  */
 export interface ExceptionInstrumentationConfig extends InstrumentationConfig {
+  // INTERNAL ONLY
+  _internalForceFlush?: () => Promise<void>;
+
   /**
    * Controls if the SDK should register a handler to exit the process on uncaught errors:
    * - `true`: The SDK will exit the process on all uncaught errors.

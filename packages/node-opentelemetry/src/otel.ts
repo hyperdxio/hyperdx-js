@@ -318,7 +318,13 @@ export const initSDK = (config: SDKConfig) => {
     ...(defaultSentryIntegrationEnabled
       ? [new SentryNodeInstrumentation()]
       : []),
-    ...(defaultExceptionCapture ? [new ExceptionInstrumentation()] : []),
+    ...(defaultExceptionCapture
+      ? [
+          new ExceptionInstrumentation({
+            _internalForceFlush: shutdown,
+          }),
+        ]
+      : []),
     ...(config.additionalInstrumentations ?? []),
   ];
 
