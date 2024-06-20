@@ -3,6 +3,7 @@
   "version": "0.16.2-next.0",
   "description": "HyperDX distribution OpenTelemetry-based session recording",
   "scripts": {
+    "prebuild": "npm run postversion",
     "build": "npm-run-all -s compile:*",
     "compile": "npm-run-all -s compile:*",
     "compile:browser": "rollup -c",
@@ -10,6 +11,7 @@
     "otlp:compile": "npm-run-all otlp:compile:pbjs otlp:compile:pbts",
     "otlp:compile:pbjs": "pbjs -t static-module -w es6 --no-comments -o src/LogsProto.js --force-number opentelemetry-proto/opentelemetry/proto/common/v1/common.proto opentelemetry-proto/opentelemetry/proto/resource/v1/resource.proto opentelemetry-proto/opentelemetry/proto/logs/v1/logs.proto",
     "otlp:compile:pbts": "pbjs -t static-module --force-number opentelemetry-proto/opentelemetry/proto/common/v1/common.proto opentelemetry-proto/opentelemetry/proto/resource/v1/resource.proto opentelemetry-proto/opentelemetry/proto/logs/v1/logs.proto | pbts -o src/LogsProto.d.ts -",
+    "postversion": "node ./scripts/version-update.mjs",
     "protoc": "protoc --plugin=../../node_modules/.bin/protoc-gen-ts_proto  --ts_proto_opt=useOptionals=all --ts_proto_opt= --ts_proto_out=./src opentelemetry-proto/opentelemetry/proto/logs/v1/logs.proto --proto_path=./opentelemetry-proto --ts_proto_opt=forceLong=number --ts_proto_opt=esModuleInterop=true",
     "test": "jest"
   },

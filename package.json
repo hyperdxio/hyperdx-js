@@ -13,6 +13,7 @@
     "ci:build": "npx nx run-many --target=build",
     "ci:unit": "npx nx run-many --target=ci:unit",
     "ci:lint": "npx nx run-many --target=ci:lint",
+    "version": "changeset version && npx nx run-many --target=postversion",
     "release": "npx nx run-many --target=build && yarn changeset publish && git push --follow-tags",
     "prepare": "husky install"
   },
