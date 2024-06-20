@@ -1,5 +1,14 @@
 # @hyperdx/otel-web-session-recorder
 
+## 0.16.2-next.1
+
+### Patch Changes
+
+- 398e858: feat: scripts to bump otel-web + session-recorder versions
+- Updated dependencies [7ec128c]
+- Updated dependencies [398e858]
+  - @hyperdx/otel-web@0.16.2-next.2
+
 ## 0.16.2-next.0
 
 ### Patch Changes

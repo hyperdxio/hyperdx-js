@@ -1,5 +1,16 @@
 # @hyperdx/browser
 
+## 0.21.0-next.5
+
+### Patch Changes
+
+- 7ec128c: style: move 'tracer', 'span', 'attributes' args to hint (recordException method)
+- 398e858: feat: scripts to bump otel-web + session-recorder versions
+- Updated dependencies [7ec128c]
+- Updated dependencies [398e858]
+  - @hyperdx/otel-web@0.16.2-next.2
+  - @hyperdx/otel-web-session-recorder@0.16.2-next.1
+
 ## 0.21.0-next.4
 
 ### Patch Changes

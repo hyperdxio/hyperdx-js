@@ -1,5 +1,13 @@
 # @hyperdx/node-opentelemetry
 
+## 0.8.0-next.13
+
+### Patch Changes
+
+- 7ec128c: style: move 'tracer', 'span', 'attributes' args to hint (recordException method)
+- Updated dependencies [7ec128c]
+  - @hyperdx/instrumentation-exception@0.1.0-next.11
+
 ## 0.8.0-next.12
 
 ### Patch Changes

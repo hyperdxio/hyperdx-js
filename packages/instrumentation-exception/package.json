@@ -2,7 +2,7 @@
   "name": "@hyperdx/instrumentation-exception",
   "author": "Warren <warren@users.noreply.github.com>",
   "license": "Apache-2.0",
-  "version": "0.1.0-next.10",
+  "version": "0.1.0-next.11",
   "homepage": "https://www.hyperdx.io",
   "repository": {
     "type": "git",

@@ -1,6 +1,6 @@
 {
   "name": "@hyperdx/otel-web-session-recorder",
-  "version": "0.16.2-next.0",
+  "version": "0.16.2-next.1",
   "description": "HyperDX distribution OpenTelemetry-based session recording",
   "scripts": {
     "prebuild": "npm run postversion",
@@ -45,7 +45,7 @@
     "type-fest": "4.20.1"
   },
   "peerDependencies": {
-    "@hyperdx/otel-web": "^0.16.2-next.0"
+    "@hyperdx/otel-web": "^0.16.2-next.2"
   },
   "devDependencies": {
     "@babel/plugin-transform-runtime": "^7.19.1",

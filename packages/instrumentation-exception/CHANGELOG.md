@@ -1,5 +1,11 @@
 # @hyperdx/instrumentation-exception
 
+## 0.1.0-next.11
+
+### Patch Changes
+
+- 7ec128c: style: move 'tracer', 'span', 'attributes' args to hint (recordException method)
+
 ## 0.1.0-next.10
 
 ### Patch Changes
