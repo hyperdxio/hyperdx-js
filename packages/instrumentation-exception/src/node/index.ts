@@ -85,18 +85,23 @@ export const buildEventFromException = async (
 
 export const recordException = async (
   e: any,
-  hint?: EventHint,
-  tracer?: Tracer,
-  span?: Span,
-  attributes?: Attributes,
+  hint?: EventHint & {
+    tracer?: Tracer;
+    span?: Span;
+    attributes?: Attributes;
+  },
 ) => {
-  const _hint = hint ?? {
-    mechanism: {
-      type: 'generic',
-      handled: true,
-    },
-  };
   try {
+    const { tracer, span, attributes, ...eventHint } = hint ?? {};
+    const _hint =
+      Object.keys(eventHint).length > 0
+        ? eventHint
+        : {
+            mechanism: {
+              type: 'generic',
+              handled: true,
+            },
+          };
     const _eventProcessor = getEventProcessor(tracer ?? defaultTracer);
     const event = await buildEventFromException(e, {
       data: _hint,

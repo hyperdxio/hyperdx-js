@@ -710,7 +710,10 @@ export const Rum: RumOtelWebType = {
       return;
     }
     const tracer = this.provider.getTracer('record-exception');
-    _recordException(error, undefined, tracer, undefined, attributes);
+    return _recordException(error, {
+      tracer,
+      attributes,
+    });
   },
 
   error(...args) {
