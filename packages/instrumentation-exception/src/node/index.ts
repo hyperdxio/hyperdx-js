@@ -85,10 +85,11 @@ export const buildEventFromException = async (
 
 export const recordException = async (
   e: any,
-  hint?: EventHint,
-  tracer?: Tracer,
-  span?: Span,
-  attributes?: Attributes,
+  hint?: EventHint & {
+    tracer?: Tracer;
+    span?: Span;
+    attributes?: Attributes;
+  },
 ) => {
   const _hint = hint ?? {
     mechanism: {
@@ -96,12 +97,15 @@ export const recordException = async (
       handled: true,
     },
   };
+
+  const { tracer, span, attributes, ...eventHint } = _hint;
+
   try {
     const _eventProcessor = getEventProcessor(tracer ?? defaultTracer);
     const event = await buildEventFromException(e, {
-      data: _hint,
+      data: eventHint,
     });
-    _eventProcessor(event, _hint, span, attributes);
+    _eventProcessor(event, eventHint, span, attributes);
   } catch (err) {
     diag.error('Failed to capture exception', err);
   }
