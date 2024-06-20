@@ -91,21 +91,23 @@ export const recordException = async (
     attributes?: Attributes;
   },
 ) => {
-  const _hint = hint ?? {
-    mechanism: {
-      type: 'generic',
-      handled: true,
-    },
-  };
-
-  const { tracer, span, attributes, ...eventHint } = _hint;
+  const { tracer, span, attributes, ...eventHint } = hint ?? {};
+  const _hint =
+    Object.keys(eventHint).length > 0
+      ? eventHint
+      : {
+          mechanism: {
+            type: 'generic',
+            handled: true,
+          },
+        };
 
   try {
     const _eventProcessor = getEventProcessor(tracer ?? defaultTracer);
     const event = await buildEventFromException(e, {
-      data: eventHint,
+      data: _hint,
     });
-    _eventProcessor(event, eventHint, span, attributes);
+    _eventProcessor(event, _hint, span, attributes);
   } catch (err) {
     diag.error('Failed to capture exception', err);
   }
