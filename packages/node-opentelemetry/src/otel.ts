@@ -12,6 +12,7 @@ import { SentryNodeInstrumentation } from '@hyperdx/instrumentation-sentry-node'
 import {
   InstrumentationBase,
   Instrumentation,
+  registerInstrumentations,
   InstrumentationModuleDefinition,
 } from '@opentelemetry/instrumentation';
 import { NodeSDK } from '@opentelemetry/sdk-node';
@@ -425,6 +426,9 @@ export const initSDK = (config: SDKConfig) => {
       const modules = (instrumentation as any)
         ._modules as InstrumentationModuleDefinition[];
       if (Array.isArray(modules)) {
+        // disable first before re-patching
+        instrumentation.disable();
+
         for (const module of modules) {
           // re-require moduleExports
           if (getModuleId(module.name)) {
