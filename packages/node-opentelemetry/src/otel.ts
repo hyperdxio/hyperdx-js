@@ -228,14 +228,12 @@ export const initSDK = (config: SDKConfig) => {
   //--------------------------------------------------
   // ------------------- LOGGER ----------------------
   //--------------------------------------------------
-  let _t = process.hrtime();
   ui.text = 'Initializing OpenTelemetry Logger...';
   const _logger = new OtelLogger({
     detectResources: defaultDetectResources,
     service: defaultServiceName,
   });
-  const t0 = process.hrtime(_t);
-  ui.succeed(`Initialized OpenTelemetry Logger in ${hrtimeToMs(t0)} ms`);
+  ui.succeed('Initialized OpenTelemetry Logger');
   //--------------------------------------------------
 
   // Health check
@@ -318,7 +316,13 @@ export const initSDK = (config: SDKConfig) => {
     ...(defaultSentryIntegrationEnabled
       ? [new SentryNodeInstrumentation()]
       : []),
-    ...(defaultExceptionCapture ? [new ExceptionInstrumentation()] : []),
+    ...(defaultExceptionCapture
+      ? [
+          new ExceptionInstrumentation({
+            _internalForceFlush: shutdown,
+          }),
+        ]
+      : []),
     ...(config.additionalInstrumentations ?? []),
   ];
 
@@ -350,8 +354,7 @@ export const initSDK = (config: SDKConfig) => {
     contextManager: contextManager,
   });
 
-  const t1 = process.hrtime(_t);
-  ui.succeed(`Initialized instrumentations packages in ${hrtimeToMs(t1)} ms`);
+  ui.succeed('Initialized instrumentations packages');
 
   if (defaultEnableInternalProfiling) {
     ui.text = 'Enabling internal profiling...';
@@ -412,14 +415,11 @@ export const initSDK = (config: SDKConfig) => {
     }
   }
 
-  _t = process.hrtime();
   ui.text = 'Starting OpenTelemetry Node SDK...';
   sdk.start();
-  const t2 = process.hrtime(_t);
-  ui.succeed(`Started OpenTelemetry Node SDK in ${hrtimeToMs(t2)} ms`);
+  ui.succeed('Started OpenTelemetry Node SDK');
 
   if (config.programmaticImports) {
-    _t = process.hrtime();
     ui.text = 'Repatching instrumentation packages...';
     for (const instrumentation of allInstrumentations) {
       const modules = (instrumentation as any)
@@ -523,8 +523,7 @@ export const initSDK = (config: SDKConfig) => {
         }
       }
     }
-    const t3 = process.hrtime(_t);
-    ui.succeed(`Repatched instrumentation packages in ${hrtimeToMs(t3)} ms`);
+    ui.succeed('Repatched instrumentation packages');
   }
 
   function handleTerminationSignal(signal: string) {

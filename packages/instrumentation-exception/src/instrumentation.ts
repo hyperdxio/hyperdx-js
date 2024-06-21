@@ -62,14 +62,15 @@ export class ExceptionInstrumentation extends InstrumentationBase {
 
   override enable() {
     const config = this.getConfig();
+    const ff = config._internalForceFlush ?? this.forceFlush;
     onUncaughtExceptionIntegration({
       exitEvenIfOtherHandlersAreRegistered:
         config.exitEvenIfOtherHandlersAreRegistered,
-      forceFlush: () => this.forceFlush(),
+      forceFlush: () => ff(),
     }).setup({} as any);
     onUnhandledRejectionIntegration({
       mode: config.unhandledRejectionMode,
-      forceFlush: () => this.forceFlush(),
+      forceFlush: () => ff(),
     }).setup({} as any);
   }
 
