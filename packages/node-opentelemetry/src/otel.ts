@@ -11,8 +11,6 @@ import { RuntimeNodeInstrumentation } from '@opentelemetry/instrumentation-runti
 import { SentryNodeInstrumentation } from '@hyperdx/instrumentation-sentry-node';
 import {
   InstrumentationBase,
-  Instrumentation,
-  registerInstrumentations,
   InstrumentationModuleDefinition,
 } from '@opentelemetry/instrumentation';
 import { NodeSDK } from '@opentelemetry/sdk-node';
