@@ -346,7 +346,7 @@ export const initSDK = (config: SDKConfig) => {
             }),
           ]),
     ],
-    instrumentations: allInstrumentations,
+    instrumentations: config.programmaticImports ? [] : allInstrumentations,
     contextManager: contextManager,
   });
 
@@ -425,9 +425,6 @@ export const initSDK = (config: SDKConfig) => {
       const modules = (instrumentation as any)
         ._modules as InstrumentationModuleDefinition[];
       if (Array.isArray(modules)) {
-        // disable first before re-patching
-        instrumentation.disable();
-
         for (const module of modules) {
           // re-require moduleExports
           if (getModuleId(module.name)) {
