@@ -12,7 +12,7 @@ export interface EventCustomAttributeFunction {
  * Options available for the Exception Instrumentation (see [documentation]())
  */
 export interface ExceptionInstrumentationConfig extends InstrumentationConfig {
-  // INTERNAL ONLY
+  // INTERNAL USE ONLY
   _internalForceFlush?: () => Promise<void>;
 
   /**
