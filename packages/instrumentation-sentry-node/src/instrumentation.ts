@@ -27,7 +27,7 @@ export class SentryNodeInstrumentation extends InstrumentationBase {
     return [
       new InstrumentationNodeModuleDefinition(
         '@sentry/node',
-        ['^7.0.0', '^8.0.0'],
+        ['>=7.30.0 <9'],
         (moduleExports: typeof Sentry) => {
           diag.debug(
             `Detected Sentry installed with SDK version: ${moduleExports.SDK_VERSION}`,
