@@ -15,7 +15,7 @@ npm install --save @hyperdx/instrumentation-sentry-node
 
 ### Supported Versions
 
-- `>=7 <9`
+- `>=7.30.0 <9`
 
 ## Usage
 

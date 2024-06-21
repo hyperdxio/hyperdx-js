@@ -11,7 +11,6 @@ import { RuntimeNodeInstrumentation } from '@opentelemetry/instrumentation-runti
 import { SentryNodeInstrumentation } from '@hyperdx/instrumentation-sentry-node';
 import {
   InstrumentationBase,
-  Instrumentation,
   InstrumentationModuleDefinition,
 } from '@opentelemetry/instrumentation';
 import { NodeSDK } from '@opentelemetry/sdk-node';
@@ -350,7 +349,7 @@ export const initSDK = (config: SDKConfig) => {
             }),
           ]),
     ],
-    instrumentations: allInstrumentations,
+    instrumentations: config.programmaticImports ? [] : allInstrumentations,
     contextManager: contextManager,
   });
 
