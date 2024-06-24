@@ -7,7 +7,7 @@ HyperDX.init({
 });
 
 // Crash immediately
-coleiscool();
+har();
 
 // unhandledRejection
 // new Promise((resolve, reject) => {

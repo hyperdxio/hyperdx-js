@@ -73,6 +73,7 @@ export function makeErrorHandler(
 
   return Object.assign(
     (error: Error): void => {
+      // stdout the original error to keep the user informed
       consoleSandbox(() => {
         console.error(error);
       });
