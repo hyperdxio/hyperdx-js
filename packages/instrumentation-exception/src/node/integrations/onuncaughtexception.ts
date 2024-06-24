@@ -1,4 +1,3 @@
-import { consoleSandbox } from '@sentry/utils';
 import { defineIntegration } from '@sentry/core';
 import { diag } from '@opentelemetry/api';
 
