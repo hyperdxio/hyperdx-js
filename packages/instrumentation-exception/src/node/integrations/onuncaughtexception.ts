@@ -58,7 +58,7 @@ export const onUncaughtExceptionIntegration = defineIntegration(
   },
 );
 
-type ErrorHandler = { _errorHandler: boolean } & ((error: Error) => void);
+type ErrorHandler = { _hdxErrorHandler: boolean } & ((error: Error) => void);
 
 /** Exported only for tests */
 export function makeErrorHandler(
@@ -87,7 +87,7 @@ export function makeErrorHandler(
           // as soon as we're using domains this listener is attached by node itself
           listener.name !== 'domainUncaughtExceptionClear' &&
           // the handler we register in this integration
-          (listener as ErrorHandler)._errorHandler !== true
+          (listener as ErrorHandler)._hdxErrorHandler !== true
         );
       }).length;
 
@@ -156,6 +156,6 @@ export function makeErrorHandler(
         }
       }
     },
-    { _errorHandler: true },
+    { _hdxErrorHandler: true },
   );
 }
