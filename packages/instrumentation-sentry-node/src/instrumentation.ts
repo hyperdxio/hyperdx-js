@@ -35,9 +35,13 @@ export class SentryNodeInstrumentation extends InstrumentationBase {
           this._wrap(moduleExports, 'init', (original: any) => {
             return (...args: any[]) => {
               const result = original.apply(this, args);
-              // WARNING: we need to add the integration once the SDK is initialized
-              moduleExports.addIntegration(hyperdxIntegration());
-              diag.debug('Added HyperDX Sentry integration.');
+              if (moduleExports.addIntegration instanceof Function) {
+                // WARNING: we need to add the integration once the SDK is initialized
+                moduleExports.addIntegration(hyperdxIntegration());
+                diag.debug('Added HyperDX Sentry integration.');
+              } else {
+                diag.error('Could not add HyperDX Sentry integration');
+              }
               return result;
             };
           });
