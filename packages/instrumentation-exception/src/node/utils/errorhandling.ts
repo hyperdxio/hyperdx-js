@@ -1,3 +1,4 @@
+import { consoleSandbox } from '@sentry/utils';
 import { diag } from '@opentelemetry/api';
 
 const DEFAULT_SHUTDOWN_TIMEOUT = 2000;
@@ -21,7 +22,10 @@ export async function logAndExitProcess(
   error: Error,
   forceFlush: () => Promise<void>,
 ): Promise<void> {
-  diag.error('Exiting process due to fatal error', error);
+  consoleSandbox(() => {
+    // eslint-disable-next-line no-console
+    console.error(error);
+  });
 
   try {
     await Promise.race([
