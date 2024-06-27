@@ -71,11 +71,10 @@ export const getMixinFunction = () => {
   if (!isSpanContextValid(spanContext)) {
     return {};
   }
-  const logKeys = DEFAULT_LOG_KEYS;
   return {
-    [logKeys.traceId]: spanContext.traceId,
-    [logKeys.spanId]: spanContext.spanId,
-    [logKeys.traceFlags]: `0${spanContext.traceFlags.toString(16)}`,
+    [DEFAULT_LOG_KEYS.traceId]: spanContext.traceId,
+    [DEFAULT_LOG_KEYS.spanId]: spanContext.spanId,
+    [DEFAULT_LOG_KEYS.traceFlags]: `0${spanContext.traceFlags.toString(16)}`,
   };
 };
 
