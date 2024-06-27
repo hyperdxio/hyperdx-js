@@ -5,6 +5,7 @@ import {
   DEFAULT_HDX_NODE_BETA_MODE,
   DEFAULT_SERVICE_NAME,
 } from './constants';
+import * as HyperDXPino from './otel-logger/pino';
 import HyperDXWinston from './otel-logger/winston';
 
 import type { HyperDXPinoOptions } from './otel-logger/pino';
@@ -55,11 +56,13 @@ export const getWinstonTransport = (
 // TODO: WILL BE DEPRECATED
 export const getWinsonTransport = getWinstonTransport;
 
+export const getPinoMixinFunction = HyperDXPino.getMixinFunction;
 export const getPinoTransport = (
   maxLevel = 'info',
   options: PinotTransportOptions = {},
 ) => {
   const apiKey = DEFAULT_HDX_API_KEY();
+
   return {
     target: '@hyperdx/node-opentelemetry/build/src/otel-logger/pino',
     options: {
