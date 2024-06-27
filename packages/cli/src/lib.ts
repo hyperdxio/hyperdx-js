@@ -23,8 +23,8 @@ export const uploadSourcemaps = async ({
   releaseId?: string;
 }) => {
   if (!serviceKey || serviceKey === '') {
-    if (process.env.HYPERDX_API_ACCESS_KEY) {
-      serviceKey = process.env.HYPERDX_API_ACCESS_KEY;
+    if (process.env.HYPERDX_SERVICE_KEY) {
+      serviceKey = process.env.HYPERDX_SERVICE_KEY;
     } else {
       throw new Error('service key cannot be empty');
     }
