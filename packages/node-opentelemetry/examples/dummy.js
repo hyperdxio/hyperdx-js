@@ -25,13 +25,13 @@ const mongoose = require('mongoose');
 const mysql = require('mysql');
 const mysql2 = require('mysql2');
 const pg = require('pg');
-const pino = require('pino');
 const winston = require('winston');
+const pino = require('pino');
 
 const HyperDX = require('../build/src');
 
 HyperDX.init({
-  apiKey: 'blabla',
+  apiKey: '',
 });
 
 // setTimeout(() => {
@@ -80,14 +80,15 @@ const logger = winston.createLogger({
   ],
 });
 
-const pinoLogger = pino(
-  pino.transport({
+const pinoLogger = pino({
+  mixin: HyperDX.getPinoMixinFunction,
+  transport: {
     targets: [
       HyperDX.getPinoTransport('info'),
       // other transports
     ],
-  }),
-);
+  },
+});
 
 const bunyanLogger = bunyan.createLogger({ name: 'myapp' });
 

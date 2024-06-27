@@ -1,6 +1,12 @@
 import build from 'pino-abstract-transport';
 import isString from 'lodash.isstring';
-import { Attributes, diag } from '@opentelemetry/api';
+import {
+  Attributes,
+  context,
+  diag,
+  isSpanContextValid,
+  trace,
+} from '@opentelemetry/api';
 
 import { Logger } from './';
 import { jsonToString } from '../utils';
@@ -46,6 +52,30 @@ const PINO_LEVELS = {
 export type HyperDXPinoOptions = LoggerOptions & {
   apiKey?: string;
   getCustomMeta?: () => Attributes;
+};
+
+// https://github.com/open-telemetry/opentelemetry-js-contrib/blob/65bc979f9f04410e9a78b4d546f5e08471c1fb6d/plugins/node/opentelemetry-instrumentation-pino/src/instrumentation.ts#L167C11-L167C30
+const DEFAULT_LOG_KEYS = {
+  traceId: 'trace_id',
+  spanId: 'span_id',
+  traceFlags: 'trace_flags',
+};
+export const getMixinFunction = () => {
+  const span = trace.getSpan(context.active());
+  if (!span) {
+    return {};
+  }
+
+  const spanContext = span.spanContext();
+
+  if (!isSpanContextValid(spanContext)) {
+    return {};
+  }
+  return {
+    [DEFAULT_LOG_KEYS.traceId]: spanContext.traceId,
+    [DEFAULT_LOG_KEYS.spanId]: spanContext.spanId,
+    [DEFAULT_LOG_KEYS.traceFlags]: `0${spanContext.traceFlags.toString(16)}`,
+  };
 };
 
 export default async ({
