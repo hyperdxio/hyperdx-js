@@ -25,7 +25,7 @@ configure your logging module.
 
 ```ts
 import winston from 'winston';
-import { getWinstonTransport } from '@hyperdx/node-opentelemetry';
+import * as HyperDX from '@hyperdx/node-opentelemetry';
 
 const MAX_LEVEL = 'info';
 
@@ -34,7 +34,7 @@ const logger = winston.createLogger({
   format: winston.format.json(),
   transports: [
     new winston.transports.Console(),
-    getWinstonTransport(MAX_LEVEL), // append this to the existing transports
+    HyperDX.getWinstonTransport(MAX_LEVEL), // append this to the existing transports
   ],
 });
 
@@ -45,18 +45,21 @@ export default logger;
 
 ```ts
 import pino from 'pino';
-import { getPinoTransport } from '@hyperdx/node-opentelemetry';
+import * as HyperDX from '@hyperdx/node-opentelemetry';
 
 const MAX_LEVEL = 'info';
 
-const logger = pino(
-  pino.transport({
+const logger = pino({
+  mixin: HyperDX.getPinoMixinFunction,
+  transport: {
     targets: [
-      getPinoTransport(MAX_LEVEL),
+      HyperDX.getPinoTransport(MAX_LEVEL),
       // other transports
     ],
-  }),
-);
+  },
+});
+
+export default logger;
 ```
 
 ### Configure Environment Variables
