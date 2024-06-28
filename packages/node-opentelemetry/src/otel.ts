@@ -612,8 +612,8 @@ export const initSDK = (config: SDKConfig) => {
 
   if (DEFAULT_HDX_STARTUP_LOGS) {
     setTimeout(() => {
-      const _targetUrl = `https://hyperdx.io/search?q=${encodeURIComponent(
-        `service:"${defaultServiceName}"`,
+      const _targetUrl = `https://www.hyperdx.io/services?service=${encodeURIComponent(
+        defaultServiceName,
       )}`;
       ui.info(`
 
