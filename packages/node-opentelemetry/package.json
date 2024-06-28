@@ -2,7 +2,7 @@
   "name": "@hyperdx/node-opentelemetry",
   "author": "Warren <warren@users.noreply.github.com>",
   "license": "MIT",
-  "version": "0.8.0-next.13",
+  "version": "0.8.0-next.14",
   "homepage": "https://www.hyperdx.io",
   "repository": {
     "type": "git",
@@ -32,8 +32,8 @@
     "prettier": "prettier --config .prettierrc --write ."
   },
   "dependencies": {
-    "@hyperdx/instrumentation-exception": "^0.1.0-next.11",
-    "@hyperdx/instrumentation-sentry-node": "^0.1.0-next.7",
+    "@hyperdx/instrumentation-exception": "^0.1.0-next.12",
+    "@hyperdx/instrumentation-sentry-node": "^0.1.0-next.8",
     "@opentelemetry/api": "^1.8.0",
     "@opentelemetry/api-logs": "^0.51.1",
     "@opentelemetry/auto-instrumentations-node": "^0.46.1",

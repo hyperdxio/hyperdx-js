@@ -1,5 +1,12 @@
 # @hyperdx/instrumentation-sentry-node
 
+## 0.1.0-next.8
+
+### Patch Changes
+
+- 6b6ddd2: fix: sentry node instrumentation version support
+- 1b37576: fix: check if addIntegration method exists
+
 ## 0.1.0-next.7
 
 ### Patch Changes

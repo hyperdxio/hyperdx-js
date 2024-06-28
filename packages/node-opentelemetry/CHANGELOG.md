@@ -1,5 +1,23 @@
 # @hyperdx/node-opentelemetry
 
+## 0.8.0-next.14
+
+### Patch Changes
+
+- 6b6ddd2: fix: sdk double patching issue
+- d332c32: fix: console log uncaught exceptions
+- f7183db: fix: rename onuncaughtexception error handler internal tag
+- 1b37576: fix: check if addIntegration method exists
+- 73a7d84: fix: sdk shutdown exception flushing issue
+- f84fd61: fix: introduce pino mixin function to handle trace/span id injection issue
+- Updated dependencies [6b6ddd2]
+- Updated dependencies [d332c32]
+- Updated dependencies [f7183db]
+- Updated dependencies [1b37576]
+- Updated dependencies [73a7d84]
+  - @hyperdx/instrumentation-sentry-node@0.1.0-next.8
+  - @hyperdx/instrumentation-exception@0.1.0-next.12
+
 ## 0.8.0-next.13
 
 ### Patch Changes
