@@ -32,6 +32,7 @@ const HyperDX = require('../build/src');
 
 HyperDX.init({
   apiKey: '',
+  disableStartupLogs: true,
 });
 
 // setTimeout(() => {

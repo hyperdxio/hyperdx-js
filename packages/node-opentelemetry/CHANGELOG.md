@@ -1,5 +1,12 @@
 # @hyperdx/node-opentelemetry
 
+## 0.8.0-next.15
+
+### Patch Changes
+
+- 84612d5: feat: add disableStartupLogs flag
+- c7ea13c: fix: show service health dashboard URL
+
 ## 0.8.0-next.14
 
 ### Patch Changes
