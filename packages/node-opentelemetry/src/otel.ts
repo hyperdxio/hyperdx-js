@@ -65,6 +65,7 @@ export type SDKConfig = {
   detectResources?: boolean;
   disableLogs?: boolean;
   disableMetrics?: boolean;
+  disableStartupLogs?: boolean;
   disableTracing?: boolean;
   enableInternalProfiling?: boolean;
   experimentalExceptionCapture?: boolean;
@@ -168,8 +169,11 @@ const healthCheckUrl = async (
 };
 
 export const initSDK = (config: SDKConfig) => {
+  const defaultDisableStartupLogs =
+    config.disableStartupLogs ?? !DEFAULT_HDX_STARTUP_LOGS;
+
   const ui = ora({
-    isSilent: !DEFAULT_HDX_STARTUP_LOGS,
+    isSilent: defaultDisableStartupLogs,
     prefixText: UI_LOG_PREFIX,
     spinner: cliSpinners.dots,
     text: 'Initializing OpenTelemetry SDK...',
@@ -610,7 +614,7 @@ export const initSDK = (config: SDKConfig) => {
     symbol: '🦄',
   });
 
-  if (DEFAULT_HDX_STARTUP_LOGS) {
+  if (!defaultDisableStartupLogs) {
     setTimeout(() => {
       const _targetUrl = `https://www.hyperdx.io/services?service=${encodeURIComponent(
         defaultServiceName,
@@ -655,7 +659,6 @@ export const init = (config?: Omit<SDKConfig, 'programmaticImports'>) =>
 
 const _shutdown = () => {
   const ui = ora({
-    isSilent: !DEFAULT_HDX_STARTUP_LOGS,
     spinner: cliSpinners.dots,
     text: 'Shutting down OpenTelemetry SDK...',
   }).start();
