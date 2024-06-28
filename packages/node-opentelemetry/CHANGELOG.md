@@ -1,5 +1,81 @@
 # @hyperdx/node-opentelemetry
 
+## 0.8.0
+
+### Minor Changes
+
+- f7cb5f9: feat: introduce exception capture - BETA
+- 1092fca: style: deprecate hyperdx debug flag
+
+### Patch Changes
+
+- a574521: style: rename 'serviceName' to 'service'
+- c7e012c: chore: bump pino-abstract-transport to v1.2.0
+- 133dfd7: dx: init sdk programmatically - pt1
+- 67a3a56: fix: read api key before init call (logger transports)
+- 24a581e: feat: config logger
+- 6b6ddd2: fix: sdk double patching issue
+- 8a46140: feat: expose getEventProcessor api
+- 70c8508: fix: revert browser error span changes + remove sentry.version semantic attribute
+- 6b82cb1: feat: introduce internal profiling
+- 7ec128c: style: move 'tracer', 'span', 'attributes' args to hint (recordException method)
+- 1c956d4: fix: missing stacktrace context bug
+- 7ce9e08: feat: add more exception tags
+- 84612d5: feat: add disableStartupLogs flag
+- d515c5a: fix: exception mechanism override bug
+- 8125482: feat: introduce init func for programmatic imports
+- 5614cc4: fix: remove sentry/core dep
+- 606dd8e: chore: bump otel core to v1.24.1 + semantic-conventions to v1.24.1
+- c8ecaea: fix: enable strictNullChecks
+- d332c32: fix: console log uncaught exceptions
+- 242afb2: fix: attach trace attributes onStart of span as well, dont overwrite attributes
+- c7ea13c: fix: show service health dashboard URL
+- f7183db: fix: rename onuncaughtexception error handler internal tag
+- 1b37576: fix: check if addIntegration method exists
+- ec4c4bb: fix: load api key and service name dynamically
+- aee31d1: style: use HyperDXSpanProcessor
+- 73a7d84: fix: sdk shutdown exception flushing issue
+- 24dfee2: feat: Add mutable context manager for setTraceAttributes
+- f84fd61: fix: introduce pino mixin function to handle trace/span id injection issue
+- 93da1df: feat: import @hyperdx/instrumentation-exception pkg
+- 34bb72b: fix: support sentry node v8
+- 52dca89: fix: introduce exception.parsed_stacktrace semattr
+- 24a581e: feat: improve CLI UI
+- 7c9bd6a: feat: add instrumentation-exception pkg to node-opentelemetry
+- 511a488: feat: install @hyperdx/instrumentation-sentry-node
+- f47620f: feat: instrument console in the otel way
+- Updated dependencies [a574521]
+- Updated dependencies [5f6af95]
+- Updated dependencies [a93c519]
+- Updated dependencies [8a46140]
+- Updated dependencies [70c8508]
+- Updated dependencies [feb4ef1]
+- Updated dependencies [7ec128c]
+- Updated dependencies [535410c]
+- Updated dependencies [52dca89]
+- Updated dependencies [1c956d4]
+- Updated dependencies [eb04eb3]
+- Updated dependencies [d515c5a]
+- Updated dependencies [93da1df]
+- Updated dependencies [5614cc4]
+- Updated dependencies [606dd8e]
+- Updated dependencies [6b6ddd2]
+- Updated dependencies [feb4ef1]
+- Updated dependencies [d332c32]
+- Updated dependencies [eb04eb3]
+- Updated dependencies [f7183db]
+- Updated dependencies [a574521]
+- Updated dependencies [1b37576]
+- Updated dependencies [73a7d84]
+- Updated dependencies [e582ad1]
+- Updated dependencies [c05e520]
+- Updated dependencies [3bca092]
+- Updated dependencies [52dca89]
+- Updated dependencies [e9f867f]
+- Updated dependencies [e36309d]
+  - @hyperdx/instrumentation-exception@0.1.0
+  - @hyperdx/instrumentation-sentry-node@0.1.0
+
 ## 0.8.0-next.15
 
 ### Patch Changes
