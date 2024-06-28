@@ -5,7 +5,7 @@
 In your build pipeline, you will need to run the CLI tool. Here's how to run it:
 
 ```sh
-npx @hyperdx/cli upload-sourcemaps --path="/path/to/sourcemaps" --apiKey="your-api-key"
+npx @hyperdx/cli upload-sourcemaps --path="/path/to/sourcemaps" --serviceKey="your-service-account-api-key"
 ```
 
 You can also add this as an npm script
@@ -20,7 +20,7 @@ You can also add this as an npm script
 }
 ```
 
-Optionally, you can set the `HYPERDX_API_ACCESS_KEY` environment variable to avoid passing the `apiKey` flag.
+Optionally, you can set the `HYPERDX_SERVICE_KEY` environment variable to avoid passing the `serviceKey` flag.
 
 ## Contributing
 
