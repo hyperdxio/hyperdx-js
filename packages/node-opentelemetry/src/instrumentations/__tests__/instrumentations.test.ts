@@ -1,11 +1,11 @@
 import { PassThrough, Readable } from 'stream';
 
-import { _parseConsoleArgs } from '../src/instrumentations/console';
+import { _parseConsoleArgs } from '../console';
 import {
   getShouldRecordBody,
   interceptReadableStream,
   splitCommaSeparatedStrings,
-} from '../src/instrumentations/http';
+} from '../http';
 
 describe('instrumentations', () => {
   describe('console', () => {

@@ -5,11 +5,10 @@ import {
   DEFAULT_HDX_NODE_BETA_MODE,
   DEFAULT_SERVICE_NAME,
 } from './constants';
-import * as HyperDXPino from './otel-logger/pino';
-import HyperDXWinston from './otel-logger/winston';
-
 import type { HyperDXPinoOptions } from './otel-logger/pino';
+import * as HyperDXPino from './otel-logger/pino';
 import type { HyperDXWinstonOptions } from './otel-logger/winston';
+import HyperDXWinston from './otel-logger/winston';
 
 type WinstonTransportOptions = Omit<
   HyperDXWinstonOptions,

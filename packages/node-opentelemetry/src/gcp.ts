@@ -1,8 +1,8 @@
+import { context, SpanKind, trace } from '@opentelemetry/api';
 import { SemanticAttributes } from '@opentelemetry/semantic-conventions';
-import { SpanKind, context, trace } from '@opentelemetry/api';
 
-import { SDKConfig, initSDK } from './otel';
 import { name as PKG_NAME, version as PKG_VERSION } from '../package.json';
+import { initSDK, SDKConfig } from './otel';
 
 export const registerGCPCloudFunctionEventHandler = (
   handler: (event: any) => Promise<void>,

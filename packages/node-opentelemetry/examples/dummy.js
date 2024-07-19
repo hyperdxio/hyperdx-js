@@ -292,22 +292,30 @@ app.get('/instruments', async (req, res) => {
 });
 
 app.get('/logs', async (req, res) => {
-  console.debug({
+  const nestedObj = {
     headers: req.headers,
     method: req.method,
     url: req.url,
-    query: req.query,
+    nested: [
+      {
+        foo: 'bar',
+      },
+    ],
+    nested2: {
+      nested3: {
+        foo: 'bar',
+      },
+    },
+  };
+  console.error({
+    message: 'Console 🍕',
+    ...nestedObj,
   });
-  console.error('BANG !!!');
-  console.log('Console 🍕');
-  logger.info({
-    message: 'Winston 🍕',
-    headers: req.headers,
-    method: req.method,
-    url: req.url,
+  logger.info('Winston 🍕', nestedObj);
+  pinoLogger.info({
+    message: 'Pino 🍕',
+    ...nestedObj,
   });
-  pinoLogger.info('Pino 🍕');
-
   bunyanLogger.info('Bunyan 🍕');
 
   console.log(await sendGetRequest());
