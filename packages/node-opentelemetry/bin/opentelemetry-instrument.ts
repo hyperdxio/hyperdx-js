@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
-import process from 'process';
 import fs from 'fs';
+import process from 'process';
 import { promisify } from 'util';
 
 const realpath = promisify(fs.realpath);

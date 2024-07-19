@@ -1,22 +1,29 @@
 import { Attributes, diag } from '@opentelemetry/api';
-import { getEnvWithoutDefaults } from '@opentelemetry/core';
 import {
-  BatchLogRecordProcessor,
-  LoggerProvider,
-  NoopLogRecordProcessor,
-} from '@opentelemetry/sdk-logs';
-import { Logger as OtelLogger, logs } from '@opentelemetry/api-logs';
+  LogAttributes,
+  Logger as OtelLogger,
+  logs,
+  SeverityNumber,
+} from '@opentelemetry/api-logs';
+import { getEnvWithoutDefaults } from '@opentelemetry/core';
 import { OTLPLogExporter } from '@opentelemetry/exporter-logs-otlp-http';
 import {
-  Resource,
   detectResourcesSync,
   envDetectorSync,
   hostDetectorSync,
   osDetectorSync,
   processDetector,
+  Resource,
 } from '@opentelemetry/resources';
+import {
+  BatchLogRecordProcessor,
+  LoggerProvider,
+  NoopLogRecordProcessor,
+} from '@opentelemetry/sdk-logs';
 import { SEMRESATTRS_SERVICE_NAME } from '@opentelemetry/semantic-conventions';
+import isPlainObject from 'lodash.isplainobject';
 
+import { version as PKG_VERSION } from '../../package.json';
 import {
   DEFAULT_EXPORTER_BATCH_SIZE,
   DEFAULT_EXPORTER_TIMEOUT_MS,
@@ -25,7 +32,7 @@ import {
   DEFAULT_SEND_INTERVAL_MS,
   DEFAULT_SERVICE_NAME,
 } from '../constants';
-import { version as PKG_VERSION } from '../../package.json';
+import { jsonToString } from '../utils';
 
 const LOG_PREFIX = `⚠️  [LOGGER]`;
 
@@ -39,6 +46,73 @@ export type LoggerOptions = {
   sendIntervalMs?: number;
   service?: string;
   timeout?: number; // The read/write/connection timeout in milliseconds
+};
+
+// https://github.com/open-telemetry/opentelemetry-js-contrib/blob/afccd0d62a0ea81afb8f5609f3ee802c038d11c6/packages/winston-transport/src/utils.ts
+const npmLevels: Record<string, number> = {
+  error: SeverityNumber.ERROR,
+  warn: SeverityNumber.WARN,
+  info: SeverityNumber.INFO,
+  http: SeverityNumber.DEBUG3,
+  verbose: SeverityNumber.DEBUG2,
+  debug: SeverityNumber.DEBUG,
+  silly: SeverityNumber.TRACE,
+};
+
+const sysLoglevels: Record<string, number> = {
+  emerg: SeverityNumber.FATAL3,
+  alert: SeverityNumber.FATAL2,
+  crit: SeverityNumber.FATAL,
+  error: SeverityNumber.ERROR,
+  warning: SeverityNumber.WARN,
+  notice: SeverityNumber.INFO2,
+  info: SeverityNumber.INFO,
+  debug: SeverityNumber.DEBUG,
+};
+
+const cliLevels: Record<string, number> = {
+  error: SeverityNumber.ERROR,
+  warn: SeverityNumber.WARN,
+  help: SeverityNumber.INFO3,
+  data: SeverityNumber.INFO2,
+  info: SeverityNumber.INFO,
+  debug: SeverityNumber.DEBUG,
+  prompt: SeverityNumber.TRACE4,
+  verbose: SeverityNumber.TRACE3,
+  input: SeverityNumber.TRACE2,
+  silly: SeverityNumber.TRACE,
+};
+
+export function getSeverityNumber(level: string): SeverityNumber | undefined {
+  return npmLevels[level] ?? sysLoglevels[level] ?? cliLevels[level];
+}
+
+export const parseLogAttributes = (
+  meta: Record<string, any>,
+): LogAttributes => {
+  try {
+    const attributes: LogAttributes = {};
+    for (const key in meta) {
+      if (Object.prototype.hasOwnProperty.call(meta, key)) {
+        const value = meta[key];
+        // stringify array of objects
+        if (Array.isArray(value)) {
+          const firstItem = value[0];
+          if (isPlainObject(firstItem)) {
+            attributes[key] = jsonToString(value);
+          }
+        }
+
+        if (attributes[key] === undefined) {
+          attributes[key] = value;
+        }
+      }
+    }
+    return attributes;
+  } catch (error) {
+    diag.error(`${LOG_PREFIX} Failed to parse log attributes. e = ${error}`);
+    return meta;
+  }
 };
 
 export class Logger {
@@ -155,15 +229,18 @@ export class Logger {
     return this.processor.forceFlush();
   }
 
-  postMessage(level: string, body: string, attributes: Attributes = {}): void {
+  postMessage(
+    level: string,
+    body: string,
+    meta: Record<string, any> = {},
+  ): void {
     this.logger.emit({
-      // TODO: should map to otel severity number
-      severityNumber: 0,
+      severityNumber: getSeverityNumber(level),
       // TODO: set up the mapping between different downstream log levels
       severityText: level,
       body,
-      attributes,
-      timestamp: this.parseTimestamp(attributes),
+      attributes: parseLogAttributes(meta),
+      timestamp: this.parseTimestamp(meta),
     });
   }
 }

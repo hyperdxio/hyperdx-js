@@ -1,5 +1,3 @@
-import build from 'pino-abstract-transport';
-import isString from 'lodash.isstring';
 import {
   Attributes,
   context,
@@ -7,11 +5,12 @@ import {
   isSpanContextValid,
   trace,
 } from '@opentelemetry/api';
+import isString from 'lodash.isstring';
+import build from 'pino-abstract-transport';
 
-import { Logger } from './';
 import { jsonToString } from '../utils';
-
 import type { LoggerOptions } from './';
+import { Logger } from './';
 
 export type PinoLogLine = {
   level: number;
