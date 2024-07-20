@@ -55,6 +55,7 @@
     "lodash.isobject": "^3.0.2",
     "lodash.isplainobject": "^4.0.6",
     "lodash.isstring": "^4.0.1",
+    "node-fetch": "^2.7.0",
     "open": "^8.4.2",
     "ora": "^5.4.1",
     "pino-abstract-transport": "^1.2.0",
