@@ -43,6 +43,8 @@ export const DEFAULT_OTEL_METRICS_EXPORTER_URL =
   (otelEnv.OTEL_EXPORTER_OTLP_ENDPOINT
     ? `${otelEnv.OTEL_EXPORTER_OTLP_ENDPOINT}/v1/metrics`
     : 'https://in-otel.hyperdx.io/v1/metrics');
+export const DEFAULT_OTEL_METRICS_EXPORTER_EXPORT_INTERVAL =
+  (otelEnv as any).OTEL_EXPORTER_OTLP_METRICS_EXPORT_INTERVAL ?? 60000; // not exist yet
 export const DEFAULT_SERVICE_NAME = () =>
   getEnvWithoutDefaults().OTEL_SERVICE_NAME ?? defaultServiceName();
 export const DEFAULT_OTEL_LOG_LEVEL = otelEnvWithDefaults.OTEL_LOG_LEVEL;
