@@ -3,7 +3,8 @@ import { PeriodicExportingMetricReader } from '@opentelemetry/sdk-metrics';
 
 import {
   DEFAULT_OTEL_METRICS_EXPORTER_URL,
-  DEFAULT_OTEL_METRICS_EXPORTER_EXPORT_INTERVAL,
+  DEFAULT_OTEL_METRIC_EXPORT_INTERVAL,
+  DEFAULT_OTEL_METRIC_EXPORT_TIMEOUT,
 } from './constants';
 
 export const getHyperDXMetricReader = () =>
@@ -11,5 +12,6 @@ export const getHyperDXMetricReader = () =>
     exporter: new OTLPMetricExporter({
       url: DEFAULT_OTEL_METRICS_EXPORTER_URL,
     }),
-    exportIntervalMillis: DEFAULT_OTEL_METRICS_EXPORTER_EXPORT_INTERVAL,
+    exportIntervalMillis: DEFAULT_OTEL_METRIC_EXPORT_INTERVAL,
+    exportTimeoutMillis: DEFAULT_OTEL_METRIC_EXPORT_TIMEOUT,
   });
