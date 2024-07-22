@@ -1,6 +1,6 @@
-import { Event } from '@sentry/types';
-import { InstrumentationConfig } from '@opentelemetry/instrumentation';
 import { Span } from '@opentelemetry/api';
+import { InstrumentationConfig } from '@opentelemetry/instrumentation';
+import { Event } from '@sentry/types';
 
 import type { UnhandledRejectionMode } from './node/integrations/onunhandledrejection';
 

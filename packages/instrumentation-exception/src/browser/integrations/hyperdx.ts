@@ -1,5 +1,5 @@
-import type { Event, IntegrationFn, StackFrame } from '@sentry/types';
 import { defineIntegration } from '@sentry/core';
+import type { Event, IntegrationFn, StackFrame } from '@sentry/types';
 
 const INTEGRATION_NAME = 'HyperDX';
 

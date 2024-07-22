@@ -83,8 +83,8 @@ function eventFromPlainObject(
           type: isEvent(exception)
             ? exception.constructor.name
             : isUnhandledRejection
-            ? 'UnhandledRejection'
-            : 'Error',
+              ? 'UnhandledRejection'
+              : 'Error',
           value: getNonErrorObjectExceptionValue(exception, {
             isUnhandledRejection,
           }),

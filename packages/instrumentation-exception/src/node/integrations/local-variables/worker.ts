@@ -1,8 +1,10 @@
 import type { Debugger, InspectorNotification, Runtime } from 'node:inspector';
 import { Session } from 'node:inspector/promises';
 import { parentPort, workerData } from 'node:worker_threads';
+
 import type { StackParser } from '@sentry/types';
 import { createStackParser, nodeStackLineParser } from '@sentry/utils';
+
 import { createGetModuleFromFilename } from '../../utils/module';
 import type {
   LocalVariablesWorkerArgs,

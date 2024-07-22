@@ -1,4 +1,5 @@
 import { posix, sep } from 'node:path';
+
 import { dirname } from '@sentry/utils';
 
 /** normalizes Windows paths */
