@@ -1,10 +1,9 @@
+import type { RumOtelWebConfig } from '@hyperdx/otel-web';
 import Rum from '@hyperdx/otel-web';
 import SessionRecorder from '@hyperdx/otel-web-session-recorder';
 import opentelemetry, { Attributes } from '@opentelemetry/api';
 
 import { resolveAsyncGlobal } from './utils';
-
-import type { RumOtelWebConfig } from '@hyperdx/otel-web';
 
 type ErrorBoundaryComponent = any; // TODO: Define ErrorBoundary type
 

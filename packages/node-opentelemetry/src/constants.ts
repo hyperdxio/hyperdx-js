@@ -1,5 +1,5 @@
+import { getEnv, getEnvWithoutDefaults } from '@opentelemetry/core';
 import { defaultServiceName } from '@opentelemetry/resources';
-import { getEnvWithoutDefaults, getEnv } from '@opentelemetry/core';
 
 import { stringToBoolean } from './utils';
 

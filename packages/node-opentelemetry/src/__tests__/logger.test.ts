@@ -1,6 +1,6 @@
 import winston from 'winston';
 
-import { getWinstonTransport } from '../src/logger';
+import { getWinstonTransport } from '../logger';
 
 const MAX_LEVEL = 'info';
 

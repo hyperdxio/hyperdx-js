@@ -1,5 +1,5 @@
-import type { Event, IntegrationFn } from '@sentry/types';
 import { defineIntegration } from '@sentry/core';
+import type { Event, IntegrationFn } from '@sentry/types';
 
 import { getSentryRelease } from '../sdk/api';
 

@@ -1,9 +1,8 @@
-import * as http from 'http';
-import zlib from 'zlib';
-import { PassThrough, Readable } from 'stream';
-
-import { Span, diag } from '@opentelemetry/api';
+import { diag, Span } from '@opentelemetry/api';
 import { headerCapture } from '@opentelemetry/instrumentation-http';
+import * as http from 'http';
+import { PassThrough, Readable } from 'stream';
+import zlib from 'zlib';
 
 const SENSITIVE_DATA_SUBSTITUTE = '[Filtered]';
 // https://github.com/getsentry/sentry-python/blob/1.18.0/sentry_sdk/scrubber.py#L17

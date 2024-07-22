@@ -1,7 +1,8 @@
 import { promises } from 'node:fs';
+
 import { defineIntegration } from '@sentry/core';
 import type { Event, IntegrationFn, StackFrame } from '@sentry/types';
-import { LRUMap, addContextToFrame } from '@sentry/utils';
+import { addContextToFrame, LRUMap } from '@sentry/utils';
 
 const FILE_CONTENT_CACHE = new LRUMap<string, string[] | null>(100);
 const DEFAULT_LINES_OF_CONTEXT = 7;

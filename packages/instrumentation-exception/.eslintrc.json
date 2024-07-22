@@ -10,20 +10,19 @@
     "sourceType": "module",
     "ecmaVersion": 2020
   },
-  "plugins": ["@typescript-eslint", "jest"],
+  "plugins": ["@typescript-eslint", "jest", "prettier", "simple-import-sort"],
   "extends": [
     "eslint:recommended",
     "plugin:@typescript-eslint/recommended",
     "plugin:jest/recommended",
-    "prettier"
+    "plugin:prettier/recommended"
   ],
   "rules": {
-    // The following rule is enabled only to supplement the inline suppression
-    // examples, and because it is not a recommended rule, you should either
-    // disable it, or understand what it enforces.
-    // https://typescript-eslint.io/rules/explicit-function-return-type/
     "@typescript-eslint/ban-ts-comment": "warn",
     "@typescript-eslint/explicit-function-return-type": "warn",
-    "@typescript-eslint/no-this-alias": "warn"
+    "@typescript-eslint/no-this-alias": "warn",
+    "prettier/prettier": "error",
+    "simple-import-sort/exports": "error",
+    "simple-import-sort/imports": "error"
   }
 }

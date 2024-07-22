@@ -1,22 +1,23 @@
 import { Attributes, diag } from '@opentelemetry/api';
-import { getEnvWithoutDefaults } from '@opentelemetry/core';
-import {
-  BatchLogRecordProcessor,
-  LoggerProvider,
-  NoopLogRecordProcessor,
-} from '@opentelemetry/sdk-logs';
 import { Logger as OtelLogger, logs } from '@opentelemetry/api-logs';
+import { getEnvWithoutDefaults } from '@opentelemetry/core';
 import { OTLPLogExporter } from '@opentelemetry/exporter-logs-otlp-http';
 import {
-  Resource,
   detectResourcesSync,
   envDetectorSync,
   hostDetectorSync,
   osDetectorSync,
   processDetector,
+  Resource,
 } from '@opentelemetry/resources';
+import {
+  BatchLogRecordProcessor,
+  LoggerProvider,
+  NoopLogRecordProcessor,
+} from '@opentelemetry/sdk-logs';
 import { SEMRESATTRS_SERVICE_NAME } from '@opentelemetry/semantic-conventions';
 
+import { version as PKG_VERSION } from '../../package.json';
 import {
   DEFAULT_EXPORTER_BATCH_SIZE,
   DEFAULT_EXPORTER_TIMEOUT_MS,
@@ -25,7 +26,6 @@ import {
   DEFAULT_SEND_INTERVAL_MS,
   DEFAULT_SERVICE_NAME,
 } from '../constants';
-import { version as PKG_VERSION } from '../../package.json';
 
 const LOG_PREFIX = `⚠️  [LOGGER]`;
 

@@ -1,5 +1,5 @@
-import { captureEvent, defineIntegration, getClient } from '@sentry/core';
 import { diag } from '@opentelemetry/api';
+import { captureEvent, defineIntegration, getClient } from '@sentry/core';
 import type {
   Client,
   Event,
@@ -8,12 +8,12 @@ import type {
   StackParser,
 } from '@sentry/types';
 import {
-  UNKNOWN_FUNCTION,
   addGlobalErrorInstrumentationHandler,
   addGlobalUnhandledRejectionInstrumentationHandler,
   getLocationHref,
   isPrimitive,
   isString,
+  UNKNOWN_FUNCTION,
 } from '@sentry/utils';
 
 import { eventFromUnknownInput } from '../eventbuilder';

@@ -1,5 +1,6 @@
 import { existsSync, readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
+
 import { defineIntegration } from '@sentry/core';
 import type { IntegrationFn } from '@sentry/types';
 

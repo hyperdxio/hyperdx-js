@@ -1,10 +1,10 @@
+import { diag } from '@opentelemetry/api';
+import { defineIntegration } from '@sentry/core';
 import type { IntegrationFn } from '@sentry/types';
 import { consoleSandbox } from '@sentry/utils';
-import { defineIntegration } from '@sentry/core';
-import { diag } from '@opentelemetry/api';
 
-import { logAndExitProcess } from '../utils/errorhandling';
 import { recordException } from '..';
+import { logAndExitProcess } from '../utils/errorhandling';
 
 export type UnhandledRejectionMode = 'none' | 'warn' | 'strict';
 

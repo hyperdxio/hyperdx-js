@@ -1,31 +1,27 @@
-import fetch from 'node-fetch';
-import path from 'path';
-
-import * as semver from 'semver';
-import cliSpinners from 'cli-spinners';
-import ora from 'ora';
-import { wrap } from 'shimmer';
-import { Attributes, DiagLogLevel, diag } from '@opentelemetry/api';
 import { ExceptionInstrumentation } from '@hyperdx/instrumentation-exception';
-import { RuntimeNodeInstrumentation } from '@opentelemetry/instrumentation-runtime-node';
 import { SentryNodeInstrumentation } from '@hyperdx/instrumentation-sentry-node';
+import { Attributes, diag, DiagLogLevel } from '@opentelemetry/api';
+import {
+  getNodeAutoInstrumentations,
+  InstrumentationConfigMap,
+} from '@opentelemetry/auto-instrumentations-node';
+import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-proto';
 import {
   InstrumentationBase,
   InstrumentationModuleDefinition,
 } from '@opentelemetry/instrumentation';
-import { NodeSDK } from '@opentelemetry/sdk-node';
-import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-proto';
+import { RuntimeNodeInstrumentation } from '@opentelemetry/instrumentation-runtime-node';
 import { Resource } from '@opentelemetry/resources';
-import {
-  InstrumentationConfigMap,
-  getNodeAutoInstrumentations,
-} from '@opentelemetry/auto-instrumentations-node';
 import { MetricReader } from '@opentelemetry/sdk-metrics';
+import { NodeSDK } from '@opentelemetry/sdk-node';
+import cliSpinners from 'cli-spinners';
+import fetch from 'node-fetch';
+import ora from 'ora';
+import path from 'path';
+import * as semver from 'semver';
+import { wrap } from 'shimmer';
 
-import HyperDXConsoleInstrumentation from './instrumentations/console';
-import HyperDXSpanProcessor from './spanProcessor';
-import { Logger as OtelLogger } from './otel-logger';
-import { getHyperDXHTTPInstrumentationConfig } from './instrumentations/http';
+import { version as PKG_VERSION } from '../package.json';
 import {
   DEFAULT_HDX_API_KEY,
   DEFAULT_HDX_NODE_ADVANCED_NETWORK_CAPTURE,
@@ -36,8 +32,8 @@ import {
   DEFAULT_HDX_NODE_STOP_ON_TERMINATION_SIGNALS,
   DEFAULT_HDX_STARTUP_LOGS,
   DEFAULT_OTEL_EXPORTER_OTLP_TRACES_TIMEOUT,
-  DEFAULT_OTEL_LOGS_EXPORTER,
   DEFAULT_OTEL_LOG_LEVEL,
+  DEFAULT_OTEL_LOGS_EXPORTER,
   DEFAULT_OTEL_METRICS_EXPORTER,
   DEFAULT_OTEL_METRICS_EXPORTER_URL,
   DEFAULT_OTEL_TRACES_EXPORTER,
@@ -46,9 +42,12 @@ import {
   DEFAULT_OTEL_TRACES_SAMPLER_ARG,
   DEFAULT_SERVICE_NAME,
 } from './constants';
-import { MutableAsyncLocalStorageContextManager } from './MutableAsyncLocalStorageContextManager';
+import HyperDXConsoleInstrumentation from './instrumentations/console';
+import { getHyperDXHTTPInstrumentationConfig } from './instrumentations/http';
 import { getHyperDXMetricReader } from './metrics';
-import { version as PKG_VERSION } from '../package.json';
+import { MutableAsyncLocalStorageContextManager } from './MutableAsyncLocalStorageContextManager';
+import { Logger as OtelLogger } from './otel-logger';
+import HyperDXSpanProcessor from './spanProcessor';
 
 const UI_LOG_PREFIX = '[⚡HyperDX]';
 

@@ -1,12 +1,11 @@
-import Transport from 'winston-transport';
+import { Attributes, diag } from '@opentelemetry/api';
 import isPlainObject from 'lodash.isplainobject';
 import isString from 'lodash.isstring';
-import { Attributes, diag } from '@opentelemetry/api';
+import Transport from 'winston-transport';
 
-import { Logger } from './';
 import { jsonToString } from '../utils';
-
 import type { LoggerOptions } from './';
+import { Logger } from './';
 
 export const parseWinstonLog = (
   log: {

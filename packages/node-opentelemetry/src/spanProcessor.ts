@@ -1,8 +1,8 @@
-import { BatchSpanProcessor, Span } from '@opentelemetry/sdk-trace-base';
+import { Context } from '@opentelemetry/api';
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-proto';
+import { BatchSpanProcessor, Span } from '@opentelemetry/sdk-trace-base';
 
 import type { MutableAsyncLocalStorageContextManager } from './MutableAsyncLocalStorageContextManager';
-import { Context } from '@opentelemetry/api';
 
 export default class HyperDXSpanProcessor extends BatchSpanProcessor {
   private readonly enableHDXGlobalContext: boolean;
