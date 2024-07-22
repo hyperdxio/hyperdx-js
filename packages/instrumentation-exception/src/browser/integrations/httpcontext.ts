@@ -1,4 +1,5 @@
 import { defineIntegration } from '@sentry/core';
+
 import { WINDOW } from '../helpers';
 
 /**

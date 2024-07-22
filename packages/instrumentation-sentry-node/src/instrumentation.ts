@@ -5,9 +5,9 @@ import {
 } from '@opentelemetry/instrumentation';
 import Sentry from '@sentry/node';
 
-import { SentryNodeInstrumentationConfig } from './types';
-import { hyperdxIntegration } from './hyperdxIntegration';
 import { name as PKG_NAME, version as PKG_VERSION } from '../package.json';
+import { hyperdxIntegration } from './hyperdxIntegration';
+import { SentryNodeInstrumentationConfig } from './types';
 
 /** Sentry instrumentation for OpenTelemetry */
 export class SentryNodeInstrumentation extends InstrumentationBase {

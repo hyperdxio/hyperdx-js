@@ -1,5 +1,5 @@
-export { recordException } from './node';
 export * from './instrumentation';
+export { recordException } from './node';
 export * from './types';
 
 // error handlers

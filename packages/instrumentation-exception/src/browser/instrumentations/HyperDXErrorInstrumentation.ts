@@ -1,12 +1,12 @@
-import * as shimmer from 'shimmer';
 import { Span } from '@opentelemetry/api';
 import {
   InstrumentationBase,
   InstrumentationConfig,
 } from '@opentelemetry/instrumentation';
+import * as shimmer from 'shimmer';
 
 import { recordException } from '../';
-import { limitLen, getElementXPath } from './utils';
+import { getElementXPath, limitLen } from './utils';
 
 // FIXME take timestamps from events?
 
@@ -109,8 +109,8 @@ export class HyperDXErrorInstrumentation extends InstrumentationBase {
       useful(err.name)
         ? err.name
         : err.constructor && err.constructor.name
-        ? err.constructor.name
-        : 'Error',
+          ? err.constructor.name
+          : 'Error',
     );
     span.setAttribute('error.message', limitLen(msg, MESSAGE_LIMIT));
     addStackIfUseful(span, err);

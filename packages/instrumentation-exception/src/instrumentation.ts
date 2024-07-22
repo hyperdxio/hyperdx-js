@@ -1,10 +1,10 @@
+import { diag, trace, TracerProvider } from '@opentelemetry/api';
 import { InstrumentationBase } from '@opentelemetry/instrumentation';
-import { TracerProvider, diag, trace } from '@opentelemetry/api';
 
-import { ExceptionInstrumentationConfig } from './types';
 import { name as PKG_NAME, version as PKG_VERSION } from '../package.json';
 import { onUncaughtExceptionIntegration } from './node/integrations/onuncaughtexception';
 import { onUnhandledRejectionIntegration } from './node/integrations/onunhandledrejection';
+import { ExceptionInstrumentationConfig } from './types';
 
 /** Exception instrumentation for OpenTelemetry */
 export class ExceptionInstrumentation extends InstrumentationBase {

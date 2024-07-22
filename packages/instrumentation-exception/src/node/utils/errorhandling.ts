@@ -1,5 +1,5 @@
-import { consoleSandbox } from '@sentry/utils';
 import { diag } from '@opentelemetry/api';
+import { consoleSandbox } from '@sentry/utils';
 
 const DEFAULT_SHUTDOWN_TIMEOUT = 2000;
 

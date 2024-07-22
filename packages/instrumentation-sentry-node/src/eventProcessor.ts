@@ -2,11 +2,11 @@
 
 import api, {
   Attributes,
+  diag,
   Span,
   SpanKind,
   SpanStatusCode,
   Tracer,
-  diag,
 } from '@opentelemetry/api';
 import { ExceptionEventName } from '@opentelemetry/sdk-trace-base/build/src/enums';
 import {
@@ -16,9 +16,9 @@ import {
   SEMATTRS_HTTP_STATUS_CODE,
 } from '@opentelemetry/semantic-conventions';
 
+import { name as PKG_NAME, version as PKG_VERSION } from '../package.json';
 import type { Event, EventHint, Exception } from './types';
 import { jsonToString } from './utils';
-import { name as PKG_NAME, version as PKG_VERSION } from '../package.json';
 
 const defaultTracer = api.trace.getTracer(PKG_NAME, PKG_VERSION);
 

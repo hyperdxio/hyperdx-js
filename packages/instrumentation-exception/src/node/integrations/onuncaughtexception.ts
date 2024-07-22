@@ -1,8 +1,8 @@
-import { defineIntegration } from '@sentry/core';
 import { diag } from '@opentelemetry/api';
+import { defineIntegration } from '@sentry/core';
 
-import { logAndExitProcess } from '../utils/errorhandling';
 import { recordException } from '..';
+import { logAndExitProcess } from '../utils/errorhandling';
 
 type OnFatalErrorHandler = typeof logAndExitProcess;
 

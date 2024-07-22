@@ -4,6 +4,7 @@ import type {
   Runtime,
   Session,
 } from 'node:inspector';
+
 import { defineIntegration } from '@sentry/core';
 import type {
   Event,
@@ -11,9 +12,10 @@ import type {
   IntegrationFn,
   StackParser,
 } from '@sentry/types';
-import { LRUMap, logger } from '@sentry/utils';
+import { logger, LRUMap } from '@sentry/utils';
 
 import { NODE_MAJOR } from '../../nodeVersion';
+import { defaultStackParser } from '../../sdk/api';
 import type {
   FrameVariables,
   LocalVariablesIntegrationOptions,
@@ -27,7 +29,6 @@ import {
   hashFrames,
   hashFromStack,
 } from './common';
-import { defaultStackParser } from '../../sdk/api';
 
 type OnPauseEvent = InspectorNotification<Debugger.PausedEventDataType>;
 export interface DebugSession {
