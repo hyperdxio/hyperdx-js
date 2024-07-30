@@ -12,3 +12,6 @@ dist/*
 **/.vscode
 **/.nyc_output
 **/.vs
+
+/.nx/cache
+/.nx/workspace-data

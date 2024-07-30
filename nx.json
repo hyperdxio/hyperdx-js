@@ -1,22 +1,20 @@
 {
-  "affected": {
-    "defaultBase": "main"
-  },
   "workspaceLayout": {
     "appsDir": "packages",
     "libsDir": "packages"
   },
   "targetDefaults": {
     "build": {
-      "dependsOn": ["^build"]
+      "dependsOn": ["^build"],
+      "cache": true
+    },
+    "lint": {
+      "cache": true
+    },
+    "test": {
+      "cache": true
     }
   },
-  "tasksRunnerOptions": {
-    "default": {
-      "runner": "nx/tasks-runners/default",
-      "options": {
-        "cacheableOperations": ["build", "lint", "test"]
-      }
-    }
-  }
+  "useInferencePlugins": false,
+  "defaultBase": "main"
 }
