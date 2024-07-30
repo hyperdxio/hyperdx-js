@@ -1,5 +1,11 @@
 # @hyperdx/node-opentelemetry
 
+## 0.8.1
+
+### Patch Changes
+
+- 26ae2d9: feat: support OTEL_METRIC_EXPORT_INTERVAL and OTEL_METRIC_EXPORT_TIMEOUT
+
 ## 0.8.0
 
 ### Minor Changes
