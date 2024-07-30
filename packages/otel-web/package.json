@@ -6,7 +6,7 @@
     "start": "npm-run-all -s compile start:_execute",
     "start:_execute": "node utils/devServer/runDevServer.js",
     "prebuild": "npm run postversion",
-    "build": "npm-run-all -s compile:*",
+    "build": "npm run compile",
     "compile": "npm-run-all -s compile:*",
     "compile:browser": "rollup -c",
     "compile:tsc": "tsc --build tsconfig.cjs.json tsconfig.esm.json",
