@@ -56,7 +56,7 @@ unsmoke: docker_compose_present
 	@echo ""
 	@echo "+++ Spinning down the smokers."
 	@echo ""
-	cd smoke-tests && docker-compose down --volumes
+	cd smoke-tests && docker compose down --volumes
 
 #: use this for local smoke testing
 resmoke: unsmoke smoke
@@ -65,4 +65,4 @@ resmoke: unsmoke smoke
 
 .PHONY: docker_compose_present
 docker_compose_present:
-	@which docker-compose || (echo "Required docker-compose command is missing"; exit 1)
+	@which docker compose || (echo "Required docker compose command is missing"; exit 1)
