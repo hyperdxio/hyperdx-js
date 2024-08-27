@@ -100,7 +100,7 @@ wait_for_ready_app() {
 	MAX_RETRIES=10
 	echo -n "# 🍿 Setting up ${CONTAINER}" >&3
 	NEXT_WAIT_TIME=0
-	until [ $NEXT_WAIT_TIME -eq $MAX_RETRIES ] || [[ $(docker-compose logs ${CONTAINER} | grep "Now listening on:") ]]
+	until [ $NEXT_WAIT_TIME -eq $MAX_RETRIES ] || [[ $(docker compose logs ${CONTAINER} | grep "Now listening on:") ]]
 	do
 		echo -n " ... $(( NEXT_WAIT_TIME++ ))s" >&3
 		sleep $NEXT_WAIT_TIME

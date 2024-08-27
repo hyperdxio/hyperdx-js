@@ -66,3 +66,6 @@ tests_output/
 .npmrc
 
 deno.lock
+
+.nx/cache
+.nx/workspace-data
