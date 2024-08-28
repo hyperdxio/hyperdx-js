@@ -154,6 +154,14 @@ class Browser {
     }
   }
 
+  deinit(): void {
+    if (!hasWindow()) {
+      return;
+    }
+
+    Rum.deinit();
+  }
+
   addAction(name: string, attributes?: Attributes): void {
     if (!hasWindow()) {
       return;
@@ -189,6 +197,10 @@ class Browser {
     }
 
     Rum.setGlobalAttributes(attributes);
+  }
+
+  getSessionId(): string | undefined {
+    return Rum.getSessionId();
   }
 
   getSessionUrl(): string | undefined {
