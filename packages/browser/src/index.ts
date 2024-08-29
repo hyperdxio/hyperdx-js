@@ -20,11 +20,13 @@ type BrowserSDKConfig = {
   disableIntercom?: boolean;
   disableReplay?: boolean;
   ignoreClass?: string;
-  instrumentations?: Instrumentations;
   ignoreUrls?: IgnoreUrls;
+  instrumentations?: Instrumentations;
   maskAllInputs?: boolean;
   maskAllText?: boolean;
   maskClass?: string;
+  mousemove?: boolean;
+  recordCanvas?: boolean;
   service: string;
   tracePropagationTargets?: (string | RegExp)[];
   url?: string;
@@ -50,11 +52,13 @@ class Browser {
     disableIntercom = false,
     disableReplay = false,
     ignoreClass,
-    instrumentations = {},
     ignoreUrls,
+    instrumentations = {},
     maskAllInputs = true,
     maskAllText = false,
     maskClass,
+    recordCanvas = false,
+    mousemove = true,
     service,
     tracePropagationTargets,
     url,
@@ -111,14 +115,18 @@ class Browser {
 
     if (disableReplay !== true) {
       SessionRecorder.init({
-        debug,
-        url: `${urlBase}/v1/logs`,
         apiKey,
-        maskTextSelector: maskAllText ? '*' : undefined,
-        maskAllInputs: maskAllInputs,
         blockClass,
+        debug,
         ignoreClass,
+        maskAllInputs: maskAllInputs,
         maskTextClass: maskClass,
+        maskTextSelector: maskAllText ? '*' : undefined,
+        recordCanvas,
+        sampling: {
+          mousemove,
+        },
+        url: `${urlBase}/v1/logs`,
       });
     }
 
@@ -160,6 +168,22 @@ class Browser {
     }
 
     Rum.deinit();
+  }
+
+  stopSessionRecorder(): void {
+    if (!hasWindow()) {
+      return;
+    }
+
+    SessionRecorder.stop();
+  }
+
+  resumeSessionRecorder(): void {
+    if (!hasWindow()) {
+      return;
+    }
+
+    SessionRecorder.resume();
   }
 
   addAction(name: string, attributes?: Attributes): void {
