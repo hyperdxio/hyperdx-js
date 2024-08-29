@@ -1,6 +1,8 @@
 import type { RumOtelWebConfig } from '@hyperdx/otel-web';
 import Rum from '@hyperdx/otel-web';
-import SessionRecorder from '@hyperdx/otel-web-session-recorder';
+import SessionRecorder, {
+  RumRecorderConfig,
+} from '@hyperdx/otel-web-session-recorder';
 import opentelemetry, { Attributes } from '@opentelemetry/api';
 
 import { resolveAsyncGlobal } from './utils';
@@ -25,8 +27,8 @@ type BrowserSDKConfig = {
   maskAllInputs?: boolean;
   maskAllText?: boolean;
   maskClass?: string;
-  mousemove?: boolean;
   recordCanvas?: boolean;
+  sampling?: RumRecorderConfig['sampling'];
   service: string;
   tracePropagationTargets?: (string | RegExp)[];
   url?: string;
@@ -58,7 +60,7 @@ class Browser {
     maskAllText = false,
     maskClass,
     recordCanvas = false,
-    mousemove = true,
+    sampling,
     service,
     tracePropagationTargets,
     url,
@@ -123,9 +125,7 @@ class Browser {
         maskTextClass: maskClass,
         maskTextSelector: maskAllText ? '*' : undefined,
         recordCanvas,
-        sampling: {
-          mousemove,
-        },
+        sampling,
         url: `${urlBase}/v1/logs`,
       });
     }
