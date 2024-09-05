@@ -2,4 +2,4 @@
 '@hyperdx/browser': patch
 ---
 
-feat: expose `deinit` + `getSessionId` + `stopSessionRecorder` + `resumeSessionRecorder` methods, add `recordCanvas` + `sampling` options
+feat: expose `getSessionId` + `stopSessionRecorder` + `resumeSessionRecorder` methods, add `recordCanvas` + `sampling` options

@@ -162,14 +162,6 @@ class Browser {
     }
   }
 
-  deinit(): void {
-    if (!hasWindow()) {
-      return;
-    }
-
-    Rum.deinit();
-  }
-
   stopSessionRecorder(): void {
     if (!hasWindow()) {
       return;
