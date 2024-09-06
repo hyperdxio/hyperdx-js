@@ -145,3 +145,12 @@ app.use(function (req, res, next) {
 });
 app.use(cors());
 ```
+
+### Retrieve Session ID
+
+To retrieve the current session ID, you can call the `getSessionId` function.
+
+```js
+const sessionId = HyperDX.getSessionId();
+```
+
