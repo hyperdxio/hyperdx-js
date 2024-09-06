@@ -40,7 +40,7 @@ HyperDX.init({
 - `disableIntercom` - (Optional) Whether to disable Intercom integration (default `false`)
 - `disableReplay` - (Optional) Whether to disable session replay (default `false`)
 - `recordCanvas` - (Optional) Whether to record canvas elements (default `false`)
-- `sampling` - (Optional) The sampling [config](https://github.com/rrweb-io/rrweb/blob/5fbb904edb653f3da17e6775ee438d81ef0bba83/docs/recipes/optimize-storage.md?plain=1#L22) in the recording 
+- `sampling` - (Optional) The sampling [config](https://github.com/rrweb-io/rrweb/blob/5fbb904edb653f3da17e6775ee438d81ef0bba83/docs/recipes/optimize-storage.md?plain=1#L22) in the session recording 
 
 ## Additional Configuration
 
