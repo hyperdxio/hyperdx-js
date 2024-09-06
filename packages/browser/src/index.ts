@@ -1,6 +1,8 @@
 import type { RumOtelWebConfig } from '@hyperdx/otel-web';
 import Rum from '@hyperdx/otel-web';
-import SessionRecorder from '@hyperdx/otel-web-session-recorder';
+import SessionRecorder, {
+  RumRecorderConfig,
+} from '@hyperdx/otel-web-session-recorder';
 import opentelemetry, { Attributes } from '@opentelemetry/api';
 
 import { resolveAsyncGlobal } from './utils';
@@ -20,11 +22,13 @@ type BrowserSDKConfig = {
   disableIntercom?: boolean;
   disableReplay?: boolean;
   ignoreClass?: string;
-  instrumentations?: Instrumentations;
   ignoreUrls?: IgnoreUrls;
+  instrumentations?: Instrumentations;
   maskAllInputs?: boolean;
   maskAllText?: boolean;
   maskClass?: string;
+  recordCanvas?: boolean;
+  sampling?: RumRecorderConfig['sampling'];
   service: string;
   tracePropagationTargets?: (string | RegExp)[];
   url?: string;
@@ -50,11 +54,13 @@ class Browser {
     disableIntercom = false,
     disableReplay = false,
     ignoreClass,
-    instrumentations = {},
     ignoreUrls,
+    instrumentations = {},
     maskAllInputs = true,
     maskAllText = false,
     maskClass,
+    recordCanvas = false,
+    sampling,
     service,
     tracePropagationTargets,
     url,
@@ -111,14 +117,16 @@ class Browser {
 
     if (disableReplay !== true) {
       SessionRecorder.init({
-        debug,
-        url: `${urlBase}/v1/logs`,
         apiKey,
-        maskTextSelector: maskAllText ? '*' : undefined,
-        maskAllInputs: maskAllInputs,
         blockClass,
+        debug,
         ignoreClass,
+        maskAllInputs: maskAllInputs,
         maskTextClass: maskClass,
+        maskTextSelector: maskAllText ? '*' : undefined,
+        recordCanvas,
+        sampling,
+        url: `${urlBase}/v1/logs`,
       });
     }
 
@@ -152,6 +160,22 @@ class Browser {
           // Ignore if intercom isn't installed or can't be used
         });
     }
+  }
+
+  stopSessionRecorder(): void {
+    if (!hasWindow()) {
+      return;
+    }
+
+    SessionRecorder.stop();
+  }
+
+  resumeSessionRecorder(): void {
+    if (!hasWindow()) {
+      return;
+    }
+
+    SessionRecorder.resume();
   }
 
   addAction(name: string, attributes?: Attributes): void {
@@ -189,6 +213,10 @@ class Browser {
     }
 
     Rum.setGlobalAttributes(attributes);
+  }
+
+  getSessionId(): string | undefined {
+    return Rum.getSessionId();
   }
 
   getSessionUrl(): string | undefined {
