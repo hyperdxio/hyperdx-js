@@ -1,5 +1,11 @@
 # @hyperdx/browser
 
+## 0.21.1
+
+### Patch Changes
+
+- fbe054e: feat: expose `getSessionId` + `stopSessionRecorder` + `resumeSessionRecorder` methods, add `recordCanvas` + `sampling` options
+
 ## 0.21.0
 
 ### Minor Changes
