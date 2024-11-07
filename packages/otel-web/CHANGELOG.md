@@ -1,5 +1,11 @@
 # @hyperdx/otel-web
 
+## 0.16.3
+
+### Patch Changes
+
+- fac5e58: fix: handle xhr responseText exception
+
 ## 0.16.2
 
 ### Patch Changes
