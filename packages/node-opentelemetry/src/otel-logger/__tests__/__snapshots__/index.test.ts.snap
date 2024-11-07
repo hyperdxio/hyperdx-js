@@ -1,0 +1,35 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`otel-logger getSeverityNumber 1`] = `
+{
+  "alert": 22,
+  "debug": 5,
+  "emerg": 23,
+  "error": 17,
+  "info": 9,
+  "verbose": 6,
+  "warn": 13,
+  "warning": 13,
+}
+`;
+
+exports[`otel-logger parseLogAttributes 1`] = `
+{
+  "a": 1,
+  "b": "2",
+  "c": "[{"d":3}]",
+  "e": [
+    1,
+    2,
+    3,
+  ],
+  "f": [
+    "a",
+    "b",
+    "c",
+  ],
+  "g": {
+    "h": "i",
+  },
+}
+`;
