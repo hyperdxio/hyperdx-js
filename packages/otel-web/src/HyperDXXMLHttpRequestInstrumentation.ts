@@ -66,7 +66,11 @@ export class HyperDXXMLHttpRequestInstrumentation extends XMLHttpRequestInstrume
                 span,
                 (header) => headers[header],
               );
-              span.setAttribute('http.response.body', xhr.responseText);
+              try {
+                span.setAttribute('http.response.body', xhr.responseText);
+              } catch (e) {
+                // ignore (DOMException if responseType is not the empty string or "text")
+              }
 
               shimmer.unwrap(xhr, 'setRequestHeader');
               shimmer.unwrap(xhr, 'send');
