@@ -90,7 +90,7 @@ class Browser {
       url: `${urlBase}/v1/traces`,
       allowInsecureUrl: true,
       apiKey,
-      app: service,
+      applicationName: service,
       ignoreUrls,
       instrumentations: {
         visibility: true,
