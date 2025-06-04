@@ -1,5 +1,5 @@
 import { diag, Span } from '@opentelemetry/api';
-import { headerCapture } from '@opentelemetry/instrumentation-http';
+import { headerCapture } from '@opentelemetry/instrumentation-http/build/src/utils';
 import * as http from 'http';
 import { PassThrough, Readable } from 'stream';
 import zlib from 'zlib';
