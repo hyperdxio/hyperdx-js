@@ -1,5 +1,11 @@
 # @hyperdx/node-opentelemetry
 
+## 0.8.2
+
+### Patch Changes
+
+- 728e922: chore: update opentelemetry packages to v0.57
+
 ## 0.8.1
 
 ### Patch Changes
