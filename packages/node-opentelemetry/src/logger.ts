@@ -1,3 +1,4 @@
+import type { LogLevelType } from '@loglayer/transport';
 import opentelemetry, { diag } from '@opentelemetry/api';
 
 import {
@@ -5,6 +6,8 @@ import {
   DEFAULT_HDX_NODE_BETA_MODE,
   DEFAULT_SERVICE_NAME,
 } from './constants';
+import type { HyperDXLogLayerOptions } from './otel-logger/loglayer';
+import HyperDXLogLayer from './otel-logger/loglayer';
 import type { HyperDXPinoOptions } from './otel-logger/pino';
 import * as HyperDXPino from './otel-logger/pino';
 import type { HyperDXWinstonOptions } from './otel-logger/winston';
@@ -17,6 +20,11 @@ type WinstonTransportOptions = Omit<
 
 type PinotTransportOptions = Omit<
   HyperDXPinoOptions,
+  'apiKey' | 'getCustomMeta' | 'resourceAttributes'
+>;
+
+type LogLayerTransportOptions = Omit<
+  HyperDXLogLayerOptions,
   'apiKey' | 'getCustomMeta' | 'resourceAttributes'
 >;
 
@@ -78,4 +86,23 @@ export const getPinoTransport = (
     },
     level: maxLevel,
   };
+};
+
+export const getLogLayerTransport = (
+  maxLevel: LogLevelType = 'info',
+  options: LogLayerTransportOptions = {},
+) => {
+  diag.debug('Initializing LogLayer transport');
+  const apiKey = DEFAULT_HDX_API_KEY();
+  return new HyperDXLogLayer({
+    ...(apiKey && {
+      headers: {
+        Authorization: apiKey,
+      },
+    }),
+    service: DEFAULT_SERVICE_NAME(),
+    getCustomMeta: DEFAULT_HDX_NODE_BETA_MODE() ? getCustomMeta : () => ({}),
+    maxLevel,
+    ...options,
+  });
 };
