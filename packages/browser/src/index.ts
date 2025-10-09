@@ -32,6 +32,7 @@ type BrowserSDKConfig = {
   service: string;
   tracePropagationTargets?: (string | RegExp)[];
   url?: string;
+  otelResourceAttributes?: Array<{ key: string; value: string }>;
 };
 
 const URL_BASE = 'https://in-otel.hyperdx.io';
@@ -64,6 +65,7 @@ class Browser {
     service,
     tracePropagationTargets,
     url,
+    otelResourceAttributes,
   }: BrowserSDKConfig) {
     if (!hasWindow()) {
       return;
@@ -81,6 +83,12 @@ class Browser {
       );
     }
 
+    if (otelResourceAttributes && otelResourceAttributes.length > 0) {
+      const attributesObj = Object.fromEntries(
+        otelResourceAttributes.map(({ key, value }) => [key, value])
+      );
+      this.setGlobalAttributes(attributesObj);
+    }
     const urlBase = url ?? URL_BASE;
 
     this._advancedNetworkCapture = advancedNetworkCapture;
