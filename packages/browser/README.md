@@ -17,10 +17,10 @@ HyperDX.init({
   tracePropagationTargets: [/api.myapp.domain/i], // Set to link traces from frontend to backend requests
   consoleCapture: true, // Capture console logs (default false)
   advancedNetworkCapture: true, // Capture full HTTP request/response headers and bodies (default false)
-  otelResourceAttributes: [
-    { key: 'service.version', value: '1.0.0' },
-    { key: 'deployment.environment', value: 'production' },
-  ],
+  otelResourceAttributes: {
+    'service.version': '1.0.0',
+    'deployment.environment': 'production',
+  },
 });
 ```
 
@@ -42,12 +42,13 @@ HyperDX.init({
 - `maskAllText` - (Optional) Whether to mask all text in session replay (default
   `false`).
 - `disableIntercom` - (Optional) Whether to disable Intercom integration (default `false`)
-- `otelResourceAttributes` - (Optional) Array of key/value pairs to set as OpenTelemetry resource attributes and global attributes. Example:
+- `otelResourceAttributes` - (Optional) Object containing OpenTelemetry resource attributes to be added to all spans. These are set at the resource level and merged with default SDK attributes. Example:
   ```js
-  otelResourceAttributes: [
-    { key: 'service.version', value: '1.0.0' },
-    { key: 'deployment.environment', value: 'production' },
-  ]
+  otelResourceAttributes: {
+    'service.version': '1.0.0',
+    'deployment.environment': 'production',
+    'custom.attribute': 'value',
+  }
   ```
 - `disableReplay` - (Optional) Whether to disable session replay (default `false`)
 - `recordCanvas` - (Optional) Whether to record canvas elements (default `false`)
