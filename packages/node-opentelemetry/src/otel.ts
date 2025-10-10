@@ -11,7 +11,7 @@ import {
   InstrumentationModuleDefinition,
 } from '@opentelemetry/instrumentation';
 import { RuntimeNodeInstrumentation } from '@opentelemetry/instrumentation-runtime-node';
-import { Resource } from '@opentelemetry/resources';
+import { resourceFromAttributes } from '@opentelemetry/resources';
 import { MetricReader } from '@opentelemetry/sdk-metrics';
 import { NodeSDK } from '@opentelemetry/sdk-node';
 import cliSpinners from 'cli-spinners';
@@ -329,7 +329,7 @@ export const initSDK = (config: SDKConfig) => {
   ];
 
   sdk = new NodeSDK({
-    resource: new Resource({
+    resource: resourceFromAttributes({
       // https://opentelemetry.io/docs/specs/semconv/resource/#telemetry-sdk-experimental
       'telemetry.distro.name': 'hyperdx',
       'telemetry.distro.version': PKG_VERSION,

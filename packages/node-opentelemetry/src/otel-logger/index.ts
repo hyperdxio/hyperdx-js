@@ -1,14 +1,14 @@
 import { Attributes, diag } from '@opentelemetry/api';
 import { Logger as OtelLogger, logs } from '@opentelemetry/api-logs';
-import { getEnvWithoutDefaults } from '@opentelemetry/core';
+import { getStringFromEnv } from '@opentelemetry/core';
 import { OTLPLogExporter } from '@opentelemetry/exporter-logs-otlp-http';
 import {
-  detectResourcesSync,
-  envDetectorSync,
-  hostDetectorSync,
-  osDetectorSync,
+  detectResources,
+  envDetector,
+  hostDetector,
+  osDetector,
   processDetector,
-  Resource,
+  resourceFromAttributes,
 } from '@opentelemetry/resources';
 import {
   BatchLogRecordProcessor,
@@ -53,7 +53,7 @@ export class Logger {
   constructor({
     baseUrl,
     bufferSize,
-    detectResources,
+    detectResources: shouldDetectResources,
     headers,
     queueSize,
     resourceAttributes,
@@ -76,9 +76,9 @@ export class Logger {
       maxQueueSize = maxExportBatchSize;
     }
 
-    const detectedResource = detectResourcesSync({
-      detectors: detectResources
-        ? [envDetectorSync, hostDetectorSync, osDetectorSync, processDetector]
+    const detectedResource = detectResources({
+      detectors: shouldDetectResources
+        ? [envDetector, hostDetector, osDetector, processDetector]
         : [],
     });
 
@@ -102,15 +102,15 @@ export class Logger {
         });
     this.provider = new LoggerProvider({
       resource: detectedResource.merge(
-        new Resource({
+        resourceFromAttributes({
           // TODO: should use otel semantic conventions
           'hyperdx.distro.version': PKG_VERSION,
           [SEMRESATTRS_SERVICE_NAME]: service ?? _serviceName,
           ...resourceAttributes,
         }),
       ),
+      processors: [this.processor],
     });
-    this.provider.addLogRecordProcessor(this.processor);
 
     this.logger = this.provider.getLogger('node-logger');
   }
@@ -125,7 +125,7 @@ export class Logger {
   }
 
   isDisabled() {
-    return getEnvWithoutDefaults().OTEL_LOGS_EXPORTER === 'none';
+    return getStringFromEnv('OTEL_LOGS_EXPORTER') === 'none';
   }
 
   setGlobalLoggerProvider() {
