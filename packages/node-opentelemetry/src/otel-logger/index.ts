@@ -1,14 +1,19 @@
-import { Attributes, diag } from '@opentelemetry/api';
-import { Logger as OtelLogger, logs } from '@opentelemetry/api-logs';
-import { getEnvWithoutDefaults } from '@opentelemetry/core';
+import {
+  Attributes,
+  context as apiContext,
+  diag,
+  trace,
+} from '@opentelemetry/api';
+import { Logger as OtelLogger, LogRecord, logs } from '@opentelemetry/api-logs';
+import { getStringFromEnv } from '@opentelemetry/core';
 import { OTLPLogExporter } from '@opentelemetry/exporter-logs-otlp-http';
 import {
-  detectResourcesSync,
-  envDetectorSync,
-  hostDetectorSync,
-  osDetectorSync,
+  detectResources,
+  envDetector,
+  hostDetector,
+  osDetector,
   processDetector,
-  Resource,
+  resourceFromAttributes,
 } from '@opentelemetry/resources';
 import {
   BatchLogRecordProcessor,
@@ -28,6 +33,47 @@ import {
 } from '../constants';
 
 const LOG_PREFIX = `⚠️  [LOGGER]`;
+
+/**
+ * Load context from attributes and set it to logRecord.context
+ *
+ * @param {LogRecord} logRecord
+ * @returns {LogRecord}
+ */
+function loadContext(logRecord: LogRecord): LogRecord {
+  let context = apiContext.active();
+  let attributes = logRecord.attributes;
+
+  if (typeof attributes !== 'undefined') {
+    const { trace_id, span_id, trace_flags, ...otherAttributes } =
+      logRecord.attributes as Attributes & {
+        trace_id?: string;
+        span_id?: string;
+        trace_flags?: number;
+      };
+
+    if (
+      typeof trace_id !== 'undefined' &&
+      typeof span_id !== 'undefined' &&
+      typeof trace_flags !== 'undefined'
+    ) {
+      context = trace.setSpanContext(context, {
+        traceId: trace_id,
+        spanId: span_id,
+        traceFlags: trace_flags,
+        isRemote: true,
+      });
+    }
+
+    attributes = otherAttributes;
+  }
+
+  return {
+    ...logRecord,
+    attributes,
+    context,
+  };
+}
 
 export type LoggerOptions = {
   baseUrl?: string;
@@ -53,7 +99,7 @@ export class Logger {
   constructor({
     baseUrl,
     bufferSize,
-    detectResources,
+    detectResources: shouldDetectResources,
     headers,
     queueSize,
     resourceAttributes,
@@ -76,9 +122,9 @@ export class Logger {
       maxQueueSize = maxExportBatchSize;
     }
 
-    const detectedResource = detectResourcesSync({
-      detectors: detectResources
-        ? [envDetectorSync, hostDetectorSync, osDetectorSync, processDetector]
+    const detectedResource = detectResources({
+      detectors: shouldDetectResources
+        ? [envDetector, hostDetector, osDetector, processDetector]
         : [],
     });
 
@@ -102,15 +148,15 @@ export class Logger {
         });
     this.provider = new LoggerProvider({
       resource: detectedResource.merge(
-        new Resource({
+        resourceFromAttributes({
           // TODO: should use otel semantic conventions
           'hyperdx.distro.version': PKG_VERSION,
           [SEMRESATTRS_SERVICE_NAME]: service ?? _serviceName,
           ...resourceAttributes,
         }),
       ),
+      processors: [this.processor],
     });
-    this.provider.addLogRecordProcessor(this.processor);
 
     this.logger = this.provider.getLogger('node-logger');
   }
@@ -125,7 +171,7 @@ export class Logger {
   }
 
   isDisabled() {
-    return getEnvWithoutDefaults().OTEL_LOGS_EXPORTER === 'none';
+    return getStringFromEnv('OTEL_LOGS_EXPORTER') === 'none';
   }
 
   setGlobalLoggerProvider() {
@@ -156,14 +202,16 @@ export class Logger {
   }
 
   postMessage(level: string, body: string, attributes: Attributes = {}): void {
-    this.logger.emit({
-      // TODO: should map to otel severity number
-      severityNumber: 0,
-      // TODO: set up the mapping between different downstream log levels
-      severityText: level,
-      body,
-      attributes,
-      timestamp: this.parseTimestamp(attributes),
-    });
+    this.logger.emit(
+      loadContext({
+        // TODO: should map to otel severity number
+        severityNumber: 0,
+        // TODO: set up the mapping between different downstream log levels
+        severityText: level,
+        body,
+        attributes,
+        timestamp: this.parseTimestamp(attributes),
+      }),
+    );
   }
 }

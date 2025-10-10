@@ -1,0 +1,16 @@
+{
+  "mode": "pre",
+  "tag": "next",
+  "initialVersions": {
+    "@hyperdx/browser": "0.21.2",
+    "@hyperdx/cli": "0.1.0",
+    "@hyperdx/deno": "0.0.2",
+    "@hyperdx/instrumentation-exception": "0.1.0",
+    "@hyperdx/instrumentation-sentry-node": "0.1.0",
+    "@hyperdx/node-logger": "0.4.0",
+    "@hyperdx/node-opentelemetry": "0.8.2",
+    "@hyperdx/otel-web": "0.16.3",
+    "@hyperdx/otel-web-session-recorder": "0.16.2"
+  },
+  "changesets": ["old-lobsters-rule", "real-dryers-melt"]
+}

@@ -1,9 +1,9 @@
 import commonjs from '@rollup/plugin-commonjs';
 import json from '@rollup/plugin-json';
-import replace from 'rollup-plugin-re';
 import resolve from '@rollup/plugin-node-resolve';
 import terser from '@rollup/plugin-terser';
 import typescript from '@rollup/plugin-typescript';
+import replace from 'rollup-plugin-re';
 import { visualizer } from 'rollup-plugin-visualizer';
 
 export default {
@@ -31,11 +31,11 @@ export default {
     commonjs(),
     resolve({
       mainFields: ['module', 'browser', 'main'],
+      preferBuiltins: false,
       dedupe: [
         '@opentelemetry/semantic-conventions',
         '@opentelemetry/sdk-trace-web',
         '@opentelemetry/instrumentation',
-        '@opentelemetry/core',
         '@opentelemetry/api',
       ],
     }),

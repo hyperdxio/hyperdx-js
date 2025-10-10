@@ -1,5 +1,15 @@
 # @hyperdx/node-opentelemetry
 
+## 0.9.0-next.0
+
+### Minor Changes
+
+- 1907f5b: chore: bump otel core to v2 + api to v1.9.0
+
+### Patch Changes
+
+- 1907f5b: fix: add loadContext to fix pino trace linking issue
+
 ## 0.8.2
 
 ### Patch Changes
