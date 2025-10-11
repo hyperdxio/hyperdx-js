@@ -13,8 +13,11 @@ COPY . .
 
 EXPOSE 3000
 
+# Enable corepack for yarn v4 support
+RUN corepack enable
+
 # symlink hyperdx sdk dependency
-RUN cd ./examples/hello-node/ && npm run setup
+RUN cd ./examples/hello-node/ && yarn run setup
 
 # run example script from root package.json
-CMD [ "npm", "run", "example-node" ]
+CMD [ "yarn", "run", "example-node" ]

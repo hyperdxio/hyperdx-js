@@ -12,8 +12,11 @@ COPY . .
 # example app listens on port 3000
 EXPOSE 3000
 
+# Enable corepack for yarn v4 support
+RUN corepack enable
+
 # symlink hyperdx sdk dependency
-RUN cd ./examples/hello-node-express/ && npm run setup
+RUN cd ./examples/hello-node-express/ && yarn run setup
 
 # run example express app
 CMD [ "node", "./examples/hello-node-express/index.js" ]
