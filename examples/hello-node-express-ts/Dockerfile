@@ -18,8 +18,8 @@ RUN corepack enable
 # Install root dependencies first (required for yarn v4 workspaces)
 RUN yarn install
 
-# Build only the required package
-RUN yarn workspace @hyperdx/node-opentelemetry run build
+# Build only the required package (use yarn run to access binaries from root)
+RUN cd ./packages/node-opentelemetry && yarn run build
 
 # Setup example app dependencies and build
 RUN cd ./packages/node-opentelemetry && yarn link && cd ../../examples/hello-node-express-ts && yarn install && yarn link @hyperdx/node-opentelemetry && yarn run build
