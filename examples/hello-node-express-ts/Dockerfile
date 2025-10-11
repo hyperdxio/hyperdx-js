@@ -15,8 +15,14 @@ EXPOSE 3000
 # Enable corepack for yarn v4 support
 RUN corepack enable
 
-# symlink hyperdx sdk dependency
-RUN cd ./examples/hello-node-express-ts/ && yarn run setup && yarn run build
+# Install root dependencies first (required for yarn v4 workspaces)
+RUN yarn install
+
+# Build only the required package
+RUN yarn workspace @hyperdx/node-opentelemetry run build
+
+# Setup example app dependencies and build
+RUN cd ./packages/node-opentelemetry && yarn link && cd ../../examples/hello-node-express-ts && yarn install && yarn link @hyperdx/node-opentelemetry && yarn run build
 
 # run example express app
 CMD [ "node", "-r", "./examples/hello-node-express-ts/dist/instrumentation.js", "./examples/hello-node-express-ts/dist/index.js" ]

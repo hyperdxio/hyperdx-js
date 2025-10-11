@@ -16,8 +16,14 @@ EXPOSE 3000
 # Enable corepack for yarn v4 support
 RUN corepack enable
 
-# symlink hyperdx sdk dependency
-RUN cd ./examples/hello-node/ && yarn run setup
+# Install root dependencies first (required for yarn v4 workspaces)
+RUN yarn install
+
+# Build only the required package
+RUN yarn workspace @hyperdx/node-opentelemetry run build
+
+# Setup example app dependencies
+RUN cd ./packages/node-opentelemetry && yarn link && cd ../../examples/hello-node && yarn install && yarn link @hyperdx/node-opentelemetry
 
 # run example script from root package.json
 CMD [ "yarn", "run", "example-node" ]
