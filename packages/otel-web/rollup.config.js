@@ -19,13 +19,13 @@ export default [
     },
     plugins: [
       json(),
+      nodeResolvePlugin,
       typescript({ tsconfig: './tsconfig.base.json' }),
       commonjs({
-        include: /node_modules/,
+        include: [/node_modules/, /instrumentation-exception/],
         sourceMap: true,
         transformMixedEsModules: true,
       }),
-      // nodeResolvePlugin,
       babelPlugin,
       terser({ output: { comments: false } }),
     ],
@@ -41,8 +41,9 @@ export default [
     },
     plugins: [
       json(),
+      nodeResolvePlugin,
       commonjs({
-        include: /node_modules/,
+        include: [/node_modules/, /instrumentation-exception/],
         sourceMap: true,
         transformMixedEsModules: true,
       }),
@@ -74,7 +75,7 @@ export default [
       json(),
       nodeResolvePlugin,
       commonjs({
-        include: /node_modules/,
+        include: [/node_modules/, /instrumentation-exception/],
         sourceMap: true,
         transformMixedEsModules: true,
       }),
