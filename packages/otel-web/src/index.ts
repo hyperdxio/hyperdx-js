@@ -572,7 +572,7 @@ export const Rum: RumOtelWebType = {
           disable,
         );
         if (pluginConf) {
-          // @ts-expect-error Can't mark in any way that processedOptions.instrumentations[confKey] is of specifc config type
+          // @ts-ignore Can't mark in any way that processedOptions.instrumentations[confKey] is of specifc config type
           const instrumentation = new Instrument(pluginConf);
           if (
             confKey === ERROR_INSTRUMENTATION_NAME &&

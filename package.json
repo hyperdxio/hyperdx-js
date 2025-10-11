@@ -18,9 +18,12 @@
     "prepare": "husky install"
   },
   "lint-staged": {
-    "**/*.{ts,tsx}": [
+    "packages/{instrumentation-*,node-*,browser,cli}/**/*.{ts,tsx}": [
       "prettier --write --ignore-unknown",
       "eslint --fix"
+    ],
+    "packages/{otel-web,session-recorder,deno}/**/*.{ts,tsx}": [
+      "prettier --write --ignore-unknown"
     ],
     "**/*.{json,yml}": [
       "prettier --write --ignore-unknown"

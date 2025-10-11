@@ -23,7 +23,7 @@
     "build:types": "tsc -d -p tsconfig.release.json --declarationMap --emitDeclarationOnly",
     "build:watch": "tsc -w -p tsconfig.json",
     "lint": "eslint . --ext .ts --ext .mts",
-    "ci:lint": "yarn lint && yarn tsc --noEmit",
+    "ci:lint": "yarn lint && tsc --noEmit",
     "prettier": "prettier --config .prettierrc --write .",
     "test": "jest",
     "test:watch": "jest --watch"

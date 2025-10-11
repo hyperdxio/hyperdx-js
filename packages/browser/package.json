@@ -34,7 +34,7 @@
     "postbuild": "mv build/src/index.d.ts build/index.d.ts",
     "build:watch": "rollup --config rollup.config.ts --configPlugin typescript -w",
     "lint": "eslint . --ext .ts --ext .mts",
-    "ci:lint": "yarn lint && yarn tsc --noEmit",
+    "ci:lint": "yarn lint && tsc --noEmit",
     "ci:unit": "jest --coverage --ci",
     "prettier": "prettier --config .prettierrc --write .",
     "test:watch": "jest --watch"
