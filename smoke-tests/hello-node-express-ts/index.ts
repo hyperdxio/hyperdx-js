@@ -85,36 +85,36 @@ app.get('/', async (_req: Request, res: Response, next: NextFunction) => {
   }
 });
 
-// app.get('/logs', (_req: Request, res: Response) => {
-//   // Log with different levels
-//   pinoLogger.trace('This is a trace log - lowest level');
-//   pinoLogger.debug({ debugInfo: 'some debug data' }, 'This is a debug log');
-//   pinoLogger.info({ userId: 123, action: 'test' }, 'This is an info log');
-//   pinoLogger.warn(
-//     { warning: 'something might be wrong' },
-//     'This is a warning log',
-//   );
-//   pinoLogger.error({ error: 'something went wrong' }, 'This is an error log');
-//   pinoLogger.fatal({ critical: 'system failure' }, 'This is a fatal log');
+app.get('/logs', (_req: Request, res: Response) => {
+  // Log with different levels
+  pinoLogger.trace('This is a trace log - lowest level');
+  pinoLogger.debug({ debugInfo: 'some debug data' }, 'This is a debug log');
+  pinoLogger.info({ userId: 123, action: 'test' }, 'This is an info log');
+  pinoLogger.warn(
+    { warning: 'something might be wrong' },
+    'This is a warning log',
+  );
+  pinoLogger.error({ error: 'something went wrong' }, 'This is an error log');
+  pinoLogger.fatal({ critical: 'system failure' }, 'This is a fatal log');
 
-//   // Log with nested objects
-//   pinoLogger.info(
-//     {
-//       request: {
-//         method: 'GET',
-//         path: '/logs',
-//         headers: { 'user-agent': 'test' },
-//       },
-//       performance: {
-//         duration: 123,
-//         memory: process.memoryUsage(),
-//       },
-//     },
-//     'Complex log with nested data',
-//   );
+  // Log with nested objects
+  pinoLogger.info(
+    {
+      request: {
+        method: 'GET',
+        path: '/logs',
+        headers: { 'user-agent': 'test' },
+      },
+      performance: {
+        duration: 123,
+        memory: process.memoryUsage(),
+      },
+    },
+    'Complex log with nested data',
+  );
 
-//   res.status(200).json({ message: 'Logs generated successfully' });
-// });
+  res.status(200).json({ message: 'Logs generated successfully' });
+});
 
 function sleepy(): Promise<void> {
   return new Promise((resolve) => {

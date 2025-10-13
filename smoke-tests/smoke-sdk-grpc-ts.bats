@@ -9,8 +9,8 @@ NODE_METER_NAME="node-monitor-meter"
 
 setup_file() {
 	echo "# 🚧 Starting smoke-sdk-grpc-ts tests" >&3
-	echo "# 📦 Building and starting containers: collector ${CONTAINER_NAME}" >&3
-	docker compose up --build --detach collector ${CONTAINER_NAME} >&3 2>&3
+	echo "# 📦 Starting containers: collector ${CONTAINER_NAME}" >&3
+	docker compose up --detach collector ${CONTAINER_NAME} >&3 2>&3
 	wait_for_ready_app ${CONTAINER_NAME}
 	echo "# 🌐 Sending test request to http://localhost:3000" >&3
 	curl --silent "http://localhost:3000"

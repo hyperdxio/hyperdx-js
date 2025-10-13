@@ -7,7 +7,7 @@
   "main": "dist/index.js",
   "scripts": {
     "build": "tsc --build",
-    "setup": "yarn install && cd ../.. && yarn install && yarn ci:build --exclude='@hyperdx/deno' && cd ./packages/node-opentelemetry && yarn link && cd ../../examples/hello-node-express-ts && yarn link @hyperdx/node-opentelemetry",
+    "setup": "yarn install && cd ../.. && yarn install && npx nx build @hyperdx/node-opentelemetry --skip-nx-cache && cd ./packages/node-opentelemetry && yarn link && cd ../../smoke-tests/hello-node-express-ts && yarn link @hyperdx/node-opentelemetry",
     "start": "ts-node -r ./instrumentation.ts index.ts",
     "start-js": "node -r ./dist/instrumentation.js ./dist/index.js"
   },

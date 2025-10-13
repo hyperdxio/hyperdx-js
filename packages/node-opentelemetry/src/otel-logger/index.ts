@@ -6,7 +6,8 @@ import {
 } from '@opentelemetry/api';
 import { Logger as OtelLogger, LogRecord, logs } from '@opentelemetry/api-logs';
 import { getEnvWithoutDefaults } from '@opentelemetry/core';
-import { OTLPLogExporter } from '@opentelemetry/exporter-logs-otlp-http';
+import { OTLPLogExporter as OTLPLogExporterGRPC } from '@opentelemetry/exporter-logs-otlp-grpc';
+import { OTLPLogExporter as OTLPLogExporterHTTP } from '@opentelemetry/exporter-logs-otlp-http';
 import {
   detectResourcesSync,
   envDetectorSync,
@@ -132,10 +133,16 @@ export class Logger {
 
     diag.warn(`${LOG_PREFIX} Sending logs to ${this._url}`);
 
-    const exporter = new OTLPLogExporter({
-      url: this._url,
-      ...(headers && { headers }),
-    });
+    const exporter =
+      process.env.OTEL_EXPORTER_OTLP_PROTOCOL === 'grpc'
+        ? new OTLPLogExporterGRPC({
+            url: this._url,
+            ...(headers && { headers }),
+          })
+        : new OTLPLogExporterHTTP({
+            url: this._url,
+            ...(headers && { headers }),
+          });
     this.processor = this.isDisabled()
       ? new NoopLogRecordProcessor()
       : new BatchLogRecordProcessor(exporter, {
