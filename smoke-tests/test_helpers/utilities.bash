@@ -18,19 +18,21 @@ metrics_received() {
 
 # test span name
 span_names_for() {
+	echo "# 🔍 Getting span names for library: $1" >&3
 	spans_from_library_named $1 | jq '.name'
 }
 
 # test span attributes
 span_attributes_for() {
 	# $1 - library name
-
+	echo "# 🔍 Getting span attributes for library: $1" >&3
 	spans_from_library_named $1 | \
 		jq ".attributes[]"
 }
 
 # test metric name
 metric_names_for() {
+	echo "# 🔍 Getting metric names for library: $1" >&3
 	metrics_from_library_named $1 | jq '.name'
 }
 
