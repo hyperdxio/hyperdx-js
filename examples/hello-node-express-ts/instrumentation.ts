@@ -1,6 +1,6 @@
-import { initSDK } from '@hyperdx/node-opentelemetry';
+import * as HyperDX from '@hyperdx/node-opentelemetry';
 
-initSDK({
+HyperDX.init({
   // advancedNetworkCapture: true,
   // betaMode: true,
   // consoleCapture: true,

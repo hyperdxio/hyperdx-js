@@ -1,7 +1,7 @@
-const { initSDK } = require('@hyperdx/node-opentelemetry');
+const HyperDX = require('@hyperdx/node-opentelemetry');
 const { context, metrics, propagation, trace } = require('@opentelemetry/api');
 
-initSDK({
+HyperDX.init({
   // advancedNetworkCapture: true,
   // betaMode: true,
   // consoleCapture: true,

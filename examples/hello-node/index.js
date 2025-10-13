@@ -1,9 +1,9 @@
-const { initSDK } = require('@hyperdx/node-opentelemetry');
+const HyperDX = require('@hyperdx/node-opentelemetry');
 const { trace } = require('@opentelemetry/api');
 
 // uses HYPERDX_API_KEY and OTEL_SERVICE_NAME environment variables
 // enable debug output with env var DEBUG=true
-initSDK({
+HyperDX.init({
   // advancedNetworkCapture: true,
   // betaMode: true,
   // consoleCapture: true,
