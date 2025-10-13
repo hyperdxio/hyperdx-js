@@ -10,21 +10,20 @@ processors:
 exporters:
   file:
     path: /var/lib/data.json
-  logging:
-    loglevel: debug
+  debug:
+    verbosity: detailed
 
 service:
   pipelines:
     traces:
       receivers: [otlp]
       processors: [batch]
-      exporters: [file, logging]
+      exporters: [file, debug]
     metrics:
       receivers: [otlp]
       processors: [batch]
-      exporters: [file, logging]
+      exporters: [file, debug]
     logs:
       receivers: [otlp]
       processors: [batch]
-      # exporters: [file, logging]
-      exporters: [logging]
+      exporters: [file, debug]
