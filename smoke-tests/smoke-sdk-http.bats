@@ -9,7 +9,7 @@ METER_NAME="hello-world-meter"
 setup_file() {
 	echo "# 🚧 Starting smoke-sdk-http tests" >&3
 	echo "# 📦 Building and starting containers: collector ${CONTAINER_NAME}" >&3
-	docker compose up --build --detach collector ${CONTAINER_NAME}
+	docker compose up --build --detach collector ${CONTAINER_NAME} >&3 2>&3
 	wait_for_ready_app ${CONTAINER_NAME}
 	echo "# 🌐 Sending test request to http://localhost:3000" >&3
 	curl --silent "http://localhost:3000"
@@ -22,9 +22,9 @@ teardown_file() {
 	echo "# 💾 Saving collector data to data-${CONTAINER_NAME}.json" >&3
 	cp collector/data.json collector/data-results/data-${CONTAINER_NAME}.json
 	echo "# 🛑 Stopping ${CONTAINER_NAME} container" >&3
-	docker compose stop ${CONTAINER_NAME}
+	docker compose stop ${CONTAINER_NAME} >&3 2>&3
 	echo "# 🔄 Restarting collector" >&3
-	docker compose restart collector
+	docker compose restart collector >&3 2>&3
 	wait_for_flush
 }
 

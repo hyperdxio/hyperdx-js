@@ -100,14 +100,18 @@ wait_for_flush() {
 wait_for_ready_app() {
 	CONTAINER=${1:?container name is a required parameter}
 	MAX_RETRIES=10
-	echo -n "# 🍿 Setting up ${CONTAINER}" >&3
+	echo "# 🍿 Setting up ${CONTAINER}" >&3
 	NEXT_WAIT_TIME=0
-	until [ $NEXT_WAIT_TIME -eq $MAX_RETRIES ] || [[ $(docker compose logs ${CONTAINER} | grep "Now listening on:") ]]
+	until [ $NEXT_WAIT_TIME -eq $MAX_RETRIES ] || [[ $(docker compose logs ${CONTAINER} 2>&1) =~ "Now listening on:" ]]
 	do
-		echo -n " ... $(( NEXT_WAIT_TIME++ ))s" >&3
-		sleep $NEXT_WAIT_TIME
+		echo "# ... waiting $(( NEXT_WAIT_TIME ))s" >&3
+		if [ $NEXT_WAIT_TIME -gt 0 ]; then
+			echo "# Container logs:" >&3
+			docker compose logs ${CONTAINER} 2>&1 | tail -10 >&3
+		fi
+		sleep $(( NEXT_WAIT_TIME++ ))
 	done
-	echo "" >&3
+	echo "# ✓ ${CONTAINER} is ready" >&3
 	[ $NEXT_WAIT_TIME -lt $MAX_RETRIES ]
 }
 
