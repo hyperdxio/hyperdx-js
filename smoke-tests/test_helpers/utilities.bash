@@ -71,6 +71,18 @@ log_severities_for() {
 	logs_from_scope_named $1 | jq '.severityText'
 }
 
+# test log trace IDs
+log_trace_ids_for() {
+	echo "# 🔍 Getting log trace IDs for scope: $1" >&3
+	logs_from_scope_named $1 | jq -r 'select(.traceId != null and .traceId != "") | .traceId'
+}
+
+# get span trace IDs
+span_trace_ids_for() {
+	echo "# 🔍 Getting span trace IDs for library: $1" >&3
+	spans_from_library_named $1 | jq -r '.traceId'
+}
+
 # Arguments
 # $1 - retry limit (default 5); Nth retry sleeps for N seconds
 wait_for_data() {

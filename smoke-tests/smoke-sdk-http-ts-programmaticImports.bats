@@ -83,3 +83,15 @@ teardown_file() {
 	result=$(log_bodies_for ${LOG_SCOPE_NAME} | grep "This is an error log")
 	assert_equal "$result" '"This is an error log"'
 }
+
+@test "Logs and traces share the same trace ID" {
+	echo "# ✅ Testing: Logs and traces share the same trace ID" >&3
+	log_trace_id=$(log_trace_ids_for ${LOG_SCOPE_NAME} | head -1)
+	span_trace_id=$(span_trace_ids_for "@opentelemetry/instrumentation-http" | grep -v "^$" | head -1)
+	echo "# Log trace ID: $log_trace_id" >&3
+	echo "# Span trace ID: $span_trace_id" >&3
+	[ -n "$log_trace_id" ]
+	[ -n "$span_trace_id" ]
+	# Check if log trace ID appears in any span trace IDs
+	span_trace_ids_for "@opentelemetry/instrumentation-http" | grep -q "$log_trace_id"
+}
