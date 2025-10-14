@@ -1,7 +1,13 @@
-import { Attributes, diag } from '@opentelemetry/api';
-import { Logger as OtelLogger, logs } from '@opentelemetry/api-logs';
+import {
+  Attributes,
+  context as apiContext,
+  diag,
+  trace,
+} from '@opentelemetry/api';
+import { Logger as OtelLogger, LogRecord, logs } from '@opentelemetry/api-logs';
 import { getEnvWithoutDefaults } from '@opentelemetry/core';
-import { OTLPLogExporter } from '@opentelemetry/exporter-logs-otlp-http';
+import { OTLPLogExporter as OTLPLogExporterGRPC } from '@opentelemetry/exporter-logs-otlp-grpc';
+import { OTLPLogExporter as OTLPLogExporterHTTP } from '@opentelemetry/exporter-logs-otlp-http';
 import {
   detectResourcesSync,
   envDetectorSync,
@@ -28,6 +34,47 @@ import {
 } from '../constants';
 
 const LOG_PREFIX = `⚠️  [LOGGER]`;
+
+/**
+ * Load context from attributes and set it to logRecord.context
+ *
+ * @param {LogRecord} logRecord
+ * @returns {LogRecord}
+ */
+function loadContext(logRecord: LogRecord): LogRecord {
+  let context = apiContext.active();
+  let attributes = logRecord.attributes;
+
+  if (typeof attributes !== 'undefined') {
+    const { trace_id, span_id, trace_flags, ...otherAttributes } =
+      logRecord.attributes as Attributes & {
+        trace_id?: string;
+        span_id?: string;
+        trace_flags?: number;
+      };
+
+    if (
+      typeof trace_id !== 'undefined' &&
+      typeof span_id !== 'undefined' &&
+      typeof trace_flags !== 'undefined'
+    ) {
+      context = trace.setSpanContext(context, {
+        traceId: trace_id,
+        spanId: span_id,
+        traceFlags: trace_flags,
+        isRemote: true,
+      });
+    }
+
+    attributes = otherAttributes;
+  }
+
+  return {
+    ...logRecord,
+    attributes,
+    context,
+  };
+}
 
 export type LoggerOptions = {
   baseUrl?: string;
@@ -86,10 +133,16 @@ export class Logger {
 
     diag.warn(`${LOG_PREFIX} Sending logs to ${this._url}`);
 
-    const exporter = new OTLPLogExporter({
-      url: this._url,
-      ...(headers && { headers }),
-    });
+    const exporter =
+      process.env.OTEL_EXPORTER_OTLP_PROTOCOL === 'grpc'
+        ? new OTLPLogExporterGRPC({
+            url: this._url,
+            ...(headers && { headers }),
+          })
+        : new OTLPLogExporterHTTP({
+            url: this._url,
+            ...(headers && { headers }),
+          });
     this.processor = this.isDisabled()
       ? new NoopLogRecordProcessor()
       : new BatchLogRecordProcessor(exporter, {
@@ -156,14 +209,16 @@ export class Logger {
   }
 
   postMessage(level: string, body: string, attributes: Attributes = {}): void {
-    this.logger.emit({
-      // TODO: should map to otel severity number
-      severityNumber: 0,
-      // TODO: set up the mapping between different downstream log levels
-      severityText: level,
-      body,
-      attributes,
-      timestamp: this.parseTimestamp(attributes),
-    });
+    this.logger.emit(
+      loadContext({
+        // TODO: should map to otel severity number
+        severityNumber: 0,
+        // TODO: set up the mapping between different downstream log levels
+        severityText: level,
+        body,
+        attributes,
+        timestamp: this.parseTimestamp(attributes),
+      }),
+    );
   }
 }

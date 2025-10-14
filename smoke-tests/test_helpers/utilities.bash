@@ -16,21 +16,31 @@ metrics_received() {
 	jq ".resourceMetrics[]?" ./collector/data.json
 }
 
+logs_received() {
+	jq ".resourceLogs[]?" ./collector/data.json
+}
+
+logs_from_scope_named() {
+	logs_received | jq ".scopeLogs[] | select(.scope.name == \"$1\").logRecords[]"
+}
+
 # test span name
 span_names_for() {
+	echo "# 🔍 Getting span names for library: $1" >&3
 	spans_from_library_named $1 | jq '.name'
 }
 
 # test span attributes
 span_attributes_for() {
 	# $1 - library name
-
+	echo "# 🔍 Getting span attributes for library: $1" >&3
 	spans_from_library_named $1 | \
 		jq ".attributes[]"
 }
 
 # test metric name
 metric_names_for() {
+	echo "# 🔍 Getting metric names for library: $1" >&3
 	metrics_from_library_named $1 | jq '.name'
 }
 
@@ -47,6 +57,30 @@ wait_for_metrics() {
 	done
 	echo "" >&3
 	[ $NEXT_WAIT_TIME -lt $MAX_RETRIES ]
+}
+
+# test log body messages
+log_bodies_for() {
+	echo "# 🔍 Getting log bodies for scope: $1" >&3
+	logs_from_scope_named $1 | jq '.body.stringValue'
+}
+
+# test log severity
+log_severities_for() {
+	echo "# 🔍 Getting log severities for scope: $1" >&3
+	logs_from_scope_named $1 | jq '.severityText'
+}
+
+# test log trace IDs
+log_trace_ids_for() {
+	echo "# 🔍 Getting log trace IDs for scope: $1" >&3
+	logs_from_scope_named $1 | jq -r 'select(.traceId != null and .traceId != "") | .traceId'
+}
+
+# get span trace IDs
+span_trace_ids_for() {
+	echo "# 🔍 Getting span trace IDs for library: $1" >&3
+	spans_from_library_named $1 | jq -r '.traceId'
 }
 
 # Arguments
@@ -98,14 +132,18 @@ wait_for_flush() {
 wait_for_ready_app() {
 	CONTAINER=${1:?container name is a required parameter}
 	MAX_RETRIES=10
-	echo -n "# 🍿 Setting up ${CONTAINER}" >&3
+	echo "# 🍿 Setting up ${CONTAINER}" >&3
 	NEXT_WAIT_TIME=0
-	until [ $NEXT_WAIT_TIME -eq $MAX_RETRIES ] || [[ $(docker compose logs ${CONTAINER} | grep "Now listening on:") ]]
+	until [ $NEXT_WAIT_TIME -eq $MAX_RETRIES ] || [[ $(docker compose logs ${CONTAINER} 2>&1) =~ "Now listening on:" ]]
 	do
-		echo -n " ... $(( NEXT_WAIT_TIME++ ))s" >&3
-		sleep $NEXT_WAIT_TIME
+		echo "# ... waiting $(( NEXT_WAIT_TIME ))s" >&3
+		if [ $NEXT_WAIT_TIME -gt 0 ]; then
+			echo "# Container logs:" >&3
+			docker compose logs ${CONTAINER} 2>&1 | tail -10 >&3
+		fi
+		sleep $(( NEXT_WAIT_TIME++ ))
 	done
-	echo "" >&3
+	echo "# ✓ ${CONTAINER} is ready" >&3
 	[ $NEXT_WAIT_TIME -lt $MAX_RETRIES ]
 }
 
