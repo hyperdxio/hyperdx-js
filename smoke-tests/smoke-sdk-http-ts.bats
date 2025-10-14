@@ -15,7 +15,7 @@ setup_file() {
 	echo "# 🌐 Sending test request to http://localhost:3000" >&3
 	curl --silent "http://localhost:3000"
 	wait_for_traces
-  # wait_for_metrics 15
+	wait_for_metrics 15
 }
 
 teardown_file() {
@@ -62,11 +62,11 @@ teardown_file() {
 # 	assert_equal "$result" '"another important value"'
 # }
 
-# @test "Manual instrumentation produces metrics for counter" {
-#     result=$(metric_names_for ${METER_NAME})
-#     assert_equal "$result" '"sheep"'
-# }
-# @test "Manual instrumentation produces metrics for observable gauge" {
-#     result=$(metric_names_for ${NODE_METER_NAME})
-#     assert_equal "$result" '"process.runtime.nodejs.memory.heap.total"'
-# }
+@test "Manual instrumentation produces metrics for counter" {
+    result=$(metric_names_for ${METER_NAME})
+    assert_equal "$result" '"sheep"'
+}
+@test "Manual instrumentation produces metrics for observable gauge" {
+    result=$(metric_names_for ${NODE_METER_NAME})
+    assert_equal "$result" '"process.runtime.nodejs.memory.heap.total"'
+}
