@@ -41,3 +41,14 @@ services:
       OTEL_EXPORTER_OTLP_PROTOCOL: grpc
     ports:
       - '127.0.0.1:3000:3000'
+
+  app-sdk-http-ts-programmaticImports:
+    <<: *app_base_ts
+    command: ['node', './smoke-tests/hello-node-express-ts/dist/index.js']
+    environment:
+      <<: *env_base
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://collector:4318
+      OTEL_EXPORTER_OTLP_PROTOCOL: http/protobuf
+      HYPERDX_SDK_PROGRAMMATIC_IMPORTS: 'true'
+    ports:
+      - '127.0.0.1:3000:3000'

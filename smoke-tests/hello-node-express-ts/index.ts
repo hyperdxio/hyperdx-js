@@ -1,3 +1,10 @@
+import * as HyperDX from '@hyperdx/node-opentelemetry';
+
+// Initialize HyperDX SDK BEFORE importing other libraries for programmatic imports
+if (process.env.HYPERDX_SDK_PROGRAMMATIC_IMPORTS === 'true') {
+  HyperDX.init({});
+}
+
 import {
   context,
   Context,
@@ -12,7 +19,6 @@ import {
 } from '@opentelemetry/api';
 import express, { Express, NextFunction, Request, Response } from 'express';
 import pino from 'pino';
-import * as HyperDX from '@hyperdx/node-opentelemetry';
 
 const pinoLogger = pino({
   mixin: HyperDX.getPinoMixinFunction,
