@@ -103,8 +103,8 @@ export class Logger {
     this.provider = new LoggerProvider({
       resource: detectedResource.merge(
         new Resource({
-          // TODO: should use otel semantic conventions
-          'hyperdx.distro.version': PKG_VERSION,
+          'telemetry.distro.name': 'hyperdx',
+          'telemetry.distro.version': PKG_VERSION,
           [SEMRESATTRS_SERVICE_NAME]: service ?? _serviceName,
           ...resourceAttributes,
         }),
