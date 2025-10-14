@@ -16,6 +16,14 @@ metrics_received() {
 	jq ".resourceMetrics[]?" ./collector/data.json
 }
 
+logs_received() {
+	jq ".resourceLogs[]?" ./collector/data.json
+}
+
+logs_from_scope_named() {
+	logs_received | jq ".scopeLogs[] | select(.scope.name == \"$1\").logRecords[]"
+}
+
 # test span name
 span_names_for() {
 	echo "# 🔍 Getting span names for library: $1" >&3
@@ -49,6 +57,18 @@ wait_for_metrics() {
 	done
 	echo "" >&3
 	[ $NEXT_WAIT_TIME -lt $MAX_RETRIES ]
+}
+
+# test log body messages
+log_bodies_for() {
+	echo "# 🔍 Getting log bodies for scope: $1" >&3
+	logs_from_scope_named $1 | jq '.body.stringValue'
+}
+
+# test log severity
+log_severities_for() {
+	echo "# 🔍 Getting log severities for scope: $1" >&3
+	logs_from_scope_named $1 | jq '.severityText'
 }
 
 # Arguments
