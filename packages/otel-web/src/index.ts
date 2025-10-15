@@ -189,6 +189,12 @@ export interface RumOtelWebConfig {
    * Config options passed to web tracer
    */
   tracer?: WebTracerConfig;
+
+  /**
+   * Additional resource attributes to be added to all spans.
+   * These will be merged with default SDK resource attributes.
+   */
+  resourceAttributes?: ResourceAttributes;
 }
 
 interface RumOtelWebConfigInternal extends RumOtelWebConfig {
@@ -530,13 +536,15 @@ export const Rum: RumOtelWebType = {
       processedOptions.cookieDomain,
     ).deinit;
 
-    const { ignoreUrls, applicationName, deploymentEnvironment, version } =
+    const { ignoreUrls, applicationName, deploymentEnvironment, version, resourceAttributes } =
       processedOptions;
     // enabled: false prevents registerInstrumentations from enabling instrumentations in constructor
     // they will be enabled in registerInstrumentations
     const pluginDefaults = { ignoreUrls, enabled: false };
 
     const resourceAttrs: ResourceAttributes = {
+      // User-provided resource attributes
+      ...(resourceAttributes || {}),
       ...SDK_INFO,
       [SemanticResourceAttributes.TELEMETRY_SDK_NAME]: '@hyperdx/otel-web',
       [SemanticResourceAttributes.TELEMETRY_SDK_VERSION]: VERSION,
@@ -544,6 +552,7 @@ export const Rum: RumOtelWebType = {
       // Splunk specific attributes
       'rum.version': VERSION,
       'rum.scriptInstance': instanceId,
+
     };
 
     const syntheticsRunId = getSyntheticsRunId();
