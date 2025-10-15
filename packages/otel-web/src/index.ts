@@ -543,6 +543,7 @@ export const Rum: RumOtelWebType = {
     const pluginDefaults = { ignoreUrls, enabled: false };
 
     const resourceAttrs: ResourceAttributes = {
+      // User-provided resource attributes
       ...(resourceAttributes || {}),
       ...SDK_INFO,
       [SemanticResourceAttributes.TELEMETRY_SDK_NAME]: '@hyperdx/otel-web',
@@ -551,8 +552,7 @@ export const Rum: RumOtelWebType = {
       // Splunk specific attributes
       'rum.version': VERSION,
       'rum.scriptInstance': instanceId,
-      // User-provided resource attributes
-      ...(resourceAttributes || {}),
+
     };
 
     const syntheticsRunId = getSyntheticsRunId();
