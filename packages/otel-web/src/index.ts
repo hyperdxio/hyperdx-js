@@ -543,6 +543,7 @@ export const Rum: RumOtelWebType = {
     const pluginDefaults = { ignoreUrls, enabled: false };
 
     const resourceAttrs: ResourceAttributes = {
+      ...(resourceAttributes || {}),
       ...SDK_INFO,
       [SemanticResourceAttributes.TELEMETRY_SDK_NAME]: '@hyperdx/otel-web',
       [SemanticResourceAttributes.TELEMETRY_SDK_VERSION]: VERSION,
