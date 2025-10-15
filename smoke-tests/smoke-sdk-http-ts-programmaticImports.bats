@@ -2,14 +2,14 @@
 
 load test_helpers/utilities
 
-CONTAINER_NAME="app-sdk-http-ts"
+CONTAINER_NAME="app-sdk-http-ts-programmaticImports"
 TRACER_NAME="hello-world-tracer"
 METER_NAME="hello-world-meter"
 NODE_METER_NAME="node-monitor-meter"
 LOG_SCOPE_NAME="node-logger"
 
 setup_file() {
-	echo "# 🚧 Starting smoke-sdk-http-ts tests" >&3
+	echo "# 🚧 Starting smoke-sdk-http-ts-programmaticImports tests" >&3
 	echo "# 📦 Starting containers: collector ${CONTAINER_NAME}" >&3
 	docker compose up --detach collector ${CONTAINER_NAME} >&3 2>&3
 	wait_for_ready_app ${CONTAINER_NAME}
@@ -22,7 +22,7 @@ setup_file() {
 }
 
 teardown_file() {
-	echo "# 🧹 Cleaning up smoke-sdk-http-ts tests" >&3
+	echo "# 🧹 Cleaning up smoke-sdk-http-ts-programmaticImports tests" >&3
 	echo "# 💾 Saving collector data to data-${CONTAINER_NAME}.json" >&3
 	cp collector/data.json collector/data-results/data-${CONTAINER_NAME}.json
 	echo "# 🛑 Stopping ${CONTAINER_NAME} container" >&3
@@ -34,17 +34,10 @@ teardown_file() {
 
 # TESTS
 
-@test "Auto instrumentation produces Express middleware spans" {
-  echo "# ✅ Testing: Auto instrumentation produces Express middleware spans" >&3
-  result=$(span_names_for "@opentelemetry/instrumentation-express" | grep -c "middleware")
-  [ "$result" -ge 4 ]
-}
-
-@test "Auto instrumentation produces http request spans" {
-  echo "# ✅ Testing: Auto instrumentation produces http request spans" >&3
+@test "HTTP instrumentation produces an http request span (without route)" {
+  echo "# ✅ Testing: HTTP instrumentation produces an http request span (without route)" >&3
   result=$(span_names_for "@opentelemetry/instrumentation-http")
-  echo "$result" | grep -q "GET /"
-  echo "$result" | grep -q "GET /logs"
+  assert_equal "$result" '"GET"'
 }
 
 @test "Manual instrumentation produces span with name of span" {

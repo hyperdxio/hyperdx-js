@@ -1,5 +1,16 @@
 # @hyperdx/node-opentelemetry
 
+## 0.9.0
+
+### Minor Changes
+
+- 2833fae: migration: follow telemetry.distro semantic convention (logs)
+
+### Patch Changes
+
+- aee67bc: feat: support gRPC protocol
+- aee67bc: fix: pino trace linking issue
+
 ## 0.8.2
 
 ### Patch Changes

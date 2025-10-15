@@ -6,51 +6,46 @@ clean-smoke-tests:
 
 #: cleans up TS build, smoke test output, and example app detritus
 squeaky-clean: clean clean-smoke-tests
-	rm -rf ./examples/dist
-	rm -rf ./examples/node_modules
-	rm -rf ./examples/hello-node/dist
-	rm -rf ./examples/hello-node/node_modules
-	rm -rf ./examples/hello-node-express/dist
-	rm -rf ./examples/hello-node-express/node_modules
-	rm -rf ./examples/hello-node-express-ts/dist
-	rm -rf ./examples/hello-node-express-ts/node_modules
+	rm -rf ./smoke-tests/hello-node-express-ts/dist
+	rm -rf ./smoke-tests/hello-node-express-ts/node_modules
 
 smoke-tests/collector/data.json:
 	@echo ""
 	@echo "+++ Zhuzhing smoke test's Collector data.json"
 	@touch $@ && chmod o+w $@
 
-smoke-sdk-grpc: smoke-tests/collector/data.json
+#: build Docker images for smoke tests (with caching)
+build-smoke-images:
 	@echo ""
-	@echo "+++ Running gRPC smoke tests."
+	@echo "+++ Building smoke test Docker images (cached)"
 	@echo ""
-	cd smoke-tests && bats ./smoke-sdk-grpc.bats --report-formatter junit --output ./
+	cd smoke-tests && docker compose build
 
-smoke-sdk-grpc-ts: smoke-tests/collector/data.json
+smoke-sdk-grpc-ts: build-smoke-images smoke-tests/collector/data.json
 	@echo ""
 	@echo "+++ Running gRPC smoke tests for TypeScript."
 	@echo ""
-	cd smoke-tests && bats ./smoke-sdk-grpc-ts.bats --report-formatter junit --output ./
+	cd smoke-tests && bats ./smoke-sdk-grpc-ts.bats --report-formatter junit --output ./ --verbose-run
 
-smoke-sdk-http: smoke-tests/collector/data.json
-	@echo ""
-	@echo "+++ Running HTTP smoke tests."
-	@echo ""
-	cd smoke-tests && bats ./smoke-sdk-http.bats --report-formatter junit --output ./
-
-smoke-sdk-http-ts: smoke-tests/collector/data.json
+smoke-sdk-http-ts: build-smoke-images smoke-tests/collector/data.json
 	@echo ""
 	@echo "+++ Running HTTP smoke tests for TypeScript."
 	@echo ""
-	cd smoke-tests && bats ./smoke-sdk-http-ts.bats --report-formatter junit --output ./
+	cd smoke-tests && bats ./smoke-sdk-http-ts.bats --report-formatter junit --output ./ --verbose-run
 
-smoke-sdk: smoke-sdk-http smoke-sdk-http-ts
+smoke-sdk-http-ts-programmaticImports: build-smoke-images smoke-tests/collector/data.json
+	@echo ""
+	@echo "+++ Running HTTP programmatic imports smoke tests for TypeScript."
+	@echo ""
+	cd smoke-tests && bats ./smoke-sdk-http-ts-programmaticImports.bats --report-formatter junit --output ./ --verbose-run
+
+smoke-sdk: smoke-sdk-http-ts smoke-sdk-grpc-ts
 
 smoke: docker_compose_present
 	@echo ""
 	@echo "+++ Smoking all the tests."
 	@echo ""
-	cd smoke-tests && bats . --report-formatter junit --output ./
+	cd smoke-tests && bats . --report-formatter junit --output ./ --verbose-run
 
 unsmoke: docker_compose_present
 	@echo ""
@@ -61,7 +56,7 @@ unsmoke: docker_compose_present
 #: use this for local smoke testing
 resmoke: unsmoke smoke
 
-.PHONY: clean-smoke-tests example smoke unsmoke resmoke smoke-sdk-grpc smoke-sdk-http smoke-sdk
+.PHONY: clean-smoke-tests build-smoke-images example smoke unsmoke resmoke smoke-sdk-grpc-ts smoke-sdk-http-ts smoke-sdk-http-ts-programmaticImports smoke-sdk
 
 .PHONY: docker_compose_present
 docker_compose_present:
