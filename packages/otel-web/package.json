@@ -1,6 +1,6 @@
 {
   "name": "@hyperdx/otel-web",
-  "version": "0.16.2",
+  "version": "0.16.3",
   "description": "HyperDX distribution of OpenTelemetry for real user monitoring (RUM)",
   "scripts": {
     "start": "npm-run-all -s compile start:_execute",

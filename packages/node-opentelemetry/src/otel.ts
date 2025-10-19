@@ -5,7 +5,8 @@ import {
   getNodeAutoInstrumentations,
   InstrumentationConfigMap,
 } from '@opentelemetry/auto-instrumentations-node';
-import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-proto';
+import { OTLPTraceExporter as OTLPTraceExporterGRPC } from '@opentelemetry/exporter-trace-otlp-grpc';
+import { OTLPTraceExporter as OTLPTraceExporterHTTP } from '@opentelemetry/exporter-trace-otlp-proto';
 import {
   InstrumentationBase,
   InstrumentationModuleDefinition,
@@ -343,10 +344,16 @@ export const initSDK = (config: SDKConfig) => {
         ? []
         : [
             new HyperDXSpanProcessor({
-              exporter: new OTLPTraceExporter({
-                timeoutMillis: DEFAULT_OTEL_EXPORTER_OTLP_TRACES_TIMEOUT,
-                url: DEFAULT_OTEL_TRACES_EXPORTER_URL,
-              }),
+              exporter:
+                env.OTEL_EXPORTER_OTLP_PROTOCOL === 'grpc'
+                  ? new OTLPTraceExporterGRPC({
+                      timeoutMillis: DEFAULT_OTEL_EXPORTER_OTLP_TRACES_TIMEOUT,
+                      url: DEFAULT_OTEL_TRACES_EXPORTER_URL,
+                    })
+                  : new OTLPTraceExporterHTTP({
+                      timeoutMillis: DEFAULT_OTEL_EXPORTER_OTLP_TRACES_TIMEOUT,
+                      url: DEFAULT_OTEL_TRACES_EXPORTER_URL,
+                    }),
               enableHDXGlobalContext: defaultBetaMode,
               contextManager,
             }),

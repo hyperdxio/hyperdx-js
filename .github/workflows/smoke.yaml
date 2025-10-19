@@ -10,13 +10,15 @@ concurrency:
 jobs:
   main:
     timeout-minutes: 8
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
     steps:
       - name: Setup BATS
         uses: mig4/setup-bats@v1
         with:
-          bats-version: 1.10.0
+          bats-version: 1.12.0
       - name: Check out repository
         uses: actions/checkout@v4
+      - name: Build smoke test images
+        run: make build-smoke-images
       - name: Run smoke tests
         run: make smoke-sdk

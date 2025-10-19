@@ -124,6 +124,15 @@ If you are having trouble getting events to show up in HyperDX, you can enable v
 
 If you're pointing to a self-hosted collector, ensure the `OTEL_EXPORTER_OTLP_ENDPOINT` environment variable is set to the correct endpoint (ex. `http://localhost:4318`) and is reachable (ex. `curl http://localhost:4318/v1/traces` should return a HTTP 405).
 
+#### Bundlers (esbuild, webpack, etc.)
+
+When using bundlers like esbuild with OpenTelemetry, in order to auto-instrument supported libraries, you'll want to make sure you make them available outside of the bundle. For instance:
+
+- For **esbuild**: Use a plugin like [esbuild-node-externals](https://www.npmjs.com/package/esbuild-node-externals) to exclude Node.js modules and libraries from bundling
+- For **other bundlers**: Use equivalent plugins or configurations that prevent bundling of Node.js modules and dependencies that OpenTelemetry needs to instrument
+
+This ensures that OpenTelemetry can properly access and patch the original modules at runtime rather than using bundled versions, which would make them unavailable to auto-instrumentation.
+
 ### (Optional) Attach User Information or Metadata (BETA)
 
 > WARNING: ONLY WORKS WITH NODE 14.8.0+
