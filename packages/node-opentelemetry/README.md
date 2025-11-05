@@ -106,6 +106,12 @@ import { initSDK } from '@hyperdx/node-opentelemetry';
 initSDK({
   consoleCapture: true, // optional, default: true
   additionalInstrumentations: [], // optional, default: []
+  additionalResourceAttributes: { // optional, default: {}
+    // Add custom resource attributes to all telemetry data
+    'environment': 'production',
+    'deployment.version': '1.0.0',
+    'custom.attribute': 'value'
+  },
 });
 
 // Other instrumentation code...
@@ -163,6 +169,30 @@ app.use((req, res, next) => {
 ```
 
 ### (Optional) Advanced Instrumentation Configuration
+
+#### Adding Custom Resource Attributes
+
+Resource attributes are key-value pairs that describe the resource (service/application) producing telemetry data. These attributes are attached to all traces, metrics, and logs exported from your application. Common use cases include adding environment information, deployment versions, or custom metadata for filtering and grouping telemetry data.
+
+When using manual instrumentation with `initSDK`, you can add custom resource attributes using the `additionalResourceAttributes` parameter:
+
+```ts
+import { initSDK } from '@hyperdx/node-opentelemetry';
+
+initSDK({
+  additionalResourceAttributes: {
+    'deployment.environment': process.env.NODE_ENV || 'development',
+    'service.version': process.env.APP_VERSION || '0.0.0',
+    'service.namespace': 'my-namespace',
+    'cloud.region': process.env.AWS_REGION,
+    // Add any custom attributes your organization needs
+    'team.name': 'backend-team',
+    'feature.flag': 'new-checkout-flow'
+  },
+});
+```
+
+These attributes will be included with all telemetry data sent to HyperDX, making it easier to filter and analyze your observability data. For standard attribute names, refer to the [OpenTelemetry Resource Semantic Conventions](https://opentelemetry.io/docs/specs/semconv/resource/).
 
 #### Adding Additional 3rd-Party Instrumentation Packages
 
