@@ -106,6 +106,12 @@ import { initSDK } from '@hyperdx/node-opentelemetry';
 initSDK({
   consoleCapture: true, // optional, default: true
   additionalInstrumentations: [], // optional, default: []
+  additionalResourceAttributes: { // optional, default: {}
+    // Add custom resource attributes to all telemetry data
+    'environment': 'production',
+    'deployment.version': '1.0.0',
+    'custom.attribute': 'value'
+  },
 });
 
 // Other instrumentation code...
@@ -123,6 +129,15 @@ npx ts-node -r './instrument.ts' index.ts
 If you are having trouble getting events to show up in HyperDX, you can enable verbose logging by setting the environment variable `OTEL_LOG_LEVEL=debug`. This will print out additional debug logging to isolate any issues.
 
 If you're pointing to a self-hosted collector, ensure the `OTEL_EXPORTER_OTLP_ENDPOINT` environment variable is set to the correct endpoint (ex. `http://localhost:4318`) and is reachable (ex. `curl http://localhost:4318/v1/traces` should return a HTTP 405).
+
+#### Bundlers (esbuild, webpack, etc.)
+
+When using bundlers like esbuild with OpenTelemetry, in order to auto-instrument supported libraries, you'll want to make sure you make them available outside of the bundle. For instance:
+
+- For **esbuild**: Use a plugin like [esbuild-node-externals](https://www.npmjs.com/package/esbuild-node-externals) to exclude Node.js modules and libraries from bundling
+- For **other bundlers**: Use equivalent plugins or configurations that prevent bundling of Node.js modules and dependencies that OpenTelemetry needs to instrument
+
+This ensures that OpenTelemetry can properly access and patch the original modules at runtime rather than using bundled versions, which would make them unavailable to auto-instrumentation.
 
 ### (Optional) Attach User Information or Metadata (BETA)
 
@@ -154,6 +169,30 @@ app.use((req, res, next) => {
 ```
 
 ### (Optional) Advanced Instrumentation Configuration
+
+#### Adding Custom Resource Attributes
+
+Resource attributes are key-value pairs that describe the resource (service/application) producing telemetry data. These attributes are attached to all traces, metrics, and logs exported from your application. Common use cases include adding environment information, deployment versions, or custom metadata for filtering and grouping telemetry data.
+
+When using manual instrumentation with `initSDK`, you can add custom resource attributes using the `additionalResourceAttributes` parameter:
+
+```ts
+import { initSDK } from '@hyperdx/node-opentelemetry';
+
+initSDK({
+  additionalResourceAttributes: {
+    'deployment.environment': process.env.NODE_ENV || 'development',
+    'service.version': process.env.APP_VERSION || '0.0.0',
+    'service.namespace': 'my-namespace',
+    'cloud.region': process.env.AWS_REGION,
+    // Add any custom attributes your organization needs
+    'team.name': 'backend-team',
+    'feature.flag': 'new-checkout-flow'
+  },
+});
+```
+
+These attributes will be included with all telemetry data sent to HyperDX, making it easier to filter and analyze your observability data. For standard attribute names, refer to the [OpenTelemetry Resource Semantic Conventions](https://opentelemetry.io/docs/specs/semconv/resource/).
 
 #### Adding Additional 3rd-Party Instrumentation Packages
 

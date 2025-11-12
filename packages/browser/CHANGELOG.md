@@ -1,5 +1,18 @@
 # @hyperdx/browser
 
+## 0.22.0
+
+### Minor Changes
+
+- d726266: Added an optional otelResourceAttributes array to the BrowserSDKConfig type.
+
+## 0.21.2
+
+### Patch Changes
+
+- Updated dependencies [fac5e58]
+  - @hyperdx/otel-web@0.16.3
+
 ## 0.21.1
 
 ### Patch Changes

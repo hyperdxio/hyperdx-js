@@ -5,13 +5,14 @@ import {
   getNodeAutoInstrumentations,
   InstrumentationConfigMap,
 } from '@opentelemetry/auto-instrumentations-node';
-import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-proto';
+import { OTLPTraceExporter as OTLPTraceExporterGRPC } from '@opentelemetry/exporter-trace-otlp-grpc';
+import { OTLPTraceExporter as OTLPTraceExporterHTTP } from '@opentelemetry/exporter-trace-otlp-proto';
 import {
   InstrumentationBase,
   InstrumentationModuleDefinition,
 } from '@opentelemetry/instrumentation';
 import { RuntimeNodeInstrumentation } from '@opentelemetry/instrumentation-runtime-node';
-import { Resource } from '@opentelemetry/resources';
+import { Resource, ResourceAttributes } from '@opentelemetry/resources';
 import { MetricReader } from '@opentelemetry/sdk-metrics';
 import { NodeSDK } from '@opentelemetry/sdk-node';
 import cliSpinners from 'cli-spinners';
@@ -57,6 +58,7 @@ const IS_LOCAL = env.NODE_ENV === 'development' || !env.NODE_ENV;
 
 export type SDKConfig = {
   additionalInstrumentations?: InstrumentationBase[];
+  additionalResourceAttributes?: ResourceAttributes;
   advancedNetworkCapture?: boolean;
   apiKey?: string;
   betaMode?: boolean;
@@ -330,6 +332,7 @@ export const initSDK = (config: SDKConfig) => {
 
   sdk = new NodeSDK({
     resource: new Resource({
+      ...config.additionalResourceAttributes,
       // https://opentelemetry.io/docs/specs/semconv/resource/#telemetry-sdk-experimental
       'telemetry.distro.name': 'hyperdx',
       'telemetry.distro.version': PKG_VERSION,
@@ -343,10 +346,16 @@ export const initSDK = (config: SDKConfig) => {
         ? []
         : [
             new HyperDXSpanProcessor({
-              exporter: new OTLPTraceExporter({
-                timeoutMillis: DEFAULT_OTEL_EXPORTER_OTLP_TRACES_TIMEOUT,
-                url: DEFAULT_OTEL_TRACES_EXPORTER_URL,
-              }),
+              exporter:
+                env.OTEL_EXPORTER_OTLP_PROTOCOL === 'grpc'
+                  ? new OTLPTraceExporterGRPC({
+                      timeoutMillis: DEFAULT_OTEL_EXPORTER_OTLP_TRACES_TIMEOUT,
+                      url: DEFAULT_OTEL_TRACES_EXPORTER_URL,
+                    })
+                  : new OTLPTraceExporterHTTP({
+                      timeoutMillis: DEFAULT_OTEL_EXPORTER_OTLP_TRACES_TIMEOUT,
+                      url: DEFAULT_OTEL_TRACES_EXPORTER_URL,
+                    }),
               enableHDXGlobalContext: defaultBetaMode,
               contextManager,
             }),
