@@ -1,5 +1,11 @@
 # @hyperdx/node-opentelemetry
 
+## 0.10.1
+
+### Patch Changes
+
+- 7038775: fix: setTraceAttributes cross trace attributes leakage issue
+
 ## 0.10.0
 
 ### Minor Changes
