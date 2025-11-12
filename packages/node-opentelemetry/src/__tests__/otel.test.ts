@@ -18,6 +18,22 @@ describe('otel', () => {
     shutdown();
   });
 
+  it('should be able to initialize the SDK with initSDK using additional resource attributes', async () => {
+    initSDK({
+      apiKey: 'blabla',
+      advancedNetworkCapture: true,
+      consoleCapture: true,
+      additionalResourceAttributes: {
+        'cloud.region': 'us-east-2',
+        'cloud.availability_zone': 'us-east-2a',
+      },
+    });
+
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+
+    shutdown();
+  });
+
   it('should be able to initialize the SDK with init', async () => {
     init({
       apiKey: 'blabla',

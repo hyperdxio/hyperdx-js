@@ -1,5 +1,17 @@
 # @hyperdx/node-opentelemetry
 
+## 0.10.1
+
+### Patch Changes
+
+- 7038775: fix: setTraceAttributes cross trace attributes leakage issue
+
+## 0.10.0
+
+### Minor Changes
+
+- 88a79d6: Allows setting user defined resource attributes when initializing the SDK.
+
 ## 0.9.0
 
 ### Minor Changes
