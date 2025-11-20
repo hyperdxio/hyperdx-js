@@ -1,4 +1,4 @@
-import { parseOtlpHeaders } from '../otel';
+import { parseOtlpHeaders } from '../utils';
 
 describe('Parse OTLP Headers', () => {
   it('should return an empty object when no headers string is provided', () => {
