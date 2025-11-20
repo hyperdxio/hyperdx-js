@@ -34,6 +34,7 @@
   "dependencies": {
     "@hyperdx/instrumentation-exception": "^0.1.0",
     "@hyperdx/instrumentation-sentry-node": "^0.1.0",
+    "@loglayer/transport": "^2.2.0",
     "@opentelemetry/api": "^1.8.0",
     "@opentelemetry/api-logs": "^0.57.2",
     "@opentelemetry/auto-instrumentations-node": "^0.56.1",
@@ -78,6 +79,7 @@
     "ioredis": "^5.4.1",
     "knex": "^3.1.0",
     "koa": "^2.15.3",
+    "loglayer": "^6.4.2",
     "mongodb": "^6.6.2",
     "mongoose": "^6.12.8",
     "mysql": "^2.18.1",
