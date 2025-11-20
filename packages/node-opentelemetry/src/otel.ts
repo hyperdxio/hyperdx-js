@@ -49,6 +49,7 @@ import { getHyperDXMetricReader } from './metrics';
 import { MutableAsyncLocalStorageContextManager } from './MutableAsyncLocalStorageContextManager';
 import { Logger as OtelLogger } from './otel-logger';
 import HyperDXSpanProcessor from './spanProcessor';
+import { parseOtlpHeaders } from './utils';
 
 const UI_LOG_PREFIX = '[⚡HyperDX]';
 
@@ -215,6 +216,13 @@ export const initSDK = (config: SDKConfig) => {
   });
   ui.succeed('Set default otel envs');
 
+  // Parse OTLP headers from environment variable
+  const otlpHeaders = parseOtlpHeaders(env.OTEL_EXPORTER_OTLP_HEADERS);
+  const healthCheckHeaders = {
+    'Content-Type': 'application/json',
+    ...otlpHeaders,
+  };
+
   const stopOnTerminationSignals =
     config.stopOnTerminationSignals ??
     DEFAULT_HDX_NODE_STOP_ON_TERMINATION_SIGNALS; // Stop by default
@@ -244,23 +252,17 @@ export const initSDK = (config: SDKConfig) => {
   Promise.all([
     healthCheckUrl(ui, DEFAULT_OTEL_TRACES_EXPORTER_URL, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: healthCheckHeaders,
       body: JSON.stringify({}),
     }),
     healthCheckUrl(ui, _logger.getExporterUrl(), {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: healthCheckHeaders,
       body: JSON.stringify({}),
     }),
     healthCheckUrl(ui, DEFAULT_OTEL_METRICS_EXPORTER_URL, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: healthCheckHeaders,
       body: JSON.stringify({}),
     }),
   ]);
