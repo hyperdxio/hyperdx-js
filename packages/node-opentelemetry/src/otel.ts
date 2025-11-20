@@ -150,7 +150,9 @@ const hrtimeToMs = (hrtime: [number, number]) => {
  * Parses OTEL_EXPORTER_OTLP_HEADERS environment variable into a structured headers object.
  * Format: "key1=value1,key2=value2" -> { key1: "value1", key2: "value2" }
  */
-const parseOtlpHeaders = (headersString?: string): Record<string, string> => {
+export const parseOtlpHeaders = (
+  headersString?: string,
+): Record<string, string> => {
   if (!headersString) {
     return {};
   }
