@@ -13,9 +13,11 @@ type ErrorBoundaryComponent = any; // TODO: Define ErrorBoundary type
 type Instrumentations = RumOtelWebConfig['instrumentations'];
 type IgnoreUrls = RumOtelWebConfig['ignoreUrls'];
 
+type ApiKeyFn = () => Promise<string>;
+
 type BrowserSDKConfig = {
   advancedNetworkCapture?: boolean;
-  apiKey: string;
+  apiKey: string | ApiKeyFn;
   blockClass?: string;
   captureConsole?: boolean; // deprecated
   consoleCapture?: boolean;
@@ -46,7 +48,7 @@ function hasWindow() {
 class Browser {
   private _advancedNetworkCapture = false;
 
-  init({
+  async init({
     advancedNetworkCapture = false,
     apiKey,
     blockClass,
@@ -67,18 +69,31 @@ class Browser {
     tracePropagationTargets,
     url,
     otelResourceAttributes,
-  }: BrowserSDKConfig) {
+  }: BrowserSDKConfig): Promise<void> {
     if (!hasWindow()) {
       return;
     }
 
-    if (apiKey == null) {
+    // Resolve apiKey if it's a function
+    let resolvedApiKey: string | undefined;
+    if (typeof apiKey === 'function') {
+      try {
+        resolvedApiKey = await apiKey();
+      } catch (error) {
+        console.warn('HyperDX: Failed to resolve apiKey from function:', error);
+        resolvedApiKey = undefined;
+      }
+    } else {
+      resolvedApiKey = apiKey;
+    }
+
+    if (resolvedApiKey == null) {
       console.warn('HyperDX: Missing apiKey, telemetry will not be saved.');
-    } else if (apiKey === '') {
+    } else if (resolvedApiKey === '') {
       console.warn(
         'HyperDX: apiKey is empty string, telemetry will not be saved.',
       );
-    } else if (typeof apiKey !== 'string') {
+    } else if (typeof resolvedApiKey !== 'string') {
       console.warn(
         'HyperDX: apiKey must be a string, telemetry will not be saved.',
       );
@@ -92,7 +107,7 @@ class Browser {
       debug,
       url: `${urlBase}/v1/traces`,
       allowInsecureUrl: true,
-      apiKey,
+      apiKey: resolvedApiKey,
       applicationName: service,
       ignoreUrls,
       resourceAttributes: otelResourceAttributes,
@@ -121,7 +136,7 @@ class Browser {
 
     if (disableReplay !== true) {
       SessionRecorder.init({
-        apiKey,
+        apiKey: resolvedApiKey,
         blockClass,
         debug,
         ignoreClass,
