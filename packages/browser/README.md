@@ -26,7 +26,7 @@ HyperDX.init({
 
 #### Options
 
-- `apiKey` - Your HyperDX Ingestion API Key.
+- `apiKey` - Your HyperDX Ingestion API Key. Can be a string or an async function that returns a string (useful for fetching the key from your backend).
 - `service` - The service name events will show up as in HyperDX.
 - `tracePropagationTargets` - A list of regex patterns to match against HTTP
   requests to link frontend and backend traces, it will add an additional
@@ -55,6 +55,23 @@ HyperDX.init({
 - `sampling` - (Optional) The sampling [config](https://github.com/rrweb-io/rrweb/blob/5fbb904edb653f3da17e6775ee438d81ef0bba83/docs/recipes/optimize-storage.md?plain=1#L22) in the session recording 
 
 ## Additional Configuration
+
+### Async API Key
+
+If you need to fetch the API key from your backend, you can pass an async function to the `apiKey` option:
+
+```js
+HyperDX.init({
+  apiKey: async () => {
+    const response = await fetch('/api/hyperdx-key');
+    const data = await response.json();
+    return data.apiKey;
+  },
+  service: 'my-frontend-app',
+});
+```
+
+**Note**: When using an async function for `apiKey`, any events that occur before the API key resolves will not be captured. The SDK initialization is deferred until the API key is available.
 
 ### Attach User Information or Metadata
 
