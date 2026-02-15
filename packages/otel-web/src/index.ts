@@ -705,7 +705,9 @@ export const Rum: RumOtelWebType = {
     const now = Date.now();
     const tracer = this.provider.getTracer('custom-action');
     const span = tracer.startSpan(name, { startTime: now });
-    span.setAttributes(attributes);
+    if (attributes) {
+      span.setAttributes(attributes);
+    }
     span.end(now);
   },
 
