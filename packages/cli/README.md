@@ -20,6 +20,17 @@ You can also add this as an npm script
 }
 ```
 
+### Options
+
+| Flag | Description | Default |
+| --- | --- | --- |
+| `-k, --serviceKey` | The HyperDX service account API key | `HYPERDX_SERVICE_KEY` env var |
+| `-p, --path` | Directory containing the sourcemaps | `.` |
+| `-u, --apiUrl` | API URL for self-hosted deployments | `https://api.hyperdx.io` |
+| `-v, --apiVersion` | The API version to use | `v1` |
+| `-rid, --releaseId` | Release ID to associate with the sourcemaps | — |
+| `-bp, --basePath` | Base path for the uploaded sourcemaps | — |
+
 Optionally, you can set the `HYPERDX_SERVICE_KEY` environment variable to avoid passing the `serviceKey` flag.
 
 ## Contributing
