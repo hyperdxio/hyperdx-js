@@ -1,5 +1,11 @@
 # @hyperdx/node-opentelemetry
 
+## 0.10.3
+
+### Patch Changes
+
+- d91383a: Fix issue where OTEL_EXPORTER_OTLP_HEADERS are not passed to health check endpoints
+
 ## 0.10.2
 
 ### Patch Changes
