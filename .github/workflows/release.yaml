@@ -33,11 +33,11 @@ jobs:
           publish: echo "skipping publish in changesets action"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Exchange OIDC token for npm publish token
+      - name: Get npm OIDC token
         if: steps.changesets.outputs.hasChangesets != 'true'
         id: npm-oidc
         run: |
-          # Get GitHub OIDC token
+          # Get GitHub OIDC token with npm registry audience
           OIDC_TOKEN=$(curl -sS -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
             "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=https://registry.npmjs.org" | jq -r '.value')
 
@@ -47,23 +47,12 @@ jobs:
           fi
           echo "Got OIDC token (length: ${#OIDC_TOKEN})"
 
-          # Exchange OIDC token for npm publish token
-          NPM_TOKEN=$(curl -sS -X POST "https://registry.npmjs.org/-/npm/v1/security/oidc/token" \
-            -H "Content-Type: application/json" \
-            -d "{\"token\": \"$OIDC_TOKEN\"}" | jq -r '.token')
+          # Debug: decode JWT header and payload (without signature) to check audience
+          echo "=== JWT Claims (non-sensitive) ==="
+          echo "$OIDC_TOKEN" | cut -d. -f2 | base64 -d 2>/dev/null | jq '{iss, aud, sub, ref, repository, workflow_ref, job_workflow_ref}' 2>/dev/null || true
 
-          if [ -z "$NPM_TOKEN" ] || [ "$NPM_TOKEN" = "null" ]; then
-            echo "::error::Failed to exchange OIDC token for npm token"
-            # Debug: show the response (without token)
-            curl -sS -X POST "https://registry.npmjs.org/-/npm/v1/security/oidc/token" \
-              -H "Content-Type: application/json" \
-              -d "{\"token\": \"$OIDC_TOKEN\"}" | jq 'del(.token)'
-            exit 1
-          fi
-
-          echo "Successfully obtained npm publish token"
-          echo "::add-mask::$NPM_TOKEN"
-          echo "npm_token=$NPM_TOKEN" >> "$GITHUB_OUTPUT"
+          echo "::add-mask::$OIDC_TOKEN"
+          echo "npm_token=$OIDC_TOKEN" >> "$GITHUB_OUTPUT"
       - name: Publish to npm
         if: steps.changesets.outputs.hasChangesets != 'true'
         run: yarn run release
