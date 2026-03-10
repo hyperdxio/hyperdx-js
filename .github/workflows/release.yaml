@@ -18,11 +18,17 @@ jobs:
         with:
           node-version: "22"
           cache: "yarn"
-          registry-url: "https://registry.npmjs.org"
+          # Note: Do NOT set registry-url here — it creates a NODE_AUTH_TOKEN
+          # that conflicts with npm OIDC trusted publishing
       - name: Setup Deno
         uses: denoland/setup-deno@v2
         with:
           deno-version: v2.x
+      - name: Upgrade npm for OIDC trusted publishing
+        run: |
+          npm install -g npm@latest
+          echo "npm version: $(npm --version)"
+          npm config set registry https://registry.npmjs.org/
       - name: Install dependencies
         run: yarn
       - name: Create Release Pull Request or Publish
@@ -33,36 +39,14 @@ jobs:
           publish: echo "skipping publish in changesets action"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Get npm OIDC token
-        if: steps.changesets.outputs.hasChangesets != 'true'
-        id: npm-oidc
-        run: |
-          # Get GitHub OIDC token with npm registry audience
-          OIDC_TOKEN=$(curl -sS -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
-            "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=https://registry.npmjs.org" | jq -r '.value')
-
-          if [ -z "$OIDC_TOKEN" ] || [ "$OIDC_TOKEN" = "null" ]; then
-            echo "::error::Failed to get OIDC token"
-            exit 1
-          fi
-          echo "Got OIDC token (length: ${#OIDC_TOKEN})"
-
-          # Debug: decode JWT header and payload (without signature) to check audience
-          echo "=== JWT Claims (non-sensitive) ==="
-          echo "$OIDC_TOKEN" | cut -d. -f2 | base64 -d 2>/dev/null | jq '{iss, aud, sub, ref, repository, workflow_ref, job_workflow_ref}' 2>/dev/null || true
-
-          echo "::add-mask::$OIDC_TOKEN"
-          echo "npm_token=$OIDC_TOKEN" >> "$GITHUB_OUTPUT"
       - name: Publish to npm
         if: steps.changesets.outputs.hasChangesets != 'true'
         run: yarn run release
         env:
-          NODE_AUTH_TOKEN: ${{ steps.npm-oidc.outputs.npm_token }}
           NPM_CONFIG_PROVENANCE: true
       - name: Publish snapshot to next tag
         if: steps.changesets.outputs.published != 'true' && steps.changesets.outputs.hasChangesets == 'true'
         run: yarn run release:next
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NODE_AUTH_TOKEN: ${{ steps.npm-oidc.outputs.npm_token }}
           NPM_CONFIG_PROVENANCE: true
