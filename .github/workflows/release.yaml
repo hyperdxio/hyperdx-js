@@ -29,3 +29,9 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_CONFIG_PROVENANCE: true
+      - name: Publish snapshot to next tag
+        if: steps.changesets.outputs.published != 'true' && steps.changesets.outputs.hasChangesets == 'true'
+        run: yarn run release:next
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_CONFIG_PROVENANCE: true
