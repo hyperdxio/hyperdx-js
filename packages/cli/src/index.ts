@@ -25,7 +25,7 @@ program
     'An optional base path for the uploaded sourcemaps',
   )
   .option(
-    '-v, --apiVersion [string]',
+    '--apiVersion [string]',
     'The API version to use (v1 or v2)',
     'v1',
   )
