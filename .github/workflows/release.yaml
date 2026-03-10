@@ -30,13 +30,32 @@ jobs:
         uses: changesets/action@v1
         with:
           version: yarn run version
-          publish: yarn run release
+          publish: echo "skipping publish in changesets action"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Publish to npm with OIDC trusted publishing
+        if: steps.changesets.outputs.hasChangesets != 'true'
+        run: |
+          # Remove the _authToken set by setup-node/changesets to let npm
+          # handle OIDC trusted publishing natively (no auth token needed)
+          if [ -n "$NPM_CONFIG_USERCONFIG" ] && [ -f "$NPM_CONFIG_USERCONFIG" ]; then
+            sed -i '/_authToken/d' "$NPM_CONFIG_USERCONFIG"
+          fi
+          unset NODE_AUTH_TOKEN
+          echo "=== npm config ==="
+          npm config list
+          echo ""
+          yarn run release
+        env:
           NPM_CONFIG_PROVENANCE: true
       - name: Publish snapshot to next tag
         if: steps.changesets.outputs.published != 'true' && steps.changesets.outputs.hasChangesets == 'true'
-        run: yarn run release:next
+        run: |
+          if [ -n "$NPM_CONFIG_USERCONFIG" ] && [ -f "$NPM_CONFIG_USERCONFIG" ]; then
+            sed -i '/_authToken/d' "$NPM_CONFIG_USERCONFIG"
+          fi
+          unset NODE_AUTH_TOKEN
+          yarn run release:next
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_CONFIG_PROVENANCE: true
