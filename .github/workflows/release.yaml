@@ -23,36 +23,12 @@ jobs:
         uses: denoland/setup-deno@v2
         with:
           deno-version: v2.x
+      - name: Upgrade npm for OIDC trusted publishing support
+        run: |
+          npm install -g npm@latest
+          echo "npm version: $(npm --version)"
       - name: Install dependencies
         run: yarn
-      - name: Debug npm auth setup
-        run: |
-          echo "=== npm version ==="
-          npm --version
-          echo ""
-          echo "=== Node version ==="
-          node --version
-          echo ""
-          echo "=== NPM Config ==="
-          npm config list
-          echo ""
-          echo "=== .npmrc files ==="
-          echo "NPM_CONFIG_USERCONFIG: $NPM_CONFIG_USERCONFIG"
-          if [ -f "$NPM_CONFIG_USERCONFIG" ]; then
-            echo "--- contents (redacted) ---"
-            sed 's/_authToken=.*/_authToken=REDACTED/' "$NPM_CONFIG_USERCONFIG"
-          fi
-          if [ -f .npmrc ]; then
-            echo "=== Repo root .npmrc ==="
-            cat .npmrc
-          fi
-          echo ""
-          echo "=== Check OIDC availability ==="
-          if [ -n "$ACTIONS_ID_TOKEN_REQUEST_URL" ]; then
-            echo "OIDC endpoint available: Yes"
-          else
-            echo "OIDC endpoint available: No"
-          fi
       - name: Create Release Pull Request or Publish
         id: changesets
         uses: changesets/action@v1
