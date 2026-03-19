@@ -15,9 +15,11 @@ limitations under the License.
 */
 
 import { SpanAttributes } from '@opentelemetry/api';
+import { SpanProcessor } from '@opentelemetry/sdk-trace-base';
 import { expect } from 'chai';
-import Rum from '../src';
+import Rum, { INSTRUMENTATIONS_ALL_DISABLED } from '../src';
 import { updateSessionStatus } from '../src/session';
+import { SpanCapturer } from './utils';
 
 describe('SplunkOtelWeb', () => {
   afterEach(() => {
@@ -144,6 +146,35 @@ describe('SplunkOtelWeb', () => {
 
       Rum.deinit();
       expect(Rum.inited).to.eq(false, 'Should be false after destroying.');
+    });
+  });
+
+  describe('addAction', () => {
+    let capturer: SpanCapturer;
+
+    beforeEach(() => {
+      Rum.init({
+        app: 'app-name',
+        beaconUrl: 'https://beacon',
+        rumAuth: '<token>',
+        instrumentations: INSTRUMENTATIONS_ALL_DISABLED,
+      });
+
+      capturer = new SpanCapturer();
+      Rum.provider?.addSpanProcessor(capturer as any as SpanProcessor);
+    });
+
+    it('should not crash when called without attributes', () => {
+      expect(() => Rum.addAction('test-action')).to.not.throw();
+      expect(capturer.spans).to.have.lengthOf(1);
+      expect(capturer.spans[0].name).to.eq('test-action');
+    });
+
+    it('should set attributes when provided', () => {
+      Rum.addAction('test-action', { key: 'value' });
+      expect(capturer.spans).to.have.lengthOf(1);
+      expect(capturer.spans[0].name).to.eq('test-action');
+      expect(capturer.spans[0].attributes).to.deep.include({ key: 'value' });
     });
   });
 });
