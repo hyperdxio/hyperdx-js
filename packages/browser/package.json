@@ -20,6 +20,10 @@
     "rollup-plugin-visualizer": "^5.9.0",
     "zone.js": "0.11.4"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/hyperdxio/hyperdx-js.git"
+  },
   "files": [
     "build/*"
   ],

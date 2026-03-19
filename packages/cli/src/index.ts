@@ -24,6 +24,11 @@ program
     '-bp, --basePath [string]',
     'An optional base path for the uploaded sourcemaps',
   )
+  .option(
+    '--apiVersion [string]',
+    'The API version to use (v1 or v2)',
+    'v1',
+  )
   .action(uploadSourcemaps);
 
 program.parse();
