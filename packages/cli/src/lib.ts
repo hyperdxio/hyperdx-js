@@ -11,6 +11,7 @@ export const uploadSourcemaps = async ({
   allowNoop,
   serviceKey,
   apiUrl,
+  apiVersion,
   basePath,
   path,
   releaseId,
@@ -18,6 +19,7 @@ export const uploadSourcemaps = async ({
   allowNoop?: boolean;
   serviceKey: string;
   apiUrl?: string;
+  apiVersion?: string;
   basePath?: string;
   path: string;
   releaseId?: string;
@@ -31,8 +33,9 @@ export const uploadSourcemaps = async ({
   }
 
   const backend = apiUrl || 'https://api.hyperdx.io';
+  const version = apiVersion || 'v1';
 
-  const res = await fetch(join(backend, 'api', 'v1'), {
+  const res = await fetch(join(backend, 'api', version), {
     method: 'get',
     headers: {
       'Content-Type': 'application/json',
@@ -71,7 +74,7 @@ export const uploadSourcemaps = async ({
   }));
 
   const urlRes = await fetch(
-    join(backend, 'api', 'v1', 'sourcemaps', 'upload-presigned-urls'),
+    join(backend, 'api', version, 'sourcemaps', 'upload-presigned-urls'),
     {
       method: 'post',
       headers: {

@@ -15,6 +15,7 @@
     "ci:lint": "npx nx run-many --target=ci:lint",
     "version": "changeset version && npx nx run-many --target=postversion",
     "release": "npx nx run-many --target=build && yarn changeset publish && git push --follow-tags",
+    "release:next": "npx nx run-many --target=build && yarn changeset version --snapshot next && npx nx run-many --target=postversion && yarn changeset publish --tag next",
     "prepare": "husky install"
   },
   "lint-staged": {
