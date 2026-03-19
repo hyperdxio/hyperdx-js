@@ -13,9 +13,11 @@ type ErrorBoundaryComponent = any; // TODO: Define ErrorBoundary type
 type Instrumentations = RumOtelWebConfig['instrumentations'];
 type IgnoreUrls = RumOtelWebConfig['ignoreUrls'];
 
+type ApiKeyFn = () => Promise<string>;
+
 type BrowserSDKConfig = {
   advancedNetworkCapture?: boolean;
-  apiKey: string;
+  apiKey: string | ApiKeyFn;
   blockClass?: string;
   captureConsole?: boolean; // deprecated
   consoleCapture?: boolean;
@@ -67,102 +69,121 @@ class Browser {
     tracePropagationTargets,
     url,
     otelResourceAttributes,
-  }: BrowserSDKConfig) {
+  }: BrowserSDKConfig): void {
     if (!hasWindow()) {
       return;
     }
 
-    if (apiKey == null) {
-      console.warn('HyperDX: Missing apiKey, telemetry will not be saved.');
-    } else if (apiKey === '') {
-      console.warn(
-        'HyperDX: apiKey is empty string, telemetry will not be saved.',
-      );
-    } else if (typeof apiKey !== 'string') {
-      console.warn(
-        'HyperDX: apiKey must be a string, telemetry will not be saved.',
-      );
-    }
-
-    const urlBase = url ?? URL_BASE;
-
     this._advancedNetworkCapture = advancedNetworkCapture;
 
-    Rum.init({
-      debug,
-      url: `${urlBase}/v1/traces`,
-      allowInsecureUrl: true,
-      apiKey,
-      applicationName: service,
-      ignoreUrls,
-      resourceAttributes: otelResourceAttributes,
-      instrumentations: {
-        visibility: true,
-        console: captureConsole ?? consoleCapture ?? false,
-        fetch: {
-          ...(tracePropagationTargets != null
-            ? {
-                propagateTraceHeaderCorsUrls: tracePropagationTargets,
-              }
-            : {}),
-          advancedNetworkCapture: () => this._advancedNetworkCapture,
-        },
-        xhr: {
-          ...(tracePropagationTargets != null
-            ? {
-                propagateTraceHeaderCorsUrls: tracePropagationTargets,
-              }
-            : {}),
-          advancedNetworkCapture: () => this._advancedNetworkCapture,
-        },
-        ...instrumentations,
-      },
-    });
+    const initWithApiKey = (resolvedApiKey: string | undefined) => {
+      if (resolvedApiKey == null) {
+        console.warn('HyperDX: Missing apiKey, telemetry will not be saved.');
+      } else if (resolvedApiKey === '') {
+        console.warn(
+          'HyperDX: apiKey is empty string, telemetry will not be saved.',
+        );
+      } else if (typeof resolvedApiKey !== 'string') {
+        console.warn(
+          'HyperDX: apiKey must be a string, telemetry will not be saved.',
+        );
+      }
 
-    if (disableReplay !== true) {
-      SessionRecorder.init({
-        apiKey,
-        blockClass,
+      const urlBase = url ?? URL_BASE;
+
+      Rum.init({
         debug,
-        ignoreClass,
-        maskAllInputs: maskAllInputs,
-        maskTextClass: maskClass,
-        maskTextSelector: maskAllText ? '*' : undefined,
-        recordCanvas,
-        sampling,
-        url: `${urlBase}/v1/logs`,
+        url: `${urlBase}/v1/traces`,
+        allowInsecureUrl: true,
+        apiKey: resolvedApiKey,
+        applicationName: service,
+        ignoreUrls,
+        resourceAttributes: otelResourceAttributes,
+        instrumentations: {
+          visibility: true,
+          console: captureConsole ?? consoleCapture ?? false,
+          fetch: {
+            ...(tracePropagationTargets != null
+              ? {
+                  propagateTraceHeaderCorsUrls: tracePropagationTargets,
+                }
+              : {}),
+            advancedNetworkCapture: () => this._advancedNetworkCapture,
+          },
+          xhr: {
+            ...(tracePropagationTargets != null
+              ? {
+                  propagateTraceHeaderCorsUrls: tracePropagationTargets,
+                }
+              : {}),
+            advancedNetworkCapture: () => this._advancedNetworkCapture,
+          },
+          ...instrumentations,
+        },
       });
-    }
 
-    const tracer = opentelemetry.trace.getTracer('@hyperdx/browser');
-
-    if (disableIntercom !== true) {
-      resolveAsyncGlobal('Intercom')
-        .then(() => {
-          window.Intercom('onShow', () => {
-            const sessionUrl = this.getSessionUrl();
-            if (sessionUrl != null) {
-              const metadata = {
-                hyperdxSessionUrl: sessionUrl,
-              };
-
-              // Use window.Intercom directly to avoid stale references
-              window.Intercom('update', metadata);
-              window.Intercom('trackEvent', 'HyperDX', metadata);
-
-              const now = Date.now();
-
-              const span = tracer.startSpan('intercom.onShow', {
-                startTime: now,
-              });
-              span.setAttribute('component', 'intercom');
-              span.end(now);
-            }
-          });
-        })
-        .catch(() => {
-          // Ignore if intercom isn't installed or can't be used
+      if (disableReplay !== true) {
+        SessionRecorder.init({
+          apiKey: resolvedApiKey,
+          blockClass,
+          debug,
+          ignoreClass,
+          maskAllInputs: maskAllInputs,
+          maskTextClass: maskClass,
+          maskTextSelector: maskAllText ? '*' : undefined,
+          recordCanvas,
+          sampling,
+          url: `${urlBase}/v1/logs`,
         });
+      }
+
+      const tracer = opentelemetry.trace.getTracer('@hyperdx/browser');
+
+      if (disableIntercom !== true) {
+        resolveAsyncGlobal('Intercom')
+          .then(() => {
+            window.Intercom('onShow', () => {
+              const sessionUrl = this.getSessionUrl();
+              if (sessionUrl != null) {
+                const metadata = {
+                  hyperdxSessionUrl: sessionUrl,
+                };
+
+                // Use window.Intercom directly to avoid stale references
+                window.Intercom('update', metadata);
+                window.Intercom('trackEvent', 'HyperDX', metadata);
+
+                const now = Date.now();
+
+                const span = tracer.startSpan('intercom.onShow', {
+                  startTime: now,
+                });
+                span.setAttribute('component', 'intercom');
+                span.end(now);
+              }
+            });
+          })
+          .catch(() => {
+            // Ignore if intercom isn't installed or can't be used
+          });
+      }
+    };
+
+    // Handle async apiKey resolution
+    if (typeof apiKey === 'function') {
+      apiKey()
+        .then((resolved) => {
+          initWithApiKey(resolved);
+        })
+        .catch((error) => {
+          console.warn(
+            'HyperDX: Failed to resolve apiKey from function:',
+            error,
+          );
+          initWithApiKey(undefined);
+        });
+    } else {
+      initWithApiKey(apiKey);
     }
   }
 
