@@ -1,7 +1,11 @@
 {
   "name": "@hyperdx/cli",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "HyperDX command line tool",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/hyperdxio/hyperdx-js.git"
+  },
   "publishConfig": {
     "access": "public"
   },
