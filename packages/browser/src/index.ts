@@ -33,6 +33,8 @@ type BrowserSDKConfig = {
   service: string;
   tracePropagationTargets?: (string | RegExp)[];
   url?: string;
+  tracesUrl?: string;
+  logsUrl?: string;
   otelResourceAttributes?: ResourceAttributes;
 };
 
@@ -66,6 +68,8 @@ class Browser {
     service,
     tracePropagationTargets,
     url,
+    tracesUrl,
+    logsUrl,
     otelResourceAttributes,
   }: BrowserSDKConfig) {
     if (!hasWindow()) {
@@ -85,12 +89,14 @@ class Browser {
     }
 
     const urlBase = url ?? URL_BASE;
+    const resolvedTracesUrl = tracesUrl ?? `${urlBase}/v1/traces`;
+    const resolvedLogsUrl = logsUrl ?? `${urlBase}/v1/logs`;
 
     this._advancedNetworkCapture = advancedNetworkCapture;
 
     Rum.init({
       debug,
-      url: `${urlBase}/v1/traces`,
+      url: resolvedTracesUrl,
       allowInsecureUrl: true,
       apiKey,
       applicationName: service,
@@ -130,7 +136,7 @@ class Browser {
         maskTextSelector: maskAllText ? '*' : undefined,
         recordCanvas,
         sampling,
-        url: `${urlBase}/v1/logs`,
+        url: resolvedLogsUrl,
       });
     }
 
