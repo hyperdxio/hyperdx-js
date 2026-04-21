@@ -1,5 +1,11 @@
 # @hyperdx/otel-web
 
+## 0.16.4
+
+### Patch Changes
+
+- b940c5c: Fix addAction crash when called without optional attributes argument
+
 ## 0.16.3
 
 ### Patch Changes
