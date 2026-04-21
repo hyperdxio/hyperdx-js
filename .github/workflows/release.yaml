@@ -37,6 +37,15 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_CONFIG_PROVENANCE: true
+      # Re-checkout to restore changeset files consumed by the changesets action above.
+      # Without this, `changeset version --snapshot next` finds no changesets and
+      # publishes full release versions to the `next` tag instead of snapshots.
+      - name: Restore checkout for snapshot
+        if: steps.changesets.outputs.published != 'true' && steps.changesets.outputs.hasChangesets == 'true'
+        uses: actions/checkout@v4
+      - name: Install dependencies for snapshot
+        if: steps.changesets.outputs.published != 'true' && steps.changesets.outputs.hasChangesets == 'true'
+        run: yarn
       - name: Publish snapshot to next tag
         if: steps.changesets.outputs.published != 'true' && steps.changesets.outputs.hasChangesets == 'true'
         run: yarn run release:next
