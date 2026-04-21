@@ -1,5 +1,13 @@
 # @hyperdx/browser
 
+## 0.22.1
+
+### Patch Changes
+
+- e1b1508: Support per-signal OTLP exporter endpoints in hyperdx/browser
+- Updated dependencies [b940c5c]
+  - @hyperdx/otel-web@0.16.4
+
 ## 0.22.0
 
 ### Minor Changes
