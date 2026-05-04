@@ -20,6 +20,7 @@ import 'mocha';
 import './init.test';
 import './servertiming.test';
 import './utils.test';
+import './masking.test';
 import './session.test';
 import './websockets.test';
 import './SessionBasedSampler.test';

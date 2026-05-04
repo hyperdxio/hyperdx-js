@@ -35,6 +35,24 @@ HyperDX.init({
 - `consoleCapture` - (Optional) Capture all console logs (default `false`).
 - `advancedNetworkCapture` - (Optional) Capture full request/response headers
   and bodies (default false).
+- `maskFields` - (Optional) Field names to mask in captured request/response
+  headers and bodies before telemetry leaves the browser. Only applies when
+  `advancedNetworkCapture` is enabled. Header matches are case-insensitive.
+  Body matches walk through nested JSON objects and accept dotted paths to
+  target nested properties (e.g. `creditCard.number`). Non-JSON request/
+  response bodies are passed through unchanged. Matched values are replaced
+  with `***`. Example:
+  ```js
+  HyperDX.init({
+    apiKey: '<YOUR_API_KEY_HERE>',
+    service: 'my-frontend-app',
+    advancedNetworkCapture: true,
+    maskFields: {
+      headers: ['authorization', 'x-api-key'],
+      body: ['password', 'creditCard.number'],
+    },
+  });
+  ```
 - `url` - (Optional) The OpenTelemetry collector URL, only needed for
   self-hosted instances.
 - `maskAllInputs` - (Optional) Whether to mask all input fields in session

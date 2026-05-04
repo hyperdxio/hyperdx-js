@@ -6,7 +6,7 @@ import {
 } from '@opentelemetry/instrumentation-xml-http-request';
 
 import { captureTraceParent } from './servertiming';
-import { headerCapture } from './utils';
+import { headerCapture, maskBody, MaskFieldsConfig } from './utils';
 
 type ExposedSuper = {
   _addResourceObserver: (xhr: XMLHttpRequest, spanUrl: string) => void;
@@ -20,6 +20,7 @@ type ExposedSuper = {
 export type HyperDXXMLHttpRequestInstrumentationConfig =
   XMLHttpRequestInstrumentationConfig & {
     advancedNetworkCapture?: () => boolean;
+    maskFields?: () => MaskFieldsConfig | undefined;
   };
 
 export class HyperDXXMLHttpRequestInstrumentation extends XMLHttpRequestInstrumentation {
@@ -36,17 +37,24 @@ export class HyperDXXMLHttpRequestInstrumentation extends XMLHttpRequestInstrume
       if (span) {
         if (config.advancedNetworkCapture?.()) {
           xhr.addEventListener('readystatechange', function () {
+            const maskFields = config.maskFields?.();
+
             if (xhr.readyState === xhr.OPENED) {
               shimmer.wrap(xhr, 'setRequestHeader', (original) => {
                 return function (header, value) {
-                  headerCapture('request', [header])(span, () => value);
+                  headerCapture('request', [header], {
+                    maskFields: maskFields?.headers,
+                  })(span, () => value);
                   return original.apply(this, arguments);
                 };
               });
               shimmer.wrap(xhr, 'send', (original) => {
                 return function (body) {
                   if (body) {
-                    span.setAttribute('http.request.body', body.toString());
+                    span.setAttribute(
+                      'http.request.body',
+                      maskBody(body, maskFields?.body),
+                    );
                   }
                   return original.apply(this, arguments);
                 };
@@ -62,12 +70,14 @@ export class HyperDXXMLHttpRequestInstrumentation extends XMLHttpRequestInstrume
                   }
                   return result;
                 }, {});
-              headerCapture('response', Object.keys(headers))(
-                span,
-                (header) => headers[header],
-              );
+              headerCapture('response', Object.keys(headers), {
+                maskFields: maskFields?.headers,
+              })(span, (header) => headers[header]);
               try {
-                span.setAttribute('http.response.body', xhr.responseText);
+                span.setAttribute(
+                  'http.response.body',
+                  maskBody(xhr.responseText, maskFields?.body),
+                );
               } catch (e) {
                 // ignore (DOMException if responseType is not the empty string or "text")
               }

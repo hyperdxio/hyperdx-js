@@ -4,10 +4,11 @@ import {
 } from '@opentelemetry/instrumentation-fetch';
 
 import { captureTraceParent } from './servertiming';
-import { headerCapture } from './utils';
+import { headerCapture, maskBody, MaskFieldsConfig } from './utils';
 
 export type HyperDXFetchInstrumentationConfig = FetchInstrumentationConfig & {
   advancedNetworkCapture?: () => boolean;
+  maskFields?: () => MaskFieldsConfig | undefined;
 };
 
 // not used yet
@@ -42,11 +43,12 @@ export class HyperDXFetchInstrumentation extends FetchInstrumentation {
       span.setAttribute('component', 'fetch');
 
       if (config.advancedNetworkCapture?.() && span) {
+        const maskFields = config.maskFields?.();
+
         if (request.headers) {
-          headerCapture('request', Object.keys(request.headers))(
-            span,
-            (header) => request.headers?.[header],
-          );
+          headerCapture('request', Object.keys(request.headers), {
+            maskFields: maskFields?.headers,
+          })(span, (header) => request.headers?.[header]);
         }
         if (request.body) {
           if (request.body instanceof ReadableStream) {
@@ -56,7 +58,10 @@ export class HyperDXFetchInstrumentation extends FetchInstrumentation {
             //   span.setAttribute('http.request.body', body);
             // });
           } else {
-            span.setAttribute('http.request.body', request.body.toString());
+            span.setAttribute(
+              'http.request.body',
+              maskBody(request.body, maskFields?.body),
+            );
           }
         }
 
@@ -66,16 +71,18 @@ export class HyperDXFetchInstrumentation extends FetchInstrumentation {
             response.headers.forEach((value, name) => {
               headerNames.push(name);
             });
-            headerCapture('response', headerNames)(
-              span,
-              (header) => response.headers.get(header) ?? '',
-            );
+            headerCapture('response', headerNames, {
+              maskFields: maskFields?.headers,
+            })(span, (header) => response.headers.get(header) ?? '');
           }
           response
             .clone()
             .text()
             .then((body) => {
-              span.setAttribute('http.response.body', body);
+              span.setAttribute(
+                'http.response.body',
+                maskBody(body, maskFields?.body),
+              );
             })
             .catch(() => {
               // Ignore

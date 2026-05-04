@@ -195,8 +195,134 @@ export function waitForGlobal(
   };
 }
 
+/**
+ * Configuration for masking sensitive fields in captured HTTP headers and
+ * request/response bodies before they are recorded as span attributes.
+ *
+ * `headers` and `body` are arrays of field names. Header matches are
+ * case-insensitive. Body matches support dotted paths to address nested
+ * object properties (e.g. `creditCard.number`).
+ */
+export interface MaskFieldsConfig {
+  headers?: string[];
+  body?: string[];
+}
+
+export const DEFAULT_MASK_PLACEHOLDER = '***';
+
+/**
+ * Returns true if `headerName` matches any of `fieldsToMask`, comparing
+ * case-insensitively.
+ */
+export function shouldMaskHeader(
+  headerName: string,
+  fieldsToMask: string[] | undefined,
+): boolean {
+  if (!fieldsToMask || fieldsToMask.length === 0) {
+    return false;
+  }
+
+  const normalized = headerName.toLowerCase();
+  for (const field of fieldsToMask) {
+    if (field.toLowerCase() === normalized) {
+      return true;
+    }
+  }
+  return false;
+}
+
+/**
+ * Mask matching fields inside a JSON-shaped request/response body. Matched
+ * values are replaced with `DEFAULT_MASK_PLACEHOLDER`. When the body cannot
+ * be parsed as JSON the original string is returned unchanged. Field paths
+ * support dotted notation (e.g. `creditCard.number`).
+ */
+export function maskBody(
+  body: unknown,
+  fieldsToMask: string[] | undefined,
+): string {
+  const original = typeof body === 'string' ? body : jsonToString(body);
+
+  if (!fieldsToMask || fieldsToMask.length === 0) {
+    return original;
+  }
+
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(original);
+  } catch {
+    // Not JSON — safest behaviour is to leave the body untouched. Users who
+    // need to mask non-JSON payloads can pre-process the request themselves.
+    return original;
+  }
+
+  const masked = maskJsonValue(parsed, fieldsToMask);
+
+  try {
+    return JSON.stringify(masked);
+  } catch {
+    return original;
+  }
+}
+
+/**
+ * Recursively walk a parsed JSON value and replace any property whose path
+ * matches one of `fieldsToMask` with `DEFAULT_MASK_PLACEHOLDER`. Path
+ * comparison uses dotted notation rooted at the top-level value.
+ */
+function maskJsonValue(
+  value: unknown,
+  fieldsToMask: string[],
+  currentPath = '',
+): unknown {
+  if (Array.isArray(value)) {
+    return value.map((item) =>
+      maskJsonValue(item, fieldsToMask, currentPath),
+    );
+  }
+
+  if (value !== null && typeof value === 'object') {
+    const result: Record<string, unknown> = {};
+    for (const key of Object.keys(value as Record<string, unknown>)) {
+      const nextPath = currentPath ? `${currentPath}.${key}` : key;
+      if (matchesField(key, nextPath, fieldsToMask)) {
+        result[key] = DEFAULT_MASK_PLACEHOLDER;
+      } else {
+        result[key] = maskJsonValue(
+          (value as Record<string, unknown>)[key],
+          fieldsToMask,
+          nextPath,
+        );
+      }
+    }
+    return result;
+  }
+
+  return value;
+}
+
+function matchesField(
+  key: string,
+  path: string,
+  fieldsToMask: string[],
+): boolean {
+  const lowerKey = key.toLowerCase();
+  const lowerPath = path.toLowerCase();
+  for (const field of fieldsToMask) {
+    const lowerField = field.toLowerCase();
+    if (lowerField === lowerPath || lowerField === lowerKey) {
+      return true;
+    }
+  }
+  return false;
+}
+
 // https://github.com/open-telemetry/opentelemetry-js/blob/b400c2e5d9729c3528482781a93393602dc6dc9f/experimental/packages/opentelemetry-instrumentation-http/src/utils.ts#L573
-export function headerCapture(type: 'request' | 'response', headers: string[]) {
+export function headerCapture(
+  type: 'request' | 'response',
+  headers: string[],
+  options: { maskFields?: string[] } = {},
+) {
   const normalizedHeaders = new Map(
     headers.map((header) => [header, header.toLowerCase().replace(/-/g, '_')]),
   );
@@ -205,14 +331,24 @@ export function headerCapture(type: 'request' | 'response', headers: string[]) {
     span: Span,
     getHeader: (key: string) => undefined | string | string[] | number,
   ) => {
-    for (const [capturedHeader, normalizedHeader] of normalizedHeaders) {
-      const value = getHeader(capturedHeader);
+    normalizedHeaders.forEach((normalizedHeader, capturedHeader) => {
+      const rawValue = getHeader(capturedHeader);
 
-      if (value === undefined) {
-        continue;
+      if (rawValue === undefined) {
+        return;
       }
 
       const key = `http.${type}.header.${normalizedHeader}`;
+      const masked = shouldMaskHeader(capturedHeader, options.maskFields);
+
+      let value: string | string[] | number = rawValue;
+      if (masked) {
+        if (Array.isArray(rawValue)) {
+          value = rawValue.map(() => DEFAULT_MASK_PLACEHOLDER);
+        } else {
+          value = DEFAULT_MASK_PLACEHOLDER;
+        }
+      }
 
       if (typeof value === 'string') {
         span.setAttribute(key, [value]);
@@ -221,6 +357,6 @@ export function headerCapture(type: 'request' | 'response', headers: string[]) {
       } else {
         span.setAttribute(key, [value]);
       }
-    }
+    });
   };
 }
