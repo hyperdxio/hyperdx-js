@@ -14,52 +14,44 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-import { TracerProvider, Tracer } from '@opentelemetry/api';
-import {
-  onCLS,
-  onFCP,
-  onFID,
-  onINP,
-  onLCP,
-  onTTFB,
-  Metric,
-} from 'web-vitals';
-const reported = {};
+import { TracerProvider } from '@opentelemetry/api';
+import * as webVitalsLib from 'web-vitals';
 
-function report(tracer: Tracer, name: string, metric: Metric): void {
-  if (reported[name]) {
-    return;
-  }
-  reported[name] = true;
+type WebVitalsCallbacks = Pick<
+  typeof webVitalsLib,
+  'onCLS' | 'onFCP' | 'onFID' | 'onINP' | 'onLCP' | 'onTTFB'
+>;
 
-  const value = metric.value;
-  const now = Date.now();
-
-  const span = tracer.startSpan('webvitals', { startTime: now });
-  span.setAttribute(name, value);
-  span.end(now);
-}
-
-export function initWebVitals(provider: TracerProvider): void {
+export function initWebVitals(
+  provider: TracerProvider,
+  // The web-vitals callbacks are accepted as an injected dependency so
+  // tests can drive them synchronously. Defaults to the real library
+  // for normal use.
+  callbacks: WebVitalsCallbacks = webVitalsLib,
+): void {
   const tracer = provider.getTracer('webvitals');
-  // Each web-vitals callback fires at most once per page lifetime; the
-  // `reported` guard above also protects against duplicate spans.
-  onFID((metric) => {
-    report(tracer, 'fid', metric);
-  });
-  onCLS((metric) => {
-    report(tracer, 'cls', metric);
-  });
-  onLCP((metric) => {
-    report(tracer, 'lcp', metric);
-  });
-  onINP((metric) => {
-    report(tracer, 'inp', metric);
-  });
-  onFCP((metric) => {
-    report(tracer, 'fcp', metric);
-  });
-  onTTFB((metric) => {
-    report(tracer, 'ttfb', metric);
-  });
+  // Per-init cache: each Core Web Vital callback may fire more than once
+  // in a page's lifetime (CLS in particular), and we only want to report
+  // each metric once. Scoped to this call so callers that re-init get a
+  // fresh cache instead of inheriting module-level state.
+  const reported: Record<string, true> = {};
+
+  function report(name: string, metric: webVitalsLib.Metric): void {
+    if (reported[name]) {
+      return;
+    }
+    reported[name] = true;
+
+    const now = Date.now();
+    const span = tracer.startSpan('webvitals', { startTime: now });
+    span.setAttribute(name, metric.value);
+    span.end(now);
+  }
+
+  callbacks.onFID((metric) => report('fid', metric));
+  callbacks.onCLS((metric) => report('cls', metric));
+  callbacks.onLCP((metric) => report('lcp', metric));
+  callbacks.onINP((metric) => report('inp', metric));
+  callbacks.onFCP((metric) => report('fcp', metric));
+  callbacks.onTTFB((metric) => report('ttfb', metric));
 }
