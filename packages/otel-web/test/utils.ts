@@ -19,7 +19,7 @@ import {
   SimpleSpanProcessor,
   SpanProcessor,
 } from '@opentelemetry/sdk-trace-base';
-import Rum, { ZipkinSpan } from '../src/index';
+import Rum from '../src/index';
 
 export class SpanCapturer implements SpanProcessor {
   public readonly spans: ReadableSpan[] = [];
@@ -40,4 +40,19 @@ export class SpanCapturer implements SpanProcessor {
 
 export function deinit(): void {
   Rum.deinit();
+}
+
+export function initWithDefaultConfig(
+  capturer: SpanCapturer,
+  additionalConfig: Partial<Parameters<typeof Rum.init>[0]> = {},
+): void {
+  Rum.init({
+    url: 'https://127.0.0.1:8888/v1/rum',
+    applicationName: 'app',
+    apiKey: undefined,
+    ...additionalConfig,
+  });
+  if (Rum.provider) {
+    Rum.provider.addSpanProcessor(capturer);
+  }
 }
