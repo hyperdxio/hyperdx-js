@@ -15,7 +15,15 @@ limitations under the License.
 */
 
 import { TracerProvider, Tracer } from '@opentelemetry/api';
-import { onCLS, onLCP, onFID, onINP, Metric } from 'web-vitals';
+import {
+  onCLS,
+  onFCP,
+  onFID,
+  onINP,
+  onLCP,
+  onTTFB,
+  Metric,
+} from 'web-vitals';
 const reported = {};
 
 function report(tracer: Tracer, name: string, metric: Metric): void {
@@ -34,7 +42,8 @@ function report(tracer: Tracer, name: string, metric: Metric): void {
 
 export function initWebVitals(provider: TracerProvider): void {
   const tracer = provider.getTracer('webvitals');
-  // CLS is defined as being sent more than once, easier to just ensure that everything is sent just on the first occurence.
+  // Each web-vitals callback fires at most once per page lifetime; the
+  // `reported` guard above also protects against duplicate spans.
   onFID((metric) => {
     report(tracer, 'fid', metric);
   });
@@ -46,5 +55,11 @@ export function initWebVitals(provider: TracerProvider): void {
   });
   onINP((metric) => {
     report(tracer, 'inp', metric);
+  });
+  onFCP((metric) => {
+    report(tracer, 'fcp', metric);
+  });
+  onTTFB((metric) => {
+    report(tracer, 'ttfb', metric);
   });
 }
