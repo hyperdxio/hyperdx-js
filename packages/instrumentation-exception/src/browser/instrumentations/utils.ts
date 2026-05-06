@@ -13,7 +13,12 @@ export function stringifyValue(value: unknown): string {
 
   if (typeof value === 'object') {
     try {
-      return JSON.stringify(value);
+      const result = JSON.stringify(value);
+      // Empty objects/arrays carry no useful error info
+      if (result === '{}' || result === '[]') {
+        return '';
+      }
+      return result;
     } catch (e) {
       return value.toString();
     }

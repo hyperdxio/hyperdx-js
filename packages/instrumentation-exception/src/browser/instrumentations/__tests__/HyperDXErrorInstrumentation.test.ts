@@ -44,7 +44,15 @@ describe('stringifyValue', () => {
     expect(result).toBeTruthy();
   });
 
-  it('should handle arrays', () => {
+  it('should return empty string for empty objects', () => {
+    expect(stringifyValue({})).toBe('');
+  });
+
+  it('should return empty string for empty arrays', () => {
+    expect(stringifyValue([])).toBe('');
+  });
+
+  it('should handle non-empty arrays', () => {
     const result = stringifyValue([1, 2, 3]);
 
     expect(result).not.toContain('[object Object]');
