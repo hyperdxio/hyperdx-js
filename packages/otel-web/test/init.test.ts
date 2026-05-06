@@ -542,18 +542,30 @@ describe('test unloaded img', () => {
       location.href +
       '/IAlwaysWantToUseVeryVerboseDescriptionsWhenIHaveToEnsureSomethingDoesNotExist.jpg';
     document.body.appendChild(img);
-    setTimeout(() => {
+
+    // Poll for the span instead of using a fixed timeout, since the error
+    // event and the async recordException chain may resolve at varying speeds.
+    const pollInterval = 50;
+    const maxWait = 1000;
+    let elapsed = 0;
+    const check = () => {
       const span = capturer.spans.find(
         (s) => s.attributes.component === 'error',
       );
-      assert.ok(span);
-      assert.strictEqual(span.name, 'eventListener.error');
-      assert.ok(
-        (span.attributes.target_src as string).endsWith('DoesNotExist.jpg'),
-      );
-
-      done();
-    }, 100);
+      if (span) {
+        assert.strictEqual(span.name, 'eventListener.error');
+        assert.ok(
+          (span.attributes.target_src as string).endsWith('DoesNotExist.jpg'),
+        );
+        done();
+      } else if (elapsed >= maxWait) {
+        done(new Error('Timed out waiting for error span from unloaded img'));
+      } else {
+        elapsed += pollInterval;
+        setTimeout(check, pollInterval);
+      }
+    };
+    setTimeout(check, pollInterval);
   });
 });
 
