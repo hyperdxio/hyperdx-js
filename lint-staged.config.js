@@ -2,8 +2,12 @@ module.exports = {
   '**/*.{ts,tsx}': (files) => {
     const cmds = [`prettier --write --ignore-unknown ${files.join(' ')}`];
 
-    // `otel-web` package does not have an eslint config yet
-    const lintable = files.filter((f) => !f.includes('/packages/otel-web/'));
+    // These packages do not have an eslint config yet
+    const lintable = files.filter(
+      (f) =>
+        !f.includes('/packages/otel-web/') &&
+        !f.includes('/packages/session-recorder/'),
+    );
 
     if (lintable.length) {
       cmds.push(`eslint --fix ${lintable.join(' ')}`);
