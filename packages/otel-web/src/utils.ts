@@ -15,6 +15,7 @@ limitations under the License.
 */
 
 import stringifySafe from 'json-stringify-safe';
+import { cloneDeep, has, set } from 'lodash';
 import { Span } from '@opentelemetry/api';
 import { wrap } from 'shimmer';
 
@@ -234,87 +235,42 @@ export function shouldMaskHeader(
 /**
  * Mask matching fields inside a JSON-shaped request/response body. Matched
  * values are replaced with `DEFAULT_MASK_PLACEHOLDER`. When the body cannot
- * be parsed as JSON the original string is returned unchanged. Field paths
- * support dotted notation (e.g. `creditCard.number`).
+ * be parsed as JSON the original string is returned unchanged.
+ *
+ * Field paths use dotted notation (e.g. `creditCard.number`) and match
+ * exactly — `'token'` only matches a top-level `token` field, not a nested
+ * `user.token`. To mask a nested field, supply its full path. Array elements
+ * can be addressed via bracket notation (e.g. `users[0].password`). Body
+ * matching is case-sensitive (JSON object keys are case-sensitive by spec).
  */
 export function maskBody(
   body: unknown,
   fieldsToMask: string[] | undefined,
 ): string {
-  const original = typeof body === 'string' ? body : jsonToString(body);
+  const stringifyOriginal = (): string =>
+    typeof body === 'string' ? body : jsonToString(body);
 
   if (!fieldsToMask || fieldsToMask.length === 0) {
-    return original;
+    return stringifyOriginal();
   }
-
-  let parsed: unknown;
-  try {
-    parsed = JSON.parse(original);
-  } catch {
-    // Not JSON — safest behaviour is to leave the body untouched. Users who
-    // need to mask non-JSON payloads can pre-process the request themselves.
-    return original;
-  }
-
-  const masked = maskJsonValue(parsed, fieldsToMask);
 
   try {
-    return JSON.stringify(masked);
-  } catch {
-    return original;
-  }
-}
-
-/**
- * Recursively walk a parsed JSON value and replace any property whose path
- * matches one of `fieldsToMask` with `DEFAULT_MASK_PLACEHOLDER`. Path
- * comparison uses dotted notation rooted at the top-level value.
- */
-function maskJsonValue(
-  value: unknown,
-  fieldsToMask: string[],
-  currentPath = '',
-): unknown {
-  if (Array.isArray(value)) {
-    return value.map((item) =>
-      maskJsonValue(item, fieldsToMask, currentPath),
-    );
-  }
-
-  if (value !== null && typeof value === 'object') {
-    const result: Record<string, unknown> = {};
-    for (const key of Object.keys(value as Record<string, unknown>)) {
-      const nextPath = currentPath ? `${currentPath}.${key}` : key;
-      if (matchesField(key, nextPath, fieldsToMask)) {
-        result[key] = DEFAULT_MASK_PLACEHOLDER;
-      } else {
-        result[key] = maskJsonValue(
-          (value as Record<string, unknown>)[key],
-          fieldsToMask,
-          nextPath,
-        );
+    const parsed = typeof body === 'string' ? JSON.parse(body) : body;
+    if (parsed === null || typeof parsed !== 'object') {
+      // Primitives / null can't have fields to mask.
+      return stringifyOriginal();
+    }
+    const masked = cloneDeep(parsed) as object;
+    for (const field of fieldsToMask) {
+      if (has(masked, field)) {
+        set(masked, field, DEFAULT_MASK_PLACEHOLDER);
       }
     }
-    return result;
+    return JSON.stringify(masked);
+  } catch {
+    // Not JSON, or stringify/clone/set failed — leave the body untouched.
+    return stringifyOriginal();
   }
-
-  return value;
-}
-
-function matchesField(
-  key: string,
-  path: string,
-  fieldsToMask: string[],
-): boolean {
-  const lowerKey = key.toLowerCase();
-  const lowerPath = path.toLowerCase();
-  for (const field of fieldsToMask) {
-    const lowerField = field.toLowerCase();
-    if (lowerField === lowerPath || lowerField === lowerKey) {
-      return true;
-    }
-  }
-  return false;
 }
 
 // https://github.com/open-telemetry/opentelemetry-js/blob/b400c2e5d9729c3528482781a93393602dc6dc9f/experimental/packages/opentelemetry-instrumentation-http/src/utils.ts#L573

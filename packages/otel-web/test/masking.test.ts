@@ -65,26 +65,31 @@ describe('maskBody', () => {
     });
   });
 
-  it('masks fields by bare key when no dotted path is given', () => {
+  it('does not mask nested fields when only a bare key is provided', () => {
+    // Path-exact matching: a bare 'token' only matches root-level token,
+    // not nested instances. Users wanting to mask a nested field must
+    // supply its full path.
     const body = JSON.stringify({
-      a: { token: 'aaa' },
-      b: { token: 'bbb' },
+      token: 'root',
+      inner: { token: 'nested' },
     });
     const masked = JSON.parse(maskBody(body, ['token']));
     assert.deepStrictEqual(masked, {
-      a: { token: DEFAULT_MASK_PLACEHOLDER },
-      b: { token: DEFAULT_MASK_PLACEHOLDER },
+      token: DEFAULT_MASK_PLACEHOLDER,
+      inner: { token: 'nested' },
     });
   });
 
-  it('masks fields inside arrays', () => {
+  it('masks fields inside arrays via indexed paths', () => {
     const body = JSON.stringify({
       users: [
         { name: 'alice', password: 'a' },
         { name: 'bob', password: 'b' },
       ],
     });
-    const masked = JSON.parse(maskBody(body, ['password']));
+    const masked = JSON.parse(
+      maskBody(body, ['users[0].password', 'users[1].password']),
+    );
     assert.deepStrictEqual(masked, {
       users: [
         { name: 'alice', password: DEFAULT_MASK_PLACEHOLDER },
@@ -152,5 +157,17 @@ describe('headerCapture with masking', () => {
     assert.deepStrictEqual(span.attributes['http.response.header.x_trace_id'], [
       'abc123',
     ]);
+  });
+
+  it('masks each element when the header value is an array', () => {
+    const span = makeFakeSpan();
+    headerCapture('response', ['set-cookie'], {
+      maskFields: ['set-cookie'],
+    })(span as any, () => ['session=abc123', 'csrf=def456']);
+
+    assert.deepStrictEqual(
+      span.attributes['http.response.header.set_cookie'],
+      [DEFAULT_MASK_PLACEHOLDER, DEFAULT_MASK_PLACEHOLDER],
+    );
   });
 });
