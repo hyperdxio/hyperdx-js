@@ -18,7 +18,12 @@ import * as assert from 'assert';
 import Rum from '../src/index';
 import { context, diag, trace } from '@opentelemetry/api';
 import * as tracing from '@opentelemetry/sdk-trace-base';
-import { deinit, initWithDefaultConfig, SpanCapturer } from './utils';
+import {
+  deinit,
+  initWithDefaultConfig,
+  SpanCapturer,
+  waitForSpan,
+} from './utils';
 import sinon from 'sinon';
 import { expect } from 'chai';
 
@@ -395,19 +400,17 @@ describe('test error', () => {
       // nop to prevent failing the test
     };
     capturer.clear();
-    // cause the error
     setTimeout(() => {
       callChain();
     }, 10);
-    // Poll for the specific onerror span instead of grabbing the last span,
-    // which may be a leaked span from a prior test's async recordException.
-    const pollInterval = 50;
-    const maxWait = 5000;
-    let elapsed = 0;
-    const check = () => {
-      window.onerror = origOnError; // restore proper error handling
-      const span = capturer.spans.find((s) => s.name === 'onerror');
-      if (span) {
+    waitForSpan(
+      capturer,
+      (s) => s.name === 'onerror',
+      (err) => {
+        window.onerror = origOnError;
+        done(err);
+      },
+      (span) => {
         assert.strictEqual(span.attributes.component, 'error');
         assert.ok(
           (span.attributes['error.stack'] as string).includes('callChain'),
@@ -418,15 +421,8 @@ describe('test error', () => {
         assert.ok(
           (span.attributes['error.message'] as string).includes('war room'),
         );
-        done();
-      } else if (elapsed >= maxWait) {
-        done(new Error('Timed out waiting for onerror span'));
-      } else {
-        elapsed += pollInterval;
-        setTimeout(check, pollInterval);
-      }
-    };
-    setTimeout(check, pollInterval);
+      },
+    );
   });
 });
 
@@ -456,38 +452,22 @@ describe('test stack length', () => {
         // swallow
       }
     }
-    const pollInterval = 50;
-    const maxWait = 5000;
-    let elapsed = 0;
-    const check = () => {
-      const errorSpan = capturer.spans.find(
-        (span) =>
-          span.attributes.component === 'error' &&
-          (span.attributes['error.message'] as string)?.includes('bad thing'),
-      );
-      if (errorSpan) {
+    waitForSpan(
+      capturer,
+      (s) =>
+        s.attributes.component === 'error' &&
+        (s.attributes['error.message'] as string)?.includes('bad thing'),
+      done,
+      (span) => {
         assert.ok(
-          (errorSpan.attributes['error.stack'] as string).includes(
-            'recurAndThrow',
-          ),
+          (span.attributes['error.stack'] as string).includes('recurAndThrow'),
         );
+        assert.ok((span.attributes['error.stack'] as string).length <= 4096);
         assert.ok(
-          (errorSpan.attributes['error.stack'] as string).length <= 4096,
+          (span.attributes['error.message'] as string).includes('something'),
         );
-        assert.ok(
-          (errorSpan.attributes['error.message'] as string).includes(
-            'something',
-          ),
-        );
-        done();
-      } else if (elapsed >= maxWait) {
-        done(new Error('Timed out waiting for error span with recurAndThrow'));
-      } else {
-        elapsed += pollInterval;
-        setTimeout(check, pollInterval);
-      }
-    };
-    setTimeout(check, pollInterval);
+      },
+    );
   });
 });
 
@@ -507,33 +487,19 @@ describe('test unhandled promise rejection', () => {
     Promise.resolve('ok').then(() => {
       throwBacon();
     });
-    const pollInterval = 50;
-    const maxWait = 5000;
-    let elapsed = 0;
-    const check = () => {
-      const errorSpan = capturer.spans.find(
-        (span) =>
-          span.name === 'unhandledrejection' &&
-          (span.attributes['error.message'] as string)?.includes('bacon'),
-      );
-      if (errorSpan) {
-        assert.ok(errorSpan.attributes.error);
+    waitForSpan(
+      capturer,
+      (s) =>
+        s.name === 'unhandledrejection' &&
+        (s.attributes['error.message'] as string)?.includes('bacon'),
+      done,
+      (span) => {
+        assert.ok(span.attributes.error);
         assert.ok(
-          (errorSpan.attributes['error.stack'] as string).includes(
-            'throwBacon',
-          ),
+          (span.attributes['error.stack'] as string).includes('throwBacon'),
         );
-        done();
-      } else if (elapsed >= maxWait) {
-        done(
-          new Error('Timed out waiting for unhandledrejection span (bacon)'),
-        );
-      } else {
-        elapsed += pollInterval;
-        setTimeout(check, pollInterval);
-      }
-    };
-    setTimeout(check, pollInterval);
+      },
+    );
   });
 });
 
@@ -548,27 +514,14 @@ describe('test console.error', () => {
 
   it('should report a span', (done) => {
     console.error('has', 'some', 'args');
-    const pollInterval = 50;
-    const maxWait = 5000;
-    let elapsed = 0;
-    const check = () => {
-      const errorSpan = capturer.spans.find(
-        (span) => span.name === 'console.error',
-      );
-      if (errorSpan) {
-        assert.strictEqual(
-          errorSpan.attributes['error.message'],
-          'has some args',
-        );
-        done();
-      } else if (elapsed >= maxWait) {
-        done(new Error('Timed out waiting for console.error span'));
-      } else {
-        elapsed += pollInterval;
-        setTimeout(check, pollInterval);
-      }
-    };
-    setTimeout(check, pollInterval);
+    waitForSpan(
+      capturer,
+      (s) => s.name === 'console.error',
+      done,
+      (span) => {
+        assert.strictEqual(span.attributes['error.message'], 'has some args');
+      },
+    );
   });
 });
 
@@ -590,27 +543,17 @@ describe('test unloaded img', () => {
       '/IAlwaysWantToUseVeryVerboseDescriptionsWhenIHaveToEnsureSomethingDoesNotExist.jpg';
     document.body.appendChild(img);
 
-    // Poll for the span instead of using a fixed timeout, since the error
-    // event and the async recordException chain may resolve at varying speeds.
-    const pollInterval = 50;
-    const maxWait = 5000;
-    let elapsed = 0;
-    const check = () => {
-      const span = capturer.spans.find((s) => s.name === 'eventListener.error');
-      if (span) {
+    waitForSpan(
+      capturer,
+      (s) => s.name === 'eventListener.error',
+      done,
+      (span) => {
         assert.strictEqual(span.attributes.component, 'error');
         assert.ok(
           (span.attributes.target_src as string).endsWith('DoesNotExist.jpg'),
         );
-        done();
-      } else if (elapsed >= maxWait) {
-        done(new Error('Timed out waiting for error span from unloaded img'));
-      } else {
-        elapsed += pollInterval;
-        setTimeout(check, pollInterval);
-      }
-    };
-    setTimeout(check, pollInterval);
+      },
+    );
   });
 });
 
