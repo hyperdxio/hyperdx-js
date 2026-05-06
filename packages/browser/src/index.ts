@@ -13,6 +13,17 @@ type ErrorBoundaryComponent = any; // TODO: Define ErrorBoundary type
 type Instrumentations = RumOtelWebConfig['instrumentations'];
 type IgnoreUrls = RumOtelWebConfig['ignoreUrls'];
 
+/**
+ * Sensitive field names to mask in captured network telemetry. Header field
+ * matches are case-insensitive. Body fields support dotted paths to address
+ * nested object properties (e.g. `creditCard.number`). Masking is applied
+ * before any data leaves the browser.
+ */
+export type MaskFields = {
+  headers?: string[];
+  body?: string[];
+};
+
 type BrowserSDKConfig = {
   advancedNetworkCapture?: boolean;
   apiKey: string;
@@ -28,6 +39,13 @@ type BrowserSDKConfig = {
   maskAllInputs?: boolean;
   maskAllText?: boolean;
   maskClass?: string;
+  /**
+   * Sensitive field names to mask in captured request/response headers and
+   * bodies before telemetry leaves the browser. Only applies when
+   * `advancedNetworkCapture` is enabled. Matched values are replaced with
+   * `'***'`.
+   */
+  maskFields?: MaskFields;
   recordCanvas?: boolean;
   sampling?: RumRecorderConfig['sampling'];
   service: string;
@@ -47,6 +65,7 @@ function hasWindow() {
 
 class Browser {
   private _advancedNetworkCapture = false;
+  private _maskFields: MaskFields | undefined;
 
   init({
     advancedNetworkCapture = false,
@@ -63,6 +82,7 @@ class Browser {
     maskAllInputs = true,
     maskAllText = false,
     maskClass,
+    maskFields,
     recordCanvas = false,
     sampling,
     service,
@@ -93,6 +113,7 @@ class Browser {
     const resolvedLogsUrl = logsUrl ?? `${urlBase}/v1/logs`;
 
     this._advancedNetworkCapture = advancedNetworkCapture;
+    this._maskFields = maskFields;
 
     Rum.init({
       debug,
@@ -112,6 +133,7 @@ class Browser {
               }
             : {}),
           advancedNetworkCapture: () => this._advancedNetworkCapture,
+          maskFields: () => this._maskFields,
         },
         xhr: {
           ...(tracePropagationTargets != null
@@ -120,6 +142,7 @@ class Browser {
               }
             : {}),
           advancedNetworkCapture: () => this._advancedNetworkCapture,
+          maskFields: () => this._maskFields,
         },
         ...instrumentations,
       },
