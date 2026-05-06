@@ -18,7 +18,12 @@ import * as assert from 'assert';
 import Rum from '../src/index';
 import { context, diag, trace } from '@opentelemetry/api';
 import * as tracing from '@opentelemetry/sdk-trace-base';
-import { deinit, initWithDefaultConfig, SpanCapturer } from './utils';
+import {
+  deinit,
+  initWithDefaultConfig,
+  SpanCapturer,
+  waitForSpan,
+} from './utils';
 import sinon from 'sinon';
 import { expect } from 'chai';
 
@@ -395,27 +400,29 @@ describe('test error', () => {
       // nop to prevent failing the test
     };
     capturer.clear();
-    // cause the error
     setTimeout(() => {
       callChain();
     }, 10);
-    // and later look for it
-    setTimeout(() => {
-      window.onerror = origOnError; // restore proper error handling
-      const span = capturer.spans[capturer.spans.length - 1];
-      assert.strictEqual(span.attributes.component, 'error');
-      assert.strictEqual(span.name, 'onerror');
-      assert.ok(
-        (span.attributes['error.stack'] as string).includes('callChain'),
-      );
-      assert.ok(
-        (span.attributes['error.stack'] as string).includes('reportError'),
-      );
-      assert.ok(
-        (span.attributes['error.message'] as string).includes('war room'),
-      );
-      done();
-    }, 100);
+    waitForSpan(
+      capturer,
+      (s) => s.name === 'onerror',
+      (err) => {
+        window.onerror = origOnError;
+        done(err);
+      },
+      (span) => {
+        assert.strictEqual(span.attributes.component, 'error');
+        assert.ok(
+          (span.attributes['error.stack'] as string).includes('callChain'),
+        );
+        assert.ok(
+          (span.attributes['error.stack'] as string).includes('reportError'),
+        );
+        assert.ok(
+          (span.attributes['error.message'] as string).includes('war room'),
+        );
+      },
+    );
   });
 });
 
@@ -445,25 +452,22 @@ describe('test stack length', () => {
         // swallow
       }
     }
-    setTimeout(() => {
-      const errorSpan = capturer.spans.find(
-        (span) => span.attributes.component === 'error',
-      );
-      assert.ok(errorSpan);
-      assert.ok(
-        (errorSpan.attributes['error.stack'] as string).includes(
-          'recurAndThrow',
-        ),
-      );
-      assert.ok((errorSpan.attributes['error.stack'] as string).length <= 4096);
-      assert.ok(
-        (errorSpan.attributes['error.message'] as string).includes('something'),
-      );
-      assert.ok(
-        (errorSpan.attributes['error.message'] as string).includes('bad thing'),
-      );
-      done();
-    }, 100);
+    waitForSpan(
+      capturer,
+      (s) =>
+        s.attributes.component === 'error' &&
+        (s.attributes['error.message'] as string)?.includes('bad thing'),
+      done,
+      (span) => {
+        assert.ok(
+          (span.attributes['error.stack'] as string).includes('recurAndThrow'),
+        );
+        assert.ok((span.attributes['error.stack'] as string).length <= 4096);
+        assert.ok(
+          (span.attributes['error.message'] as string).includes('something'),
+        );
+      },
+    );
   });
 });
 
@@ -483,20 +487,19 @@ describe('test unhandled promise rejection', () => {
     Promise.resolve('ok').then(() => {
       throwBacon();
     });
-    setTimeout(() => {
-      const errorSpan = capturer.spans.find(
-        (span) => span.attributes.component === 'error',
-      );
-      assert.ok(errorSpan);
-      assert.ok(errorSpan.attributes.error);
-      assert.ok(
-        (errorSpan.attributes['error.stack'] as string).includes('throwBacon'),
-      );
-      assert.ok(
-        (errorSpan.attributes['error.message'] as string).includes('bacon'),
-      );
-      done();
-    }, 100);
+    waitForSpan(
+      capturer,
+      (s) =>
+        s.name === 'unhandledrejection' &&
+        (s.attributes['error.message'] as string)?.includes('bacon'),
+      done,
+      (span) => {
+        assert.ok(span.attributes.error);
+        assert.ok(
+          (span.attributes['error.stack'] as string).includes('throwBacon'),
+        );
+      },
+    );
   });
 });
 
@@ -511,17 +514,14 @@ describe('test console.error', () => {
 
   it('should report a span', (done) => {
     console.error('has', 'some', 'args');
-    setTimeout(() => {
-      const errorSpan = capturer.spans.find(
-        (span) => span.attributes.component === 'error',
-      );
-      assert.ok(errorSpan);
-      assert.strictEqual(
-        errorSpan.attributes['error.message'],
-        'has some args',
-      );
-      done();
-    }, 100);
+    waitForSpan(
+      capturer,
+      (s) => s.name === 'console.error',
+      done,
+      (span) => {
+        assert.strictEqual(span.attributes['error.message'], 'has some args');
+      },
+    );
   });
 });
 
@@ -542,18 +542,18 @@ describe('test unloaded img', () => {
       location.href +
       '/IAlwaysWantToUseVeryVerboseDescriptionsWhenIHaveToEnsureSomethingDoesNotExist.jpg';
     document.body.appendChild(img);
-    setTimeout(() => {
-      const span = capturer.spans.find(
-        (s) => s.attributes.component === 'error',
-      );
-      assert.ok(span);
-      assert.strictEqual(span.name, 'eventListener.error');
-      assert.ok(
-        (span.attributes.target_src as string).endsWith('DoesNotExist.jpg'),
-      );
 
-      done();
-    }, 100);
+    waitForSpan(
+      capturer,
+      (s) => s.name === 'eventListener.error',
+      done,
+      (span) => {
+        assert.strictEqual(span.attributes.component, 'error');
+        assert.ok(
+          (span.attributes.target_src as string).endsWith('DoesNotExist.jpg'),
+        );
+      },
+    );
   });
 });
 
