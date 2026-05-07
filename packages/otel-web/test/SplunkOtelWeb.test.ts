@@ -30,8 +30,8 @@ describe('SplunkOtelWeb', () => {
     it('should be settable via constructor and then readable', () => {
       Rum.init({
         app: 'app-name',
-        beaconUrl: 'https://beacon',
-        rumAuth: '<token>',
+        url: 'https://beacon',
+        apiKey: '<token>',
         globalAttributes: {
           key1: 'value1',
         },
@@ -44,8 +44,8 @@ describe('SplunkOtelWeb', () => {
     it('should be patchable via setGlobalAttributes and then readable', () => {
       Rum.init({
         app: 'app-name',
-        beaconUrl: 'https://beacon',
-        rumAuth: '<token>',
+        url: 'https://beacon',
+        apiKey: '<token>',
         globalAttributes: {
           key1: 'value1',
           key2: 'value2',
@@ -67,8 +67,8 @@ describe('SplunkOtelWeb', () => {
     it('should notify about changes via setGlobalAttributes', async () => {
       Rum.init({
         app: 'app-name',
-        beaconUrl: 'https://beacon',
-        rumAuth: '<token>',
+        url: 'https://beacon',
+        apiKey: '<token>',
         globalAttributes: {
           key1: 'value1',
           key2: 'value2',
@@ -102,8 +102,8 @@ describe('SplunkOtelWeb', () => {
 
       Rum.init({
         app: 'app-name',
-        beaconUrl: 'https://beacon',
-        rumAuth: '<token>',
+        url: 'https://beacon',
+        apiKey: '<token>',
       });
       expect(Rum.getSessionId()).to.match(/[0-9a-f]{32}/);
 
@@ -116,8 +116,8 @@ describe('SplunkOtelWeb', () => {
 
       Rum.init({
         app: 'app-name',
-        beaconUrl: 'https://beacon',
-        rumAuth: '<token>',
+        url: 'https://beacon',
+        apiKey: '<token>',
       });
       Rum.addEventListener('session-changed', (ev) => {
         sessionId = ev.payload.sessionId;
@@ -139,8 +139,8 @@ describe('SplunkOtelWeb', () => {
 
       Rum.init({
         app: 'app-name',
-        beaconUrl: 'https://beacon',
-        rumAuth: '<token>',
+        url: 'https://beacon',
+        apiKey: '<token>',
       });
       expect(Rum.inited).to.eq(true, 'Should be true after creating.');
 
@@ -155,8 +155,8 @@ describe('SplunkOtelWeb', () => {
     beforeEach(() => {
       Rum.init({
         app: 'app-name',
-        beaconUrl: 'https://beacon',
-        rumAuth: '<token>',
+        url: 'https://beacon',
+        apiKey: '<token>',
         instrumentations: INSTRUMENTATIONS_ALL_DISABLED,
       });
 
