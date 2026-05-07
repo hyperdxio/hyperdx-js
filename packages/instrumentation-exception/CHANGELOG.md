@@ -1,5 +1,11 @@
 # @hyperdx/instrumentation-exception
 
+## 0.2.0
+
+### Minor Changes
+
+- 65be0bd: Improve how instrumation-exception stringifies properties like arrays and objects
+
 ## 0.1.0
 
 ### Minor Changes
