@@ -1,5 +1,12 @@
 # @hyperdx/node-opentelemetry
 
+## 0.10.4
+
+### Patch Changes
+
+- Updated dependencies [65be0bd]
+  - @hyperdx/instrumentation-exception@0.2.0
+
 ## 0.10.3
 
 ### Patch Changes
