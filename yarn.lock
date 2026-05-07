@@ -6358,9 +6358,9 @@ compressible@~2.0.16:
     mime-db ">= 1.43.0 < 2"
 
 compressing@^1.10.0:
-  version "1.10.4"
-  resolved "https://registry.yarnpkg.com/compressing/-/compressing-1.10.4.tgz#a26122c058b80146f8cbe22598903869a5b634e3"
-  integrity sha512-0gPqeoSNKM0wFq1GmihyLoRzxMsEn4fQo92Ttf8noe9X8U77U1DOvH4If5v6iF5TPa5sUyk5zWI0spoZJfzp2g==
+  version "1.10.5"
+  resolved "https://registry.yarnpkg.com/compressing/-/compressing-1.10.5.tgz#7b3775879dbe35fa504827885c546495148b90d4"
+  integrity sha512-kmVGoqpCTZLy36T8XeYexmyJ8YhZhgjGzkPr2iCGHdfZg7IkelF5DEf5Xyzeo7hwSSEW6ifZuv0IeRAkee5NcA==
   dependencies:
     "@eggjs/yauzl" "^2.11.0"
     flushwritable "^1.0.0"
@@ -8024,18 +8024,7 @@ foreground-child@^3.1.0:
     cross-spawn "^7.0.0"
     signal-exit "^4.0.1"
 
-form-data@^4.0.0:
-  version "4.0.5"
-  resolved "https://registry.yarnpkg.com/form-data/-/form-data-4.0.5.tgz#b49e48858045ff4cbf6b03e1805cebcad3679053"
-  integrity sha512-8RipRLol37bNs2bhoV67fiTEvdTrbMUYcFTiy3+wuuOnUog2QBHCZWXDRijWQfAkhBj2Uf5UnVaiWwA5vdd82w==
-  dependencies:
-    asynckit "^0.4.0"
-    combined-stream "^1.0.8"
-    es-set-tostringtag "^2.1.0"
-    hasown "^2.0.2"
-    mime-types "^2.1.12"
-
-form-data@^4.0.5:
+form-data@^4.0.0, form-data@^4.0.5:
   version "4.0.5"
   resolved "https://registry.yarnpkg.com/form-data/-/form-data-4.0.5.tgz#b49e48858045ff4cbf6b03e1805cebcad3679053"
   integrity sha512-8RipRLol37bNs2bhoV67fiTEvdTrbMUYcFTiy3+wuuOnUog2QBHCZWXDRijWQfAkhBj2Uf5UnVaiWwA5vdd82w==
