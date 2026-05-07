@@ -38,6 +38,39 @@ export class SpanCapturer implements SpanProcessor {
   }
 }
 
+/**
+ * Poll a SpanCapturer until a span matching `predicate` appears, then invoke
+ * `done`.  Uses polling instead of a fixed timeout so tests are resilient to
+ * async `recordException` completing at varying speeds (especially on CI).
+ */
+export function waitForSpan(
+  capturer: SpanCapturer,
+  predicate: (span: ReadableSpan) => boolean,
+  done: (err?: Error) => void,
+  assertions: (span: ReadableSpan) => void,
+  timeoutMsg = 'Timed out waiting for span',
+  { pollInterval = 50, maxWait = 5000 } = {},
+): void {
+  let elapsed = 0;
+  const check = (): void => {
+    const span = capturer.spans.find(predicate);
+    if (span) {
+      try {
+        assertions(span);
+        done();
+      } catch (e) {
+        done(e instanceof Error ? e : new Error(String(e)));
+      }
+    } else if (elapsed >= maxWait) {
+      done(new Error(timeoutMsg));
+    } else {
+      elapsed += pollInterval;
+      setTimeout(check, pollInterval);
+    }
+  };
+  setTimeout(check, pollInterval);
+}
+
 export function deinit(): void {
   Rum.deinit();
 }
