@@ -2,7 +2,7 @@
   "name": "@hyperdx/node-opentelemetry",
   "author": "Warren <warren@users.noreply.github.com>",
   "license": "MIT",
-  "version": "0.10.3",
+  "version": "0.10.4",
   "homepage": "https://www.hyperdx.io",
   "repository": {
     "type": "git",
@@ -32,7 +32,7 @@
     "prettier": "prettier --config .prettierrc --write ."
   },
   "dependencies": {
-    "@hyperdx/instrumentation-exception": "^0.1.0",
+    "@hyperdx/instrumentation-exception": "^0.2.0",
     "@hyperdx/instrumentation-sentry-node": "^0.1.0",
     "@opentelemetry/api": "^1.8.0",
     "@opentelemetry/api-logs": "^0.57.2",
@@ -79,7 +79,7 @@
     "knex": "^3.1.0",
     "koa": "^3.1.2",
     "mongodb": "^6.6.2",
-    "mongoose": "^6.13.6",
+    "mongoose": "^6.13.9",
     "mysql": "^2.18.1",
     "mysql2": "^3.9.7",
     "pg": "^8.11.5",

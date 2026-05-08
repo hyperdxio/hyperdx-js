@@ -1,5 +1,29 @@
 # @hyperdx/browser
 
+## 0.23.0
+
+### Minor Changes
+
+- 057f3b9: Emit FCP and TTFB Core Web Vitals from the browser RUM SDK. The bundled
+  `web-vitals` library already exports `onFCP` and `onTTFB`; `initWebVitals`
+  now registers callbacks for them alongside the existing LCP / INP / CLS / FID
+  ones. Each new metric lands as a `webvitals` span with the value on a single
+  attribute (`fcp` or `ttfb`), matching the existing pattern.
+
+### Patch Changes
+
+- Updated dependencies [057f3b9]
+  - @hyperdx/otel-web@0.17.0
+  - @hyperdx/otel-web-session-recorder@1.0.0
+
+## 0.22.1
+
+### Patch Changes
+
+- e1b1508: Support per-signal OTLP exporter endpoints in hyperdx/browser
+- Updated dependencies [b940c5c]
+  - @hyperdx/otel-web@0.16.4
+
 ## 0.22.0
 
 ### Minor Changes
