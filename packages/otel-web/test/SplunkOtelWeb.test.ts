@@ -15,9 +15,11 @@ limitations under the License.
 */
 
 import { SpanAttributes } from '@opentelemetry/api';
+import { SpanProcessor } from '@opentelemetry/sdk-trace-base';
 import { expect } from 'chai';
-import Rum from '../src';
+import Rum, { INSTRUMENTATIONS_ALL_DISABLED } from '../src';
 import { updateSessionStatus } from '../src/session';
+import { SpanCapturer } from './utils';
 
 describe('SplunkOtelWeb', () => {
   afterEach(() => {
@@ -28,8 +30,8 @@ describe('SplunkOtelWeb', () => {
     it('should be settable via constructor and then readable', () => {
       Rum.init({
         app: 'app-name',
-        beaconUrl: 'https://beacon',
-        rumAuth: '<token>',
+        url: 'https://beacon',
+        apiKey: '<token>',
         globalAttributes: {
           key1: 'value1',
         },
@@ -42,8 +44,8 @@ describe('SplunkOtelWeb', () => {
     it('should be patchable via setGlobalAttributes and then readable', () => {
       Rum.init({
         app: 'app-name',
-        beaconUrl: 'https://beacon',
-        rumAuth: '<token>',
+        url: 'https://beacon',
+        apiKey: '<token>',
         globalAttributes: {
           key1: 'value1',
           key2: 'value2',
@@ -65,8 +67,8 @@ describe('SplunkOtelWeb', () => {
     it('should notify about changes via setGlobalAttributes', async () => {
       Rum.init({
         app: 'app-name',
-        beaconUrl: 'https://beacon',
-        rumAuth: '<token>',
+        url: 'https://beacon',
+        apiKey: '<token>',
         globalAttributes: {
           key1: 'value1',
           key2: 'value2',
@@ -100,8 +102,8 @@ describe('SplunkOtelWeb', () => {
 
       Rum.init({
         app: 'app-name',
-        beaconUrl: 'https://beacon',
-        rumAuth: '<token>',
+        url: 'https://beacon',
+        apiKey: '<token>',
       });
       expect(Rum.getSessionId()).to.match(/[0-9a-f]{32}/);
 
@@ -114,8 +116,8 @@ describe('SplunkOtelWeb', () => {
 
       Rum.init({
         app: 'app-name',
-        beaconUrl: 'https://beacon',
-        rumAuth: '<token>',
+        url: 'https://beacon',
+        apiKey: '<token>',
       });
       Rum.addEventListener('session-changed', (ev) => {
         sessionId = ev.payload.sessionId;
@@ -137,13 +139,42 @@ describe('SplunkOtelWeb', () => {
 
       Rum.init({
         app: 'app-name',
-        beaconUrl: 'https://beacon',
-        rumAuth: '<token>',
+        url: 'https://beacon',
+        apiKey: '<token>',
       });
       expect(Rum.inited).to.eq(true, 'Should be true after creating.');
 
       Rum.deinit();
       expect(Rum.inited).to.eq(false, 'Should be false after destroying.');
+    });
+  });
+
+  describe('addAction', () => {
+    let capturer: SpanCapturer;
+
+    beforeEach(() => {
+      Rum.init({
+        app: 'app-name',
+        url: 'https://beacon',
+        apiKey: '<token>',
+        instrumentations: INSTRUMENTATIONS_ALL_DISABLED,
+      });
+
+      capturer = new SpanCapturer();
+      Rum.provider?.addSpanProcessor(capturer as any as SpanProcessor);
+    });
+
+    it('should not crash when called without attributes', () => {
+      expect(() => Rum.addAction('test-action')).to.not.throw();
+      expect(capturer.spans).to.have.lengthOf(1);
+      expect(capturer.spans[0].name).to.eq('test-action');
+    });
+
+    it('should set attributes when provided', () => {
+      Rum.addAction('test-action', { key: 'value' });
+      expect(capturer.spans).to.have.lengthOf(1);
+      expect(capturer.spans[0].name).to.eq('test-action');
+      expect(capturer.spans[0].attributes).to.deep.include({ key: 'value' });
     });
   });
 });

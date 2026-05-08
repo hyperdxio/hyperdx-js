@@ -1,6 +1,6 @@
 {
   "name": "@hyperdx/otel-web",
-  "version": "0.16.3",
+  "version": "0.17.0",
   "description": "HyperDX distribution of OpenTelemetry for real user monitoring (RUM)",
   "scripts": {
     "start": "npm-run-all -s compile start:_execute",
@@ -13,6 +13,7 @@
     "postversion": "node ./scripts/version-update.mjs",
     "test:unit:watch": "karma start",
     "test:unit:ci": "nyc karma start --single-run --no-auto-watch --browsers ChromeHeadless",
+    "ci:unit": "nyc karma start --single-run --no-auto-watch --browsers ChromeHeadlessNoSandbox",
     "test:unit:ci-node": "env TS_NODE_TRANSPILE_ONLY=true nyc mocha",
     "test:integration:local": "npm-run-all -s compile test:integration:local:headlessChrome:_execute",
     "test:integration:local:firefox": "npm-run-all -s compile test:integration:local:firefox:_execute",
@@ -48,7 +49,7 @@
   ],
   "dependencies": {
     "@babel/runtime": "^7.21.0",
-    "@hyperdx/instrumentation-exception": "^0.1.0",
+    "@hyperdx/instrumentation-exception": "^0.2.0",
     "@opentelemetry/api": "^1.8.0",
     "@opentelemetry/core": "^1.24.1",
     "@opentelemetry/exporter-trace-otlp-http": "^0.51.1",
@@ -62,7 +63,7 @@
     "@opentelemetry/sdk-trace-web": "~1.24.1",
     "@opentelemetry/semantic-conventions": "^1.24.1",
     "json-stringify-safe": "^5.0.1",
-    "lodash": "^4.17.21",
+    "lodash": "^4.18.1",
     "shimmer": "^1.2.1",
     "web-vitals": "^3.3.2"
   },
@@ -89,7 +90,7 @@
     "codecov": "^3.8.2",
     "compression": "^1.7.4",
     "cors": "^2.8.5",
-    "express": "^4.17.1",
+    "express": "^4.22.0",
     "geckodriver": "^3.2.0",
     "generate-source-map": "0.0.5",
     "http-mitm-proxy": "^0.9.0",
@@ -125,6 +126,10 @@
     "nightwatch": {
       "selenium-webdriver": "4.5.0"
     }
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/hyperdxio/hyperdx-js.git"
   },
   "publishConfig": {
     "access": "public"

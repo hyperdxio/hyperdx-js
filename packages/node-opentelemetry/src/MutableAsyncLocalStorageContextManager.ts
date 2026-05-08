@@ -44,9 +44,8 @@ export class MutableAsyncLocalStorageContextManager extends AbstractAsyncHooksCo
     thisArg?: ThisParameterType<F>,
     ...args: A
   ): ReturnType<F> {
-    // Create a fresh mutableContext for each new context to prevent
-    // cross-contamination between concurrent requests
-    const mutableContext = {
+    const mutableContext = this._asyncLocalStorage.getStore()
+      ?.mutableContext ?? {
       traceAttributes: new Map(),
     };
 

@@ -6,7 +6,7 @@ import {
 import * as shimmer from 'shimmer';
 
 import { recordException } from '../';
-import { getElementXPath, limitLen } from './utils';
+import { getElementXPath, limitLen, stringifyValue } from './utils';
 
 // FIXME take timestamps from events?
 
@@ -15,14 +15,6 @@ const MESSAGE_LIMIT = 1024;
 
 function useful(s) {
   return s && s.trim() !== '' && !s.startsWith('[object') && s !== 'error';
-}
-
-function stringifyValue(value: unknown) {
-  if (value === undefined) {
-    return '(undefined)';
-  }
-
-  return value.toString();
 }
 
 function addStackIfUseful(span: Span, err: Error) {
@@ -210,7 +202,7 @@ export class HyperDXErrorInstrumentation extends InstrumentationBase {
         firstError,
       );
     } else {
-      this.hdxReportString(source, stringifyValue(arg)); // FIXME or JSON.stringify?
+      this.hdxReportString(source, stringifyValue(arg));
     }
   }
 }

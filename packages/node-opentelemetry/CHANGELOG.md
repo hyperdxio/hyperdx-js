@@ -1,5 +1,24 @@
 # @hyperdx/node-opentelemetry
 
+## 0.10.4
+
+### Patch Changes
+
+- Updated dependencies [65be0bd]
+  - @hyperdx/instrumentation-exception@0.2.0
+
+## 0.10.3
+
+### Patch Changes
+
+- d91383a: Fix issue where OTEL_EXPORTER_OTLP_HEADERS are not passed to health check endpoints
+
+## 0.10.2
+
+### Patch Changes
+
+- 3552a79: revert: fix: setTraceAttributes cross trace attributes leakage issue
+
 ## 0.10.1
 
 ### Patch Changes
