@@ -1,5 +1,11 @@
 # @hyperdx/otel-web
 
+## 0.17.1
+
+### Patch Changes
+
+- 43874fd: chore: Upgrade dependencies
+
 ## 0.17.0
 
 ### Minor Changes
