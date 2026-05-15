@@ -1,5 +1,11 @@
 # @hyperdx/node-opentelemetry
 
+## 0.10.5
+
+### Patch Changes
+
+- 43874fd: chore: Upgrade dependencies
+
 ## 0.10.4
 
 ### Patch Changes
