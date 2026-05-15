@@ -4,11 +4,121 @@ import {
 } from '@opentelemetry/instrumentation-fetch';
 
 import { captureTraceParent } from './servertiming';
-import { headerCapture } from './utils';
+import { RedactableKey, headerCapture, shouldRedactKey } from './utils';
 
 export type HyperDXFetchInstrumentationConfig = FetchInstrumentationConfig & {
   advancedNetworkCapture?: () => boolean;
+  redactKeys?: {
+    headers?: RedactableKey[];
+    body?: RedactableKey[];
+  };
 };
+
+function redactValue(): string {
+  return '[REDACTED]';
+}
+
+function redactObject(obj: any, redactConfig: RedactableKey[] | undefined) {
+  if (!redactConfig || !obj || typeof obj !== 'object') {
+    return obj;
+  }
+
+  if (Array.isArray(obj)) {
+    return obj.map((item) => redactObject(item, redactConfig));
+  }
+
+  const result: any = {};
+  for (const [key, value] of Object.entries(obj)) {
+    if (shouldRedactKey(key, redactConfig)) {
+      result[key] = redactValue();
+    } else if (value && typeof value === 'object') {
+      result[key] = redactObject(value, redactConfig);
+    } else {
+      result[key] = value;
+    }
+  }
+  return result;
+}
+
+function redactFormData(
+  formData: FormData,
+  redactConfig: RedactableKey[] | undefined,
+): string {
+  if (!redactConfig) {
+    return formData.toString();
+  }
+
+  const entries: Array<[string, string]> = [];
+  formData.forEach((value, key) => {
+    if (shouldRedactKey(key, redactConfig)) {
+      entries.push([key, redactValue()]);
+    } else {
+      entries.push([key, value.toString()]);
+    }
+  });
+
+  return JSON.stringify(Object.fromEntries(entries));
+}
+
+function redactURLSearchParams(
+  params: URLSearchParams,
+  redactConfig: RedactableKey[] | undefined,
+): string {
+  if (!redactConfig) {
+    return params.toString();
+  }
+
+  const newParams = new URLSearchParams();
+  params.forEach((value, key) => {
+    if (shouldRedactKey(key, redactConfig)) {
+      newParams.set(key, redactValue());
+    } else {
+      newParams.set(key, value);
+    }
+  });
+
+  return newParams.toString();
+}
+
+function redactRequestBody(
+  body: ReadableStream<Uint8Array> | BodyInit,
+  redactConfig: RedactableKey[] | undefined,
+): string {
+  if (!body) return '';
+
+  // Maintain backward compatibility with ReadableStream
+  if (body instanceof ReadableStream) {
+    return '[ReadableStream]';
+  }
+
+  if (typeof FormData !== 'undefined' && body instanceof FormData) {
+    return redactFormData(body, redactConfig);
+  }
+
+  if (
+    typeof URLSearchParams !== 'undefined' &&
+    body instanceof URLSearchParams
+  ) {
+    return redactURLSearchParams(body, redactConfig);
+  }
+
+  if (typeof body === 'string') {
+    if (!redactConfig) {
+      return body;
+    }
+
+    try {
+      const parsed = JSON.parse(body);
+      const redacted = redactObject(parsed, redactConfig);
+      return JSON.stringify(redacted);
+    } catch {
+      // Not JSON, return as-is
+      return body;
+    }
+  }
+
+  return body.toString();
+}
 
 // not used yet
 async function readStream(stream: ReadableStream): Promise<string> {
@@ -43,21 +153,18 @@ export class HyperDXFetchInstrumentation extends FetchInstrumentation {
 
       if (config.advancedNetworkCapture?.() && span) {
         if (request.headers) {
-          headerCapture('request', Object.keys(request.headers))(
-            span,
-            (header) => request.headers?.[header],
-          );
+          headerCapture(
+            'request',
+            Object.keys(request.headers),
+            config.redactKeys?.headers,
+          )(span, (header) => request.headers?.[header]);
         }
         if (request.body) {
-          if (request.body instanceof ReadableStream) {
-            span.setAttribute('http.request.body', '[ReadableStream]');
-            // FIXME: This is not working yet
-            // readStream(request.body).then((body) => {
-            //   span.setAttribute('http.request.body', body);
-            // });
-          } else {
-            span.setAttribute('http.request.body', request.body.toString());
-          }
+          const redactedBody = redactRequestBody(
+            request.body,
+            config.redactKeys?.body,
+          );
+          span.setAttribute('http.request.body', redactedBody);
         }
 
         if (response instanceof Response) {
@@ -66,15 +173,17 @@ export class HyperDXFetchInstrumentation extends FetchInstrumentation {
             response.headers.forEach((value, name) => {
               headerNames.push(name);
             });
-            headerCapture('response', headerNames)(
-              span,
-              (header) => response.headers.get(header) ?? '',
-            );
+            headerCapture(
+              'response',
+              headerNames,
+              config.redactKeys?.headers,
+            )(span, (header) => response.headers.get(header) ?? '');
           }
           response
             .clone()
             .text()
             .then((body) => {
+              // TODO: redact response body
               span.setAttribute('http.response.body', body);
             })
             .catch(() => {
