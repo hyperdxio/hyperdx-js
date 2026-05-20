@@ -1,5 +1,13 @@
 # @hyperdx/otel-web-session-recorder
 
+## 1.0.1
+
+### Patch Changes
+
+- 43874fd: chore: Upgrade dependencies
+- Updated dependencies [43874fd]
+  - @hyperdx/otel-web@0.17.1
+
 ## 1.0.0
 
 ### Patch Changes
