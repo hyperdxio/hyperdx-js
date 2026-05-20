@@ -31,6 +31,9 @@
     "ci:unit": "jest --coverage --ci",
     "prettier": "prettier --config .prettierrc --write ."
   },
+  "engines": {
+    "node": ">=22.0.0"
+  },
   "dependencies": {
     "@hyperdx/instrumentation-exception": "^0.2.0",
     "@hyperdx/instrumentation-sentry-node": "^0.1.0",
@@ -73,7 +76,7 @@
     "bunyan": "^1.8.15",
     "compression": "^1.7.4",
     "express": "^4.22.0",
-    "fastify": "^4.27.0",
+    "fastify": "^5.8.5",
     "graphql": "^16.8.1",
     "ioredis": "^5.4.1",
     "knex": "^3.1.0",
