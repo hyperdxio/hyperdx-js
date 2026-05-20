@@ -5,23 +5,22 @@ import {
   trace,
 } from '@opentelemetry/api';
 import { Logger as OtelLogger, LogRecord, logs } from '@opentelemetry/api-logs';
-import { getEnvWithoutDefaults } from '@opentelemetry/core';
 import { OTLPLogExporter as OTLPLogExporterGRPC } from '@opentelemetry/exporter-logs-otlp-grpc';
 import { OTLPLogExporter as OTLPLogExporterHTTP } from '@opentelemetry/exporter-logs-otlp-http';
 import {
-  detectResourcesSync,
-  envDetectorSync,
-  hostDetectorSync,
-  osDetectorSync,
+  detectResources as otelDetectResources,
+  envDetector,
+  hostDetector,
+  osDetector,
   processDetector,
-  Resource,
+  resourceFromAttributes,
 } from '@opentelemetry/resources';
 import {
   BatchLogRecordProcessor,
   LoggerProvider,
-  NoopLogRecordProcessor,
+  LogRecordProcessor,
 } from '@opentelemetry/sdk-logs';
-import { SEMRESATTRS_SERVICE_NAME } from '@opentelemetry/semantic-conventions';
+import { ATTR_SERVICE_NAME } from '@opentelemetry/semantic-conventions';
 
 import { version as PKG_VERSION } from '../../package.json';
 import {
@@ -93,7 +92,7 @@ export class Logger {
 
   private readonly logger: OtelLogger;
 
-  private readonly processor: BatchLogRecordProcessor | NoopLogRecordProcessor;
+  private readonly processor: LogRecordProcessor;
 
   private readonly provider: LoggerProvider;
 
@@ -123,9 +122,9 @@ export class Logger {
       maxQueueSize = maxExportBatchSize;
     }
 
-    const detectedResource = detectResourcesSync({
+    const detectedResource = otelDetectResources({
       detectors: detectResources
-        ? [envDetectorSync, hostDetectorSync, osDetectorSync, processDetector]
+        ? [envDetector, hostDetector, osDetector, processDetector]
         : [],
     });
 
@@ -144,7 +143,11 @@ export class Logger {
             ...(headers && { headers }),
           });
     this.processor = this.isDisabled()
-      ? new NoopLogRecordProcessor()
+      ? {
+          onEmit() {}, // eslint-disable-line @typescript-eslint/no-empty-function
+          shutdown: () => Promise.resolve(),
+          forceFlush: () => Promise.resolve(),
+        }
       : new BatchLogRecordProcessor(exporter, {
           /** The maximum batch size of every export. It must be smaller or equal to
            * maxQueueSize. The default value is 512. */
@@ -155,15 +158,15 @@ export class Logger {
         });
     this.provider = new LoggerProvider({
       resource: detectedResource.merge(
-        new Resource({
+        resourceFromAttributes({
           'telemetry.distro.name': 'hyperdx',
           'telemetry.distro.version': PKG_VERSION,
-          [SEMRESATTRS_SERVICE_NAME]: service ?? _serviceName,
+          [ATTR_SERVICE_NAME]: service ?? _serviceName,
           ...resourceAttributes,
         }),
       ),
+      processors: [this.processor],
     });
-    this.provider.addLogRecordProcessor(this.processor);
 
     this.logger = this.provider.getLogger('node-logger');
   }
@@ -178,7 +181,7 @@ export class Logger {
   }
 
   isDisabled() {
-    return getEnvWithoutDefaults().OTEL_LOGS_EXPORTER === 'none';
+    return process.env.OTEL_LOGS_EXPORTER === 'none';
   }
 
   setGlobalLoggerProvider() {
