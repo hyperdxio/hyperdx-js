@@ -22,8 +22,13 @@ import {
 import { VERSION } from './version';
 import { isUrlIgnored } from '@opentelemetry/core';
 import { addSpanNetworkEvents } from '@opentelemetry/sdk-trace-web';
-import { SemanticAttributes } from '@opentelemetry/semantic-conventions';
 import { context, Context, ROOT_CONTEXT } from '@opentelemetry/api';
+// TODO: Migrate to the new OTel semantic conventions (ATTR_URL_FULL / 'url.full',
+// ATTR_HTTP_REQUEST_METHOD / 'http.request.method') and emit both old and new keys,
+// like the upstream instrumentation-fetch does, so the backend can transition queries
+// without data gaps.
+const ATTR_HTTP_URL = 'http.url' as const;
+const ATTR_HTTP_METHOD = 'http.method' as const;
 
 export interface SplunkPostDocLoadResourceInstrumentationConfig
   extends InstrumentationConfig {
@@ -152,8 +157,8 @@ export class SplunkPostDocLoadResourceInstrumentation extends InstrumentationBas
       this.urlToContextMap[targetUrl.toString()],
     );
     span.setAttribute('component', MODULE_NAME);
-    span.setAttribute(SemanticAttributes.HTTP_URL, entry.name);
-    span.setAttribute(SemanticAttributes.HTTP_METHOD, 'GET');
+    span.setAttribute(ATTR_HTTP_URL, entry.name);
+    span.setAttribute(ATTR_HTTP_METHOD, 'GET');
 
     addSpanNetworkEvents(span, entry);
     //TODO look for server-timings? captureTraceParentFromPerformanceEntries(entry)

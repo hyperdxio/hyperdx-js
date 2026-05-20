@@ -19,11 +19,13 @@ import {
   InstrumentationBase,
   InstrumentationConfig,
 } from '@opentelemetry/instrumentation';
-import {
-  MessagingDestinationKindValues,
-  MessagingOperationValues,
-  SemanticAttributes,
-} from '@opentelemetry/semantic-conventions';
+// Messaging semantic conventions are incubating and only available via
+// the '@opentelemetry/semantic-conventions/incubating' subpath export,
+// which requires 'bundler' or 'node16' moduleResolution. Since this
+// package must compile as CommonJS, we define the constants locally.
+const ATTR_MESSAGING_SYSTEM = 'messaging.system' as const;
+const ATTR_MESSAGING_DESTINATION = 'messaging.destination' as const;
+const ATTR_MESSAGING_OPERATION = 'messaging.operation' as const;
 import { waitForGlobal } from './utils';
 import { VERSION } from './version';
 
@@ -138,10 +140,8 @@ export class SplunkSocketIoClientInstrumentation extends InstrumentationBase {
         const span = inst.tracer.startSpan(`${eventName} send`, {
           kind: SpanKind.PRODUCER,
           attributes: {
-            [SemanticAttributes.MESSAGING_SYSTEM]: 'socket.io',
-            [SemanticAttributes.MESSAGING_DESTINATION]: this.nsp,
-            [SemanticAttributes.MESSAGING_DESTINATION_KIND]:
-              MessagingDestinationKindValues.TOPIC,
+            [ATTR_MESSAGING_SYSTEM]: 'socket.io',
+            [ATTR_MESSAGING_DESTINATION]: this.nsp,
             [SocketIoInstrumentationAttributes.SOCKET_IO_NAMESPACE]: this.nsp,
             [SocketIoInstrumentationAttributes.SOCKET_IO_EVENT_NAME]: eventName,
           },
@@ -181,24 +181,18 @@ export class SplunkSocketIoClientInstrumentation extends InstrumentationBase {
           wrappedListener = inst.listeners.get(listener);
         } else {
           wrappedListener = function (...args: unknown[]) {
-            const span = inst.tracer.startSpan(
-              `${eventName} ${MessagingOperationValues.RECEIVE}`,
-              {
-                kind: SpanKind.CONSUMER,
-                attributes: {
-                  [SemanticAttributes.MESSAGING_SYSTEM]: 'socket.io',
-                  [SemanticAttributes.MESSAGING_DESTINATION]: this.nsp,
-                  [SemanticAttributes.MESSAGING_DESTINATION_KIND]:
-                    MessagingDestinationKindValues.TOPIC,
-                  [SemanticAttributes.MESSAGING_OPERATION]:
-                    MessagingOperationValues.RECEIVE,
-                  [SocketIoInstrumentationAttributes.SOCKET_IO_NAMESPACE]:
-                    this.nsp,
-                  [SocketIoInstrumentationAttributes.SOCKET_IO_EVENT_NAME]:
-                    eventName,
-                },
+            const span = inst.tracer.startSpan(`${eventName} receive`, {
+              kind: SpanKind.CONSUMER,
+              attributes: {
+                [ATTR_MESSAGING_SYSTEM]: 'socket.io',
+                [ATTR_MESSAGING_DESTINATION]: this.nsp,
+                [ATTR_MESSAGING_OPERATION]: 'receive',
+                [SocketIoInstrumentationAttributes.SOCKET_IO_NAMESPACE]:
+                  this.nsp,
+                [SocketIoInstrumentationAttributes.SOCKET_IO_EVENT_NAME]:
+                  eventName,
               },
-            );
+            });
 
             try {
               listener.call(this, args);

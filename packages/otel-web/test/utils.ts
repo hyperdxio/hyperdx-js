@@ -20,6 +20,7 @@ import {
   SpanProcessor,
 } from '@opentelemetry/sdk-trace-base';
 import Rum from '../src/index';
+import type { SplunkWebTracerProvider } from '../src/SplunkWebTracerProvider';
 
 export class SpanCapturer implements SpanProcessor {
   public readonly spans: ReadableSpan[] = [];
@@ -86,6 +87,17 @@ export function initWithDefaultConfig(
     ...additionalConfig,
   });
   if (Rum.provider) {
-    Rum.provider.addSpanProcessor(capturer);
+    addTestSpanProcessor(Rum.provider, capturer);
   }
+}
+
+/**
+ * In OTel SDK v2, addSpanProcessor was removed from BasicTracerProvider.
+ * This helper pushes a processor into the internal list for test use only.
+ */
+export function addTestSpanProcessor(
+  provider: SplunkWebTracerProvider,
+  processor: SpanProcessor,
+): void {
+  (provider as any)._activeSpanProcessor._spanProcessors.push(processor);
 }

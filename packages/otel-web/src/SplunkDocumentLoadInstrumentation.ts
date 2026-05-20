@@ -19,9 +19,12 @@ import { DocumentLoadInstrumentation } from '@opentelemetry/instrumentation-docu
 import * as api from '@opentelemetry/api';
 import { captureTraceParentFromPerformanceEntries } from './servertiming';
 import { PerformanceEntries } from '@opentelemetry/sdk-trace-web';
-import { Span } from '@opentelemetry/sdk-trace-base';
+import { ReadableSpan } from '@opentelemetry/sdk-trace-base';
 import { isUrlIgnored } from '@opentelemetry/core';
-import { SemanticAttributes } from '@opentelemetry/semantic-conventions';
+// TODO: Migrate to the new OTel semantic conventions (ATTR_HTTP_REQUEST_METHOD / 'http.request.method')
+// and emit both old and new keys, like the upstream instrumentation-fetch does, so the backend
+// can transition queries without data gaps.
+const ATTR_HTTP_METHOD = 'http.method' as const;
 
 export interface SplunkDocLoadInstrumentationConfig
   extends InstrumentationConfig {
@@ -72,7 +75,7 @@ export class SplunkDocumentLoadInstrumentation extends DocumentLoadInstrumentati
       exposedSuper._endSpan.bind(this);
     exposedSuper._endSpan = (span, performanceName, entries) => {
       // TODO: upstream exposed name on api.Span, then fix
-      const exposedSpan = span as any as Span;
+      const exposedSpan = span as unknown as ReadableSpan;
 
       if (span) {
         span.setAttribute('component', this.component);
@@ -96,7 +99,7 @@ export class SplunkDocumentLoadInstrumentation extends DocumentLoadInstrumentati
         }
 
         captureTraceParentFromPerformanceEntries(entries, span);
-        span.setAttribute(SemanticAttributes.HTTP_METHOD, 'GET');
+        span.setAttribute(ATTR_HTTP_METHOD, 'GET');
       }
       if (span && exposedSpan.name === 'documentLoad') {
         addExtraDocLoadTags(span);
