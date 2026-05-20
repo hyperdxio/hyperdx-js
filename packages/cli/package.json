@@ -34,6 +34,9 @@
     "prebuild": "npm run clean",
     "build": "tsup"
   },
+  "engines": {
+    "node": ">=22.0.0"
+  },
   "installConfig": {
     "hoistingLimits": "workspaces"
   },

@@ -29,6 +29,9 @@
     "dev:unit": "jest --watch",
     "prettier": "prettier --config .prettierrc --write ."
   },
+  "engines": {
+    "node": ">=22.0.0"
+  },
   "dependencies": {
     "@nestjs/common": "^9.4.2",
     "@opentelemetry/api-logs": "~0.51.0",
