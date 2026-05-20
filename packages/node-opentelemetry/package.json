@@ -39,7 +39,7 @@
     "@hyperdx/instrumentation-sentry-node": "^0.1.0",
     "@opentelemetry/api": "^1.8.0",
     "@opentelemetry/api-logs": "^0.57.2",
-    "@opentelemetry/auto-instrumentations-node": "^0.56.1",
+    "@opentelemetry/auto-instrumentations-node": "^0.75.0",
     "@opentelemetry/core": "^1.30.1",
     "@opentelemetry/exporter-logs-otlp-grpc": "^0.57.2",
     "@opentelemetry/exporter-logs-otlp-http": "^0.57.2",
