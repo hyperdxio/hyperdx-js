@@ -28,6 +28,9 @@
     "test": "jest",
     "test:watch": "jest --watch"
   },
+  "engines": {
+    "node": ">=22.0.0"
+  },
   "dependencies": {
     "@hyperdx/instrumentation-sentry-node": "^0.1.0",
     "@opentelemetry/core": "^1.24.1",

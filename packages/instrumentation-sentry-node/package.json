@@ -26,6 +26,9 @@
     "ci:lint": "yarn lint && yarn tsc --noEmit",
     "prettier": "prettier --config .prettierrc --write ."
   },
+  "engines": {
+    "node": ">=22.0.0"
+  },
   "dependencies": {
     "@opentelemetry/core": "^1.24.1",
     "@opentelemetry/instrumentation": "^0.51.1",

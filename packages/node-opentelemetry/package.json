@@ -31,6 +31,9 @@
     "ci:unit": "jest --coverage --ci",
     "prettier": "prettier --config .prettierrc --write ."
   },
+  "engines": {
+    "node": ">=22.0.0"
+  },
   "dependencies": {
     "@hyperdx/instrumentation-exception": "^0.2.0",
     "@hyperdx/instrumentation-sentry-node": "^0.1.0",
