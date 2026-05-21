@@ -4,7 +4,6 @@ import SessionRecorder, {
   RumRecorderConfig,
 } from '@hyperdx/otel-web-session-recorder';
 import opentelemetry, { Attributes } from '@opentelemetry/api';
-import { ResourceAttributes } from '@opentelemetry/resources';
 
 import { resolveAsyncGlobal } from './utils';
 
@@ -35,7 +34,7 @@ type BrowserSDKConfig = {
   url?: string;
   tracesUrl?: string;
   logsUrl?: string;
-  otelResourceAttributes?: ResourceAttributes;
+  otelResourceAttributes?: Attributes;
 };
 
 const URL_BASE = 'https://in-otel.hyperdx.io';

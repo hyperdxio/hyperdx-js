@@ -22,7 +22,10 @@ import {
   SpanAttributes,
   SpanKind,
 } from '@opentelemetry/api';
-import { AlwaysOffSampler, AlwaysOnSampler } from '@opentelemetry/core';
+import {
+  AlwaysOffSampler,
+  AlwaysOnSampler,
+} from '@opentelemetry/sdk-trace-base';
 import { getRumSessionId } from './session';
 
 export interface SessionBasedSamplerConfig {

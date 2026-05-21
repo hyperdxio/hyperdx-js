@@ -63,3 +63,11 @@ export const parseOtlpHeaders = (
 
   return headers;
 };
+
+// Helper to parse numeric env vars (replaces getEnvWithoutDefaults() from core 1.x)
+export const getNumEnv = (key: string): number | undefined => {
+  const val = process.env[key];
+  if (val == null || val === '') return undefined;
+  const num = Number(val);
+  return Number.isNaN(num) ? undefined : num;
+};

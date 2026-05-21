@@ -15,10 +15,9 @@ limitations under the License.
 */
 
 import { context, trace } from '@opentelemetry/api';
-import { SpanProcessor } from '@opentelemetry/sdk-trace-base';
 import { expect } from 'chai';
 import SplunkOtelWeb, { INSTRUMENTATIONS_ALL_DISABLED } from '../src/index';
-import { SpanCapturer } from './utils';
+import { SpanCapturer, addTestSpanProcessor } from './utils';
 
 describe('async context propagation', () => {
   const capturer = new SpanCapturer();
@@ -33,7 +32,7 @@ describe('async context propagation', () => {
       instrumentations: INSTRUMENTATIONS_ALL_DISABLED,
     });
 
-    SplunkOtelWeb.provider?.addSpanProcessor(capturer as any as SpanProcessor);
+    addTestSpanProcessor(SplunkOtelWeb.provider!, capturer);
   });
   afterEach(() => {
     SplunkOtelWeb.deinit();
@@ -50,7 +49,9 @@ describe('async context propagation', () => {
 
         expect(capturer.spans).to.have.length(2);
         const [childSpan, parentSpan] = capturer.spans;
-        expect(childSpan.parentSpanId).to.eq(parentSpan.spanContext().spanId);
+        expect(childSpan.parentSpanContext?.spanId).to.eq(
+          parentSpan.spanContext().spanId,
+        );
         expect(childSpan.spanContext().traceId).to.eq(
           parentSpan.spanContext().traceId,
         );
@@ -69,7 +70,9 @@ describe('async context propagation', () => {
 
         expect(capturer.spans).to.have.length(2);
         const [childSpan, parentSpan] = capturer.spans;
-        expect(childSpan.parentSpanId).to.eq(parentSpan.spanContext().spanId);
+        expect(childSpan.parentSpanContext?.spanId).to.eq(
+          parentSpan.spanContext().spanId,
+        );
         expect(childSpan.spanContext().traceId).to.eq(
           parentSpan.spanContext().traceId,
         );
@@ -90,7 +93,9 @@ describe('async context propagation', () => {
 
           expect(capturer.spans).to.have.length(2);
           const [childSpan, parentSpan] = capturer.spans;
-          expect(childSpan.parentSpanId).to.eq(parentSpan.spanContext().spanId);
+          expect(childSpan.parentSpanContext?.spanId).to.eq(
+            parentSpan.spanContext().spanId,
+          );
           expect(childSpan.spanContext().traceId).to.eq(
             parentSpan.spanContext().traceId,
           );
@@ -110,7 +115,9 @@ describe('async context propagation', () => {
 
         expect(capturer.spans).to.have.length(2);
         const [childSpan, parentSpan] = capturer.spans;
-        expect(childSpan.parentSpanId).to.eq(parentSpan.spanContext().spanId);
+        expect(childSpan.parentSpanContext?.spanId).to.eq(
+          parentSpan.spanContext().spanId,
+        );
         expect(childSpan.spanContext().traceId).to.eq(
           parentSpan.spanContext().traceId,
         );
@@ -129,7 +136,9 @@ describe('async context propagation', () => {
 
       expect(capturer.spans).to.have.length(2);
       const [childSpan, parentSpan] = capturer.spans;
-      expect(childSpan.parentSpanId).to.eq(parentSpan.spanContext().spanId);
+      expect(childSpan.parentSpanContext?.spanId).to.eq(
+        parentSpan.spanContext().spanId,
+      );
       expect(childSpan.spanContext().traceId).to.eq(
         parentSpan.spanContext().traceId,
       );
@@ -161,7 +170,9 @@ describe('async context propagation', () => {
 
         expect(capturer.spans).to.have.length(2);
         const [childSpan, parentSpan] = capturer.spans;
-        expect(childSpan.parentSpanId).to.eq(parentSpan.spanContext().spanId);
+        expect(childSpan.parentSpanContext?.spanId).to.eq(
+          parentSpan.spanContext().spanId,
+        );
         expect(childSpan.spanContext().traceId).to.eq(
           parentSpan.spanContext().traceId,
         );
@@ -184,7 +195,9 @@ describe('async context propagation', () => {
 
         expect(capturer.spans).to.have.length(2);
         const [childSpan, parentSpan] = capturer.spans;
-        expect(childSpan.parentSpanId).to.eq(parentSpan.spanContext().spanId);
+        expect(childSpan.parentSpanContext?.spanId).to.eq(
+          parentSpan.spanContext().spanId,
+        );
         expect(childSpan.spanContext().traceId).to.eq(
           parentSpan.spanContext().traceId,
         );
@@ -204,7 +217,9 @@ describe('async context propagation', () => {
 
       expect(capturer.spans).to.have.length(2);
       const [childSpan, parentSpan] = capturer.spans;
-      expect(childSpan.parentSpanId).to.eq(parentSpan.spanContext().spanId);
+      expect(childSpan.parentSpanContext?.spanId).to.eq(
+        parentSpan.spanContext().spanId,
+      );
       expect(childSpan.spanContext().traceId).to.eq(
         parentSpan.spanContext().traceId,
       );

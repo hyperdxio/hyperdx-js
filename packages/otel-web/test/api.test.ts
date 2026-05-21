@@ -18,8 +18,7 @@ import { expect } from 'chai';
 import { context, trace, SpanStatusCode } from '@opentelemetry/api';
 
 import SplunkOtelWeb, { INSTRUMENTATIONS_ALL_DISABLED } from '../src/index';
-import { SpanCapturer } from './utils';
-import { SpanProcessor } from '@opentelemetry/sdk-trace-base';
+import { SpanCapturer, addTestSpanProcessor } from './utils';
 
 // note: we've added these tests mainly to keep track of substantial changes in the Open Telemetry API
 describe('Transitive API', () => {
@@ -34,9 +33,7 @@ describe('Transitive API', () => {
     });
 
     spanCapturer = new SpanCapturer();
-    SplunkOtelWeb.provider?.addSpanProcessor(
-      spanCapturer as any as SpanProcessor,
-    );
+    addTestSpanProcessor(SplunkOtelWeb.provider!, spanCapturer);
   });
 
   afterEach(() => {
@@ -51,7 +48,6 @@ describe('Transitive API', () => {
     it('should return a tracer', () => {
       const tracer = subject();
       expect(typeof tracer.startSpan).to.eql('function');
-      expect(typeof tracer.getActiveSpanProcessor).to.eql('function');
     });
 
     it('can start a span', () => {
@@ -97,7 +93,6 @@ describe('Transitive API', () => {
     it('can set status', () => {
       const span = subject();
       span.setStatus({ code: SpanStatusCode.UNSET });
-      span.setStatus({ code: SpanStatusCode.OK });
       span.setStatus({ code: SpanStatusCode.ERROR });
       span.end();
 
@@ -141,7 +136,9 @@ describe('Transitive API', () => {
       expect(spanCapturer.spans).to.have.length(2);
 
       const [childSpan, parentSpan] = spanCapturer.spans;
-      expect(childSpan.parentSpanId).to.eq(parentSpan.spanContext().spanId);
+      expect(childSpan.parentSpanContext?.spanId).to.eq(
+        parentSpan.spanContext().spanId,
+      );
       expect(childSpan.spanContext().traceId).to.eq(
         parentSpan.spanContext().traceId,
       );

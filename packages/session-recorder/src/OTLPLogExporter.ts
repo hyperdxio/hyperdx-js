@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-import { Resource } from '@opentelemetry/resources';
+import type { Resource } from '@opentelemetry/resources';
 import { gzipSync } from 'fflate';
 import type { JsonArray, JsonObject, JsonValue } from 'type-fest';
 

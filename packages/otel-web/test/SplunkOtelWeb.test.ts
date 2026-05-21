@@ -15,11 +15,10 @@ limitations under the License.
 */
 
 import { SpanAttributes } from '@opentelemetry/api';
-import { SpanProcessor } from '@opentelemetry/sdk-trace-base';
 import { expect } from 'chai';
 import Rum, { INSTRUMENTATIONS_ALL_DISABLED } from '../src';
 import { updateSessionStatus } from '../src/session';
-import { SpanCapturer } from './utils';
+import { SpanCapturer, addTestSpanProcessor } from './utils';
 
 describe('SplunkOtelWeb', () => {
   afterEach(() => {
@@ -161,7 +160,7 @@ describe('SplunkOtelWeb', () => {
       });
 
       capturer = new SpanCapturer();
-      Rum.provider?.addSpanProcessor(capturer as any as SpanProcessor);
+      addTestSpanProcessor(Rum.provider!, capturer);
     });
 
     it('should not crash when called without attributes', () => {
