@@ -31,7 +31,15 @@ export default {
     commonjs(),
     resolve({
       mainFields: ['module', 'browser', 'main'],
-      dedupe: ['@opentelemetry/api'],
+      dedupe: [
+        '@opentelemetry/api',
+        '@opentelemetry/core',
+        '@opentelemetry/instrumentation',
+        '@opentelemetry/sdk-trace-base',
+        '@opentelemetry/sdk-trace-web',
+        '@opentelemetry/semantic-conventions',
+        '@opentelemetry/resources',
+      ],
     }),
     terser({
       sourceMap: true,
