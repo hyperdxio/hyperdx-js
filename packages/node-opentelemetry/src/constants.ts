@@ -1,14 +1,6 @@
-import { stringToBoolean } from './utils';
+import { getNumEnv, stringToBoolean } from './utils';
 
 const env = process.env;
-
-// Helper to parse numeric env vars (replaces getEnvWithoutDefaults() from core 1.x)
-const getNumEnv = (key: string): number | undefined => {
-  const val = env[key];
-  if (val == null || val === '') return undefined;
-  const num = Number(val);
-  return Number.isNaN(num) ? undefined : num;
-};
 
 // TO EXTRACT ENV VARS [https://github.com/open-telemetry/opentelemetry-js/blob/3ab4f765d8d696327b7d139ae6a45e7bd7edd924/experimental/packages/sdk-logs/src/export/BatchLogRecordProcessorBase.ts#L50]
 // TO EXTRACT DEFAULTS [https://github.com/open-telemetry/opentelemetry-js/blob/3ab4f765d8d696327b7d139ae6a45e7bd7edd924/experimental/packages/sdk-logs/src/types.ts#L49]
