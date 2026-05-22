@@ -1,5 +1,25 @@
 # @hyperdx/otel-web
 
+## 0.18.0
+
+### Minor Changes
+
+- aedb9ea: Upgrade all OpenTelemetry dependencies to latest versions (core/resources/sdk-trace-base/sdk-metrics to ^2.7.1, semantic-conventions to ^1.41.1, api to ^1.9.1). Migrates to v2 APIs: `resourceFromAttributes()` replaces `new Resource()`, updated semantic convention constants, updated resource detectors, and span processors passed via constructor options.
+
+### Patch Changes
+
+- df0ca02: Move `@babel/runtime` from runtime dependencies to devDependencies. The
+  published CommonJS and ESM output (`dist/cjs/`, `dist/esm/`) is produced by
+  `tsc` and does not reference `@babel/runtime` at all; only the unpublished
+  Rollup IIFE bundle needed it. Keeping it as a runtime dependency forced
+  consumers to install a vulnerable version of `@babel/runtime` (<7.26.10,
+  GHSA-968p-4wvh-cqc8), surfacing as a moderate-severity finding in
+  `npm audit`. With this change, a clean install of `@hyperdx/browser`,
+  `@hyperdx/otel-web`, or `@hyperdx/otel-web-session-recorder` no longer
+  pulls in the vulnerable `@babel/runtime` and `npm audit` is clean.
+- Updated dependencies [aedb9ea]
+  - @hyperdx/instrumentation-exception@0.3.0
+
 ## 0.17.1
 
 ### Patch Changes
