@@ -2,7 +2,7 @@
   "name": "@hyperdx/instrumentation-exception",
   "author": "Warren <warren@users.noreply.github.com>",
   "license": "Apache-2.0",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "homepage": "https://www.hyperdx.io",
   "repository": {
     "type": "git",
@@ -32,7 +32,7 @@
     "node": ">=22.0.0"
   },
   "dependencies": {
-    "@hyperdx/instrumentation-sentry-node": "^0.1.0",
+    "@hyperdx/instrumentation-sentry-node": "^0.2.0",
     "@opentelemetry/core": "^2.7.1",
     "@opentelemetry/instrumentation": "^0.218.0",
     "@opentelemetry/semantic-conventions": "^1.41.1",
