@@ -27,9 +27,33 @@ describe('browserContext', () => {
     );
   });
 
+  it('treats an empty-string language as absent', () => {
+    assert.deepStrictEqual(
+      getBrowserContextResourceAttributes({ language: '' }),
+      {},
+    );
+  });
+
   it('resolveBrowserContext reads a non-empty IANA time zone from the environment', () => {
     const { timeZone } = resolveBrowserContext();
     assert.strictEqual(typeof timeZone, 'string');
     assert.ok((timeZone as string).length > 0);
+  });
+
+  it('resolveBrowserContext reads navigator.language when available', () => {
+    const original = Object.getOwnPropertyDescriptor(globalThis, 'navigator');
+    Object.defineProperty(globalThis, 'navigator', {
+      value: { language: 'fr-FR' },
+      configurable: true,
+    });
+    try {
+      assert.strictEqual(resolveBrowserContext().language, 'fr-FR');
+    } finally {
+      if (original) {
+        Object.defineProperty(globalThis, 'navigator', original);
+      } else {
+        delete (globalThis as any).navigator;
+      }
+    }
   });
 });
