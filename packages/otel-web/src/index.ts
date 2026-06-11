@@ -548,7 +548,7 @@ export const Rum: RumOtelWebType = {
     const pluginDefaults = { ignoreUrls, enabled: false };
 
     const resourceAttrs: Attributes = {
-      // Approximate locale/region signals (browser.language, browser.timezone).
+      // Approximate locale/region signals (browser.language, hyperdx.browser.timezone).
       // Honest proxies, NOT IP geolocation; placed first so user-provided
       // resourceAttributes can override them.
       ...getBrowserContextResourceAttributes(),

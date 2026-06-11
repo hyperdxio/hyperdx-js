@@ -14,7 +14,7 @@ describe('browserContext', () => {
       }),
       {
         'browser.language': 'en-US',
-        'browser.timezone': 'America/New_York',
+        'hyperdx.browser.timezone': 'America/New_York',
       },
     );
   });
@@ -23,7 +23,7 @@ describe('browserContext', () => {
     assert.deepStrictEqual(getBrowserContextResourceAttributes({}), {});
     assert.deepStrictEqual(
       getBrowserContextResourceAttributes({ timeZone: 'UTC' }),
-      { 'browser.timezone': 'UTC' },
+      { 'hyperdx.browser.timezone': 'UTC' },
     );
   });
 

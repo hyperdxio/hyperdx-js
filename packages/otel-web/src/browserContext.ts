@@ -10,7 +10,7 @@ import type { Attributes } from '@opentelemetry/api';
 export interface BrowserContext {
   /** navigator.language, e.g. "en-US" (OTel semconv `browser.language`). */
   language?: string;
-  /** IANA time zone, e.g. "America/New_York". */
+  /** IANA time zone, e.g. "America/New_York" (emitted as `hyperdx.browser.timezone`). */
   timeZone?: string;
 }
 
@@ -32,9 +32,11 @@ export function resolveBrowserContext(): BrowserContext {
 
 /**
  * Map a {@link BrowserContext} to resource attributes. `browser.language`
- * is an OpenTelemetry semantic-convention attribute; `browser.timezone` is
- * a custom companion in the same namespace. Absent values are omitted so
- * they never overwrite a user-provided attribute with an empty string.
+ * is an OpenTelemetry semantic-convention attribute; `hyperdx.browser.timezone`
+ * is a vendor-namespaced custom attribute — OTel semconv has no timezone
+ * resource attribute, so it is kept out of the reserved `browser.` namespace
+ * to avoid a future collision. Absent values are omitted so they never
+ * overwrite a user-provided attribute with an empty string.
  *
  * The context is injectable so the mapping can be unit-tested without real
  * browser globals.
@@ -47,7 +49,7 @@ export function getBrowserContextResourceAttributes(
     attrs['browser.language'] = context.language;
   }
   if (context.timeZone) {
-    attrs['browser.timezone'] = context.timeZone;
+    attrs['hyperdx.browser.timezone'] = context.timeZone;
   }
   return attrs;
 }
