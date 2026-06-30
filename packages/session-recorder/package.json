@@ -35,7 +35,7 @@
   ],
   "dependencies": {
     "@opentelemetry/api": "^1.9.1",
-    "@opentelemetry/core": "^2.7.1",
+    "@opentelemetry/core": "^2.8.0",
     "@opentelemetry/resources": "^2.7.1",
     "fflate": "0.7.4",
     "long": "^5.2.3",
