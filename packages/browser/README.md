@@ -52,7 +52,24 @@ HyperDX.init({
   ```
 - `disableReplay` - (Optional) Whether to disable session replay (default `false`)
 - `recordCanvas` - (Optional) Whether to record canvas elements (default `false`)
-- `sampling` - (Optional) The sampling [config](https://github.com/rrweb-io/rrweb/blob/5fbb904edb653f3da17e6775ee438d81ef0bba83/docs/recipes/optimize-storage.md?plain=1#L22) in the session recording 
+- `sampling` - (Optional) The sampling [config](https://github.com/rrweb-io/rrweb/blob/5fbb904edb653f3da17e6775ee438d81ef0bba83/docs/recipes/optimize-storage.md?plain=1#L22) in the session recording
+- `replay` - (Optional) A passthrough for the underlying rrweb recorder
+  options, including `hooks` for observing events as rrweb captures them.
+  Explicit options (`maskAllInputs`, `recordCanvas`, `sampling`, etc.) take
+  precedence over the same fields set here. Example:
+  ```js
+  HyperDX.init({
+    apiKey: '<YOUR_API_KEY_HERE>',
+    service: 'my-frontend-app',
+    replay: {
+      hooks: {
+        mutation: (...mutations) => {
+          // consumer-defined observation / filtering logic
+        },
+      },
+    },
+  });
+  ```
 
 ## Additional Configuration
 
