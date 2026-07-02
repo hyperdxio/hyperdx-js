@@ -193,7 +193,9 @@ describe('webvitals', () => {
     const lcpSpans = captured.filter((s) => 'lcp' in s.attrs);
     assert.strictEqual(lcpSpans.length, 2);
     assert.deepStrictEqual(
-      lcpSpans.map((s) => s.attrs.lcp).sort(),
+      lcpSpans
+        .map((s) => s.attrs.lcp)
+        .sort((a, b) => (a as number) - (b as number)),
       [1234, 4321],
     );
     assert.deepStrictEqual(
@@ -261,6 +263,10 @@ describe('webvitals (real browser)', function () {
       `FCP should be a positive duration in ms, got ${fcpSpan.attrs.fcp}`,
     );
     assert.strictEqual(typeof fcpSpan.attrs['webvitals.metric_id'], 'string');
+    assert.strictEqual(
+      typeof fcpSpan.attrs['webvitals.navigation_type'],
+      'string',
+    );
 
     assert.ok(ttfbSpan, 'TTFB span should be emitted');
     assert.strictEqual(ttfbSpan.name, 'webvitals');
@@ -270,5 +276,9 @@ describe('webvitals (real browser)', function () {
       `TTFB should be a non-negative duration in ms, got ${ttfbSpan.attrs.ttfb}`,
     );
     assert.strictEqual(typeof ttfbSpan.attrs['webvitals.metric_id'], 'string');
+    assert.strictEqual(
+      typeof ttfbSpan.attrs['webvitals.navigation_type'],
+      'string',
+    );
   });
 });
