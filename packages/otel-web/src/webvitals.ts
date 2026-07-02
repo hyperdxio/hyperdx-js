@@ -30,21 +30,27 @@ export function initWebVitals(
   callbacks: WebVitalsCallbacks = webVitalsLib,
 ): void {
   const tracer = provider.getTracer('webvitals');
-  // Per-init cache: each Core Web Vital callback may fire more than once
-  // in a page's lifetime (CLS in particular), and we only want to report
-  // each metric once. Scoped to this call so callers that re-init get a
-  // fresh cache instead of inheriting module-level state.
+  // Per-init cache keyed on the metric *instance* id (`metric.id`), not the
+  // metric name. A single Core Web Vital callback may fire more than once in
+  // a page's lifetime (CLS in particular), and we only want to report each
+  // instance once. Keying on name, however, would drop measurements from a
+  // page restored from the back/forward cache: those get a brand-new metric
+  // instance with a new id, which is a distinct, valid measurement we still
+  // want to emit. Scoped to this call so callers that re-init get a fresh
+  // cache instead of inheriting module-level state.
   const reported: Record<string, true> = {};
 
   function report(name: string, metric: webVitalsLib.Metric): void {
-    if (reported[name]) {
+    if (reported[metric.id]) {
       return;
     }
-    reported[name] = true;
+    reported[metric.id] = true;
 
     const now = Date.now();
     const span = tracer.startSpan('webvitals', { startTime: now });
     span.setAttribute(name, metric.value);
+    span.setAttribute('webvitals.navigation_type', metric.navigationType);
+    span.setAttribute('webvitals.metric_id', metric.id);
     span.end(now);
   }
 
