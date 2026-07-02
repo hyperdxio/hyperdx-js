@@ -8,6 +8,7 @@
     "pretty": true,
     "resolveJsonModule": true,
     "allowSyntheticDefaultImports": true,
+    "skipLibCheck": true,
     "target": "ES2017",
     "types": ["node"]
   },
