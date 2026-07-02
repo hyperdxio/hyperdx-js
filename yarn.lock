@@ -4115,12 +4115,15 @@
     estree-walker "^2.0.2"
     picomatch "^2.3.1"
 
-"@rrweb/types@^2.0.0-alpha.11":
-  version "2.0.0-alpha.15"
-  resolved "https://registry.yarnpkg.com/@rrweb/types/-/types-2.0.0-alpha.15.tgz#5d158dc1071e529cb0392fb040f57384aa1ddb89"
-  integrity sha512-NsD2D8oFYT+XZidklW3T/waqDyaUqu+GqBNMZRJ5UQ7hbwtlx0lmt6ZCvKa29cT/6GfEwNYxAQqelodAwRnHTw==
-  dependencies:
-    rrweb-snapshot "^2.0.0-alpha.15"
+"@rrweb/types@^2.1.0":
+  version "2.1.0"
+  resolved "https://registry.yarnpkg.com/@rrweb/types/-/types-2.1.0.tgz#fbf4eac008547407faae8b36cae5d347ee433b1c"
+  integrity sha512-svOHkcuukP6rIjz2umwVsS7uYct+2h0N97+bg+8IJYKIUj5+YjwIvqx5y9NILFKPIu3yk+Mb+KDFfJ8RV+4JlA==
+
+"@rrweb/utils@^2.1.0":
+  version "2.1.0"
+  resolved "https://registry.yarnpkg.com/@rrweb/utils/-/utils-2.1.0.tgz#8b4284e6995d879d370363daff17c28401580d44"
+  integrity sha512-hU7MT3TSdD+Do7FmMoHrBfPevFCheN5vo2mn97Y4vbXuwemopAmo8dqo5KJeMaA6oQQt7FinHJ0Xqb7k68Ci6Q==
 
 "@sentry-internal/tracing@7.116.0":
   version "7.116.0"
@@ -8049,11 +8052,6 @@ fflate@0.7.4:
   resolved "https://registry.yarnpkg.com/fflate/-/fflate-0.7.4.tgz#61587e5d958fdabb5a9368a302c25363f4f69f50"
   integrity sha512-5u2V/CDW15QM1XbbgS+0DfPxVB+jUKhWEKuuFuHncbk3tEEqzmoXL+2KyOFuKGqOnmdIy0/davWF1CkuwtibCw==
 
-fflate@^0.4.4:
-  version "0.4.8"
-  resolved "https://registry.yarnpkg.com/fflate/-/fflate-0.4.8.tgz#f90b82aefbd8ac174213abb338bd7ef848f0f5ae"
-  integrity sha512-FJqqoDBR00Mdj9ppamLa/Y7vxm+PRmNWA67N846RvsoYVMKB4q3y/de5PA7gUmRMYK/8CMz2GDZQmCRN1wBcWA==
-
 figures@3.2.0:
   version "3.2.0"
   resolved "https://registry.yarnpkg.com/figures/-/figures-3.2.0.tgz#625c18bd293c604dc4a8ddb2febf0c88341746af"
@@ -11142,10 +11140,10 @@ minizlib@^2.1.1:
     minipass "^3.0.0"
     yallist "^4.0.0"
 
-mitt@^1.1.3:
-  version "1.2.0"
-  resolved "https://registry.yarnpkg.com/mitt/-/mitt-1.2.0.tgz#cb24e6569c806e31bd4e3995787fe38a04fdf90d"
-  integrity sha512-r6lj77KlwqLhIUku9UWYes7KJtsczvolZkzp8hbaDPPaE24OmWl5s539Mytlj22siEQKosZ26qCBgda2PKwoJw==
+mitt@^3.0.0:
+  version "3.0.1"
+  resolved "https://registry.yarnpkg.com/mitt/-/mitt-3.0.1.tgz#ea36cf0cc30403601ae074c8f77b7092cdab36d1"
+  integrity sha512-vKivATfr97l2/QBCYAkXYDbrIWPM2IIKEl7YPhjCvKlG3kE2gm+uBo6nEXK3M5/Ffh/FLpKExzOQ3JJoJGFKBw==
 
 mixme@^0.5.1:
   version "0.5.10"
@@ -11375,6 +11373,11 @@ nanoid@3.3.1:
   version "3.3.1"
   resolved "https://registry.yarnpkg.com/nanoid/-/nanoid-3.3.1.tgz#6347a18cac88af88f58af0b3594b723d5e99bb35"
   integrity sha512-n6Vs/3KGyxPQd6uO0eH4Bv0ojGSUvuLlIHtC3Y0kEO23YRge8H9x1GCzLn28YX0H66pMkxuaeESFq4tKISKwdw==
+
+nanoid@^3.3.12:
+  version "3.3.15"
+  resolved "https://registry.yarnpkg.com/nanoid/-/nanoid-3.3.15.tgz#36c490fad8c6e86c824c940dfdde999b69ed4316"
+  integrity sha512-y7Wygv/7mEOvxTuEQDB8StXdMRBWf1kR/tlhAzBRUFkB2jfcLOAxO/SHmOO2zgz1pVgK29/kyupn059/bCHdjA==
 
 natural-compare-lite@^1.4.0:
   version "1.4.0"
@@ -12260,6 +12263,15 @@ postcss-load-config@^3.0.1:
     lilconfig "^2.0.5"
     yaml "^1.10.2"
 
+postcss@^8.4.38:
+  version "8.5.16"
+  resolved "https://registry.yarnpkg.com/postcss/-/postcss-8.5.16.tgz#1230ce0b5df354c24c0ea45f99ce5f6a88279d28"
+  integrity sha512-vuwillviilfKZsg0VGj5R/YwwcHx4SLsIOI/7K6mQkWx+l5cUHTjj5g0AasTBcyXsbfTgrwsUNmVUb5xVwyPwg==
+  dependencies:
+    nanoid "^3.3.12"
+    picocolors "^1.1.1"
+    source-map-js "^1.2.1"
+
 postgres-array@~2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/postgres-array/-/postgres-array-2.0.0.tgz#48f8fce054fbc69671999329b8834b772652d82e"
@@ -13030,32 +13042,38 @@ rollup@^3.2.5:
   optionalDependencies:
     fsevents "~2.3.2"
 
+rrdom@^2.1.0:
+  version "2.1.0"
+  resolved "https://registry.yarnpkg.com/rrdom/-/rrdom-2.1.0.tgz#2b7a21e782667b5317aff27b2c2aa71de21c5256"
+  integrity sha512-d7oaIHzwffxI74UJMZDGq/f97/Yfm3QX4CcTIlQelt2HsLavItLjp8x8nQ0g9Pet5+5wG1RGr9yvsxb1gJlo8A==
+  dependencies:
+    rrweb-snapshot "^2.1.0"
+
 rrweb-cssom@^0.8.0:
   version "0.8.0"
   resolved "https://registry.yarnpkg.com/rrweb-cssom/-/rrweb-cssom-0.8.0.tgz#3021d1b4352fbf3b614aaeed0bc0d5739abe0bc2"
   integrity sha512-guoltQEx+9aMf2gDZ0s62EcV8lsXR+0w8915TC3ITdn2YueuNjdAYh/levpU9nFaoChh9RUS5ZdQMrKfVEN9tw==
 
-rrweb-snapshot@^1.1.14:
-  version "1.1.14"
-  resolved "https://registry.yarnpkg.com/rrweb-snapshot/-/rrweb-snapshot-1.1.14.tgz#9d4d9be54a28a893373428ee4393ec7e5bd83fcc"
-  integrity sha512-eP5pirNjP5+GewQfcOQY4uBiDnpqxNRc65yKPW0eSoU1XamDfc4M8oqpXGMyUyvLyxFDB0q0+DChuxxiU2FXBQ==
-
-rrweb-snapshot@^2.0.0-alpha.15:
-  version "2.0.0-alpha.15"
-  resolved "https://registry.yarnpkg.com/rrweb-snapshot/-/rrweb-snapshot-2.0.0-alpha.15.tgz#26107a89d9b88e239107f3c8d1ef7897531e5932"
-  integrity sha512-U5lOYoMt6YsmxKcnWVhX1ller6B8/OICQqLWqvylajTYv5oRHgAk68AFDTAXxLsjMSTQjtr1Vp+REFSmnhWrIg==
-
-rrweb@1.1.3:
-  version "1.1.3"
-  resolved "https://registry.yarnpkg.com/rrweb/-/rrweb-1.1.3.tgz#4fbb3d473d71c79b6c30a54e585e5a01c8ac08bb"
-  integrity sha512-F2qp8LteJLyycsv+lCVJqtVpery63L3U+/ogqMA0da8R7Jx57o6gT+HpjrzdeeGMIBZR7kKNaKyJwDupTTu5KA==
+rrweb-snapshot@^2.1.0:
+  version "2.1.0"
+  resolved "https://registry.yarnpkg.com/rrweb-snapshot/-/rrweb-snapshot-2.1.0.tgz#580e1425f993b3317f2b3489792d1c8f37adb899"
+  integrity sha512-CFjUKWlO+Dl72gk8qwcDcNE/Pj9yr6IvGRAiRAx12pmJaSWaOKFoFgpQQ1j/mW0WKwEZXbHnMJL8M92gIsdwUQ==
   dependencies:
+    postcss "^8.4.38"
+
+rrweb@^2.1.0:
+  version "2.1.0"
+  resolved "https://registry.yarnpkg.com/rrweb/-/rrweb-2.1.0.tgz#3a6ee5f330dc646d85d7d9bdd2a04eb703e3a502"
+  integrity sha512-gGGvd1eXWnOuJpQumH7+gPmBwTXzNrjmQyedWVePcEx0S5fe3VkQW4vw5f5ItY+vuigaaktte9cZKOg0OEvv+w==
+  dependencies:
+    "@rrweb/types" "^2.1.0"
+    "@rrweb/utils" "^2.1.0"
     "@types/css-font-loading-module" "0.0.7"
     "@xstate/fsm" "^1.4.0"
     base64-arraybuffer "^1.0.1"
-    fflate "^0.4.4"
-    mitt "^1.1.3"
-    rrweb-snapshot "^1.1.14"
+    mitt "^3.0.0"
+    rrdom "^2.1.0"
+    rrweb-snapshot "^2.1.0"
 
 run-con@~1.2.11:
   version "1.2.12"
@@ -13533,6 +13551,11 @@ sonic-boom@^4.0.1:
   integrity sha512-hTSD/6JMLyT4r9zeof6UtuBDpjJ9sO08/nmS5djaA9eozT9oOlNdpXSnzcgj4FTqpk3nkLrs61l4gip9r1HCrQ==
   dependencies:
     atomic-sleep "^1.0.0"
+
+source-map-js@^1.2.1:
+  version "1.2.1"
+  resolved "https://registry.yarnpkg.com/source-map-js/-/source-map-js-1.2.1.tgz#1ce5650fddd87abc099eda37dcff024c2667ae46"
+  integrity sha512-UXWMKhLOwVKb728IUtQPXxfYU+usdybtUrK/8uGE8CQMvrhOpwvzDBwj0QhSL7MQc7vIsISBG8VQ8+IDQxpfQA==
 
 source-map-support@0.5.13:
   version "0.5.13"
