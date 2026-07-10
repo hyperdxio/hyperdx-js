@@ -1,5 +1,23 @@
 # @hyperdx/browser
 
+## 0.25.0
+
+### Minor Changes
+
+- 61bc742: Expose the rrweb `blockSelector` option through the browser SDK config. You can
+  now pass `blockSelector` to `HyperDX.init(...)` to block session-recording of
+  elements matching a CSS selector (complementing the existing `blockClass`). The
+  value is forwarded to the session recorder; omit it to keep the previous
+  behavior. Improved documentation by adding description for `blockClass` alongside
+  new `blockSelector` property.
+
+### Patch Changes
+
+- Updated dependencies [6a98ed1]
+- Updated dependencies [c6e35c8]
+  - @hyperdx/otel-web-session-recorder@3.0.0
+  - @hyperdx/otel-web@0.19.0
+
 ## 0.24.0
 
 ### Minor Changes
