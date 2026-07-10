@@ -16,6 +16,7 @@ type BrowserSDKConfig = {
   advancedNetworkCapture?: boolean;
   apiKey: string;
   blockClass?: string;
+  blockSelector?: string;
   captureConsole?: boolean; // deprecated
   consoleCapture?: boolean;
   debug?: boolean;
@@ -51,6 +52,7 @@ class Browser {
     advancedNetworkCapture = false,
     apiKey,
     blockClass,
+    blockSelector,
     captureConsole, // deprecated
     consoleCapture,
     debug = false,
@@ -128,6 +130,7 @@ class Browser {
       SessionRecorder.init({
         apiKey,
         blockClass,
+        blockSelector,
         debug,
         ignoreClass,
         maskAllInputs: maskAllInputs,
