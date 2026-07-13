@@ -1,0 +1,35 @@
+name: Install Check
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+permissions:
+  contents: read
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  main:
+    timeout-minutes: 10
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Setup node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'yarn'
+      - name: Install root dependencies
+        run: yarn
+      # Only the Node packages the load check requires. Avoids building @hyperdx/deno,
+      # which needs the deno binary (not installed here); nx pulls in any deps.
+      - name: Build Node packages
+        run: npx nx run-many --target=build --projects=@hyperdx/node-opentelemetry,@hyperdx/instrumentation-exception,@hyperdx/instrumentation-sentry-node,@hyperdx/node-logger
+      # Installs the freshly-built @hyperdx tarballs in a clean project with @opentelemetry/*
+      # deps floated to latest, then requires each entrypoint. Unlike unit/smoke CI, this does
+      # NOT use the committed yarn.lock, so it catches breakage from floated transitive deps
+      # (e.g. https://github.com/hyperdxio/hyperdx/issues/2630).
+      - name: Fresh-install load check (OTel floated to latest)
+        run: bash ./smoke-tests/install-check.sh
