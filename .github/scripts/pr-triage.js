@@ -113,11 +113,20 @@ module.exports = async ({ github, context }) => {
   }
 
   // ── Process all target PRs ───────────────────────────────────────────────
+  // Bulk mode keeps going after a failure so one bad PR doesn't halt the rest,
+  // but any failure must surface so a gating workflow can signal that triage
+  // did not complete.
+  const failures = [];
   for (const prNumber of prNumbers) {
     try {
       await classifyPR(prNumber);
     } catch (err) {
       console.error(`PR #${prNumber}: classification failed — ${err.message}`);
+      failures.push(prNumber);
     }
+  }
+
+  if (failures.length > 0) {
+    throw new Error(`Triage failed for ${failures.length} PR(s): ${failures.join(', ')}`);
   }
 };

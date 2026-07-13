@@ -17,9 +17,8 @@ permissions:
   issues: write
 
 concurrency:
-  group:
-    ${{ github.workflow }}-${{ github.event.pull_request.number || github.run_id
-    }}
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number ||
+    inputs.pr_number || 'bulk' }}
   cancel-in-progress: true
 
 jobs:
