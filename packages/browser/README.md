@@ -1,3 +1,8 @@
+# HyperDX Browser SDK
+
+Browser SDK for [HyperDX](https://www.hyperdx.io/) — real user monitoring
+(RUM), tracing, and session replay for web applications.
+
 ## Getting Started
 
 ### Install
@@ -103,7 +108,7 @@ HyperDX.setGlobalAttributes({
 ### Auto Capture React Error Boundary Errors
 
 If you're using React, you can automatically capture errors that occur within
-React error boundaries by passing your error boundary component 
+React error boundaries by passing your error boundary component
 into the `attachToReactErrorBoundary` function.
 
 ```js
@@ -189,3 +194,6 @@ To retrieve the current session ID, you can call the `getSessionId` function.
 const sessionId = HyperDX.getSessionId();
 ```
 
+## License
+
+Apache 2.0

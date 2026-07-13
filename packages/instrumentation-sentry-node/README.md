@@ -1,9 +1,9 @@
 # OpenTelemetry Sentry Instrumentation for Node.js
 
 [![NPM Published Version][npm-img]][npm-url]
-[![Apache License][license-image]][license-image]
+[![Apache License][license-image]][license-url]
 
-This module provides automatic instrumentation for the [`@sentry/node`](https://github.com/getsentry/sentry-javascript/tree/develop/packages/node)module.
+This module provides automatic instrumentation for the [`@sentry/node`](https://github.com/getsentry/sentry-javascript/tree/develop/packages/node) module.
 
 Compatible with OpenTelemetry JS API and SDK `1.0+`.
 
@@ -48,4 +48,4 @@ Apache 2.0 - See [LICENSE][license-url] for more information.
 [license-url]: https://github.com/hyperdxio/hyperdx-js/blob/main/packages/instrumentation-sentry-node/LICENSE
 [license-image]: https://img.shields.io/badge/license-Apache_2.0-green.svg?style=flat
 [npm-url]: https://www.npmjs.com/package/@hyperdx/instrumentation-sentry-node
-[npm-img]: https://badge.fury.io/js/%40opentelemetry%2Finstrumentation-pg.svg
+[npm-img]: https://badge.fury.io/js/%40hyperdx%2Finstrumentation-sentry-node.svg
