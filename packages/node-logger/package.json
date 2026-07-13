@@ -54,7 +54,8 @@
     "winston-transport": "^4.7.0"
   },
   "devDependencies": {
-    "@types/lodash.isstring": "^4.0.9"
+    "@types/lodash.isstring": "^4.0.9",
+    "pino": "^8.14.1"
   },
   "peerDependencies": {},
   "keywords": [

@@ -41,6 +41,16 @@ smoke-sdk-http-ts-programmaticImports: build-smoke-images smoke-tests/collector/
 
 smoke-sdk: smoke-sdk-http-ts smoke-sdk-grpc-ts
 
+#: fresh-install load check — packs the Node packages, installs them in a clean project
+#: with OTel deps floated to latest, and asserts each entrypoint loads under `require`.
+install-check:
+	@echo ""
+	@echo "+++ Running fresh-install load check"
+	@echo ""
+	npx nx run-many --target=build
+	bash ./smoke-tests/install-check.sh
+	bash ./smoke-tests/install-check.sh --pin-otel
+
 smoke: docker_compose_present
 	@echo ""
 	@echo "+++ Smoking all the tests."
@@ -56,7 +66,7 @@ unsmoke: docker_compose_present
 #: use this for local smoke testing
 resmoke: unsmoke smoke
 
-.PHONY: clean-smoke-tests build-smoke-images example smoke unsmoke resmoke smoke-sdk-grpc-ts smoke-sdk-http-ts smoke-sdk-http-ts-programmaticImports smoke-sdk
+.PHONY: clean-smoke-tests build-smoke-images example smoke unsmoke resmoke smoke-sdk-grpc-ts smoke-sdk-http-ts smoke-sdk-http-ts-programmaticImports smoke-sdk install-check
 
 .PHONY: docker_compose_present
 docker_compose_present:

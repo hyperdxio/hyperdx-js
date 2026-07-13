@@ -1,0 +1,33 @@
+name: Install Check
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  main:
+    timeout-minutes: 10
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Setup node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'yarn'
+      - name: Install root dependencies
+        run: yarn
+      - name: Build
+        run: yarn ci:build
+      # Installs the freshly-built @hyperdx tarballs in a clean project with @opentelemetry/*
+      # deps floated to latest, then requires each entrypoint. Unlike unit/smoke CI, this does
+      # NOT use the committed yarn.lock, so it catches breakage from floated transitive deps
+      # (e.g. https://github.com/hyperdxio/hyperdx/issues/2630).
+      - name: Fresh-install load check (OTel floated to latest)
+        run: bash ./smoke-tests/install-check.sh
+      - name: Fresh-install load check (sdk-trace-base pinned to 2.9.0 — #2630 regression)
+        run: bash ./smoke-tests/install-check.sh --pin-otel
