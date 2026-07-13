@@ -47,7 +47,7 @@ install-check:
 	@echo ""
 	@echo "+++ Running fresh-install load check"
 	@echo ""
-	npx nx run-many --target=build
+	npx nx run-many --target=build --projects=@hyperdx/node-opentelemetry,@hyperdx/instrumentation-exception,@hyperdx/instrumentation-sentry-node,@hyperdx/node-logger
 	bash ./smoke-tests/install-check.sh
 	bash ./smoke-tests/install-check.sh --pin-otel
 

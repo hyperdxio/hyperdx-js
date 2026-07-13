@@ -21,8 +21,10 @@ jobs:
           cache: 'yarn'
       - name: Install root dependencies
         run: yarn
-      - name: Build
-        run: yarn ci:build
+      # Only the Node packages the load check requires. Avoids building @hyperdx/deno,
+      # which needs the deno binary (not installed here); nx pulls in any deps.
+      - name: Build Node packages
+        run: npx nx run-many --target=build --projects=@hyperdx/node-opentelemetry,@hyperdx/instrumentation-exception,@hyperdx/instrumentation-sentry-node,@hyperdx/node-logger
       # Installs the freshly-built @hyperdx tarballs in a clean project with @opentelemetry/*
       # deps floated to latest, then requires each entrypoint. Unlike unit/smoke CI, this does
       # NOT use the committed yarn.lock, so it catches breakage from floated transitive deps
