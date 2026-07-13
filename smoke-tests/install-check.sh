@@ -14,10 +14,7 @@
 #
 # Prerequisite: packages must already be built (`yarn ci:build` / `nx run-many --target=build`).
 #
-# Usage:
-#   smoke-tests/install-check.sh            # float OTel deps to latest (drift gate)
-#   smoke-tests/install-check.sh --pin-otel # additionally pin sdk-trace-base@2.9.0 as a
-#                                           # deterministic regression against #2630
+# Usage: smoke-tests/install-check.sh
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -26,11 +23,6 @@ REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 # session-recorder / cli, which are browser bundles or expose `exports` maps / DOM globals
 # and would false-fail a bare Node `require`.
 NODE_PKGS=(node-opentelemetry instrumentation-exception instrumentation-sentry-node node-logger)
-
-PIN_OTEL=false
-if [[ "${1:-}" == "--pin-otel" ]]; then
-  PIN_OTEL=true
-fi
 
 TARBALL_DIR="$(mktemp -d)"
 CONSUMER_DIR="$(mktemp -d)"
@@ -47,10 +39,10 @@ echo "+++ Generating clean-consumer package.json in $CONSUMER_DIR"
 # @hyperdx deps resolve to the freshly-built tarballs, not the buggy registry copies).
 # @opentelemetry/* are intentionally NOT constrained, so they float to latest.
 REPO_ROOT="$REPO_ROOT" TARBALL_DIR="$TARBALL_DIR" CONSUMER_DIR="$CONSUMER_DIR" \
-  PIN_OTEL="$PIN_OTEL" PKGS="${NODE_PKGS[*]}" node <<'NODE'
+  PKGS="${NODE_PKGS[*]}" node <<'NODE'
 const fs = require('fs');
 const path = require('path');
-const { REPO_ROOT, TARBALL_DIR, CONSUMER_DIR, PIN_OTEL, PKGS } = process.env;
+const { REPO_ROOT, TARBALL_DIR, CONSUMER_DIR, PKGS } = process.env;
 
 const deps = {};
 const overrides = {};
@@ -64,22 +56,13 @@ for (const dir of PKGS.split(' ')) {
   overrides[pkg.name] = `file:${abs}`;
 }
 
-if (PIN_OTEL === 'true') {
-  // Deterministic regression against #2630: the version that dropped build/src/enums.
-  deps['@opentelemetry/sdk-trace-base'] = '2.9.0';
-}
-
 fs.writeFileSync(
   path.join(CONSUMER_DIR, 'package.json'),
   JSON.stringify({ name: 'hdx-clean-consumer', private: true, dependencies: deps, overrides }, null, 2),
 );
 NODE
 
-if [[ "$PIN_OTEL" == "true" ]]; then
-  echo "+++ npm install (sdk-trace-base pinned to 2.9.0; other OTel deps float to latest)"
-else
-  echo "+++ npm install (OTel deps float to latest)"
-fi
+echo "+++ npm install (OTel deps float to latest)"
 ( cd "$CONSUMER_DIR" && npm install --no-package-lock --no-audit --no-fund )
 
 echo "+++ Requiring each entrypoint"

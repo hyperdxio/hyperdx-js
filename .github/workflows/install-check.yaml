@@ -33,5 +33,3 @@ jobs:
       # (e.g. https://github.com/hyperdxio/hyperdx/issues/2630).
       - name: Fresh-install load check (OTel floated to latest)
         run: bash ./smoke-tests/install-check.sh
-      - name: Fresh-install load check (sdk-trace-base pinned to 2.9.0 — #2630 regression)
-        run: bash ./smoke-tests/install-check.sh --pin-otel

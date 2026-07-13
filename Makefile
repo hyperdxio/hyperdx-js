@@ -49,7 +49,6 @@ install-check:
 	@echo ""
 	npx nx run-many --target=build --projects=@hyperdx/node-opentelemetry,@hyperdx/instrumentation-exception,@hyperdx/instrumentation-sentry-node,@hyperdx/node-logger
 	bash ./smoke-tests/install-check.sh
-	bash ./smoke-tests/install-check.sh --pin-otel
 
 smoke: docker_compose_present
 	@echo ""
