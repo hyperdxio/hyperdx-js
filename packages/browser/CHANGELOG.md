@@ -1,5 +1,11 @@
 # @hyperdx/browser
 
+## 0.25.1
+
+### Patch Changes
+
+- 9de609b: feat: Add rrweb replay config
+
 ## 0.25.0
 
 ### Minor Changes
