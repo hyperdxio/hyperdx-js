@@ -1,5 +1,53 @@
 # @hyperdx/browser
 
+## 0.25.0
+
+### Minor Changes
+
+- 61bc742: Expose the rrweb `blockSelector` option through the browser SDK config. You can
+  now pass `blockSelector` to `HyperDX.init(...)` to block session-recording of
+  elements matching a CSS selector (complementing the existing `blockClass`). The
+  value is forwarded to the session recorder; omit it to keep the previous
+  behavior. Improved documentation by adding description for `blockClass` alongside
+  new `blockSelector` property.
+
+### Patch Changes
+
+- Updated dependencies [6a98ed1]
+- Updated dependencies [c6e35c8]
+  - @hyperdx/otel-web-session-recorder@3.0.0
+  - @hyperdx/otel-web@0.19.0
+
+## 0.24.0
+
+### Minor Changes
+
+- aedb9ea: Upgrade all OpenTelemetry dependencies to latest versions (core/resources/sdk-trace-base/sdk-metrics to ^2.7.1, semantic-conventions to ^1.41.1, api to ^1.9.1). Migrates to v2 APIs: `resourceFromAttributes()` replaces `new Resource()`, updated semantic convention constants, updated resource detectors, and span processors passed via constructor options.
+
+### Patch Changes
+
+- df0ca02: Move `@babel/runtime` from runtime dependencies to devDependencies. The
+  published CommonJS and ESM output (`dist/cjs/`, `dist/esm/`) is produced by
+  `tsc` and does not reference `@babel/runtime` at all; only the unpublished
+  Rollup IIFE bundle needed it. Keeping it as a runtime dependency forced
+  consumers to install a vulnerable version of `@babel/runtime` (<7.26.10,
+  GHSA-968p-4wvh-cqc8), surfacing as a moderate-severity finding in
+  `npm audit`. With this change, a clean install of `@hyperdx/browser`,
+  `@hyperdx/otel-web`, or `@hyperdx/otel-web-session-recorder` no longer
+  pulls in the vulnerable `@babel/runtime` and `npm audit` is clean.
+- Updated dependencies [df0ca02]
+- Updated dependencies [aedb9ea]
+  - @hyperdx/otel-web-session-recorder@2.0.0
+  - @hyperdx/otel-web@0.18.0
+
+## 0.23.1
+
+### Patch Changes
+
+- Updated dependencies [43874fd]
+  - @hyperdx/otel-web@0.17.1
+  - @hyperdx/otel-web-session-recorder@1.0.1
+
 ## 0.23.0
 
 ### Minor Changes

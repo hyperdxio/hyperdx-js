@@ -8,8 +8,12 @@ import api, {
   SpanStatusCode,
   Tracer,
 } from '@opentelemetry/api';
-import { ExceptionEventName } from '@opentelemetry/sdk-trace-base/build/src/enums';
 import {
+  // `EVENT_EXCEPTION` is the stable public constant for the exception span-event name
+  // ('exception'). We import it here instead of the private
+  // `@opentelemetry/sdk-trace-base/build/src/enums` path, which was removed in
+  // sdk-trace-base 2.9.0 and broke `require()` on a clean install (#2630).
+  EVENT_EXCEPTION as ExceptionEventName,
   SEMATTRS_EXCEPTION_MESSAGE,
   SEMATTRS_EXCEPTION_TYPE,
   SEMATTRS_HTTP_RESPONSE_CONTENT_LENGTH,

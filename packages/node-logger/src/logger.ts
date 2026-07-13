@@ -1,49 +1,55 @@
 import stringifySafe from 'json-stringify-safe';
 import { Attributes, diag, DiagConsoleLogger } from '@opentelemetry/api';
-import { getEnvWithoutDefaults } from '@opentelemetry/core';
 import {
   BatchLogRecordProcessor,
-  BufferConfig,
   LoggerProvider,
 } from '@opentelemetry/sdk-logs';
 import { OTLPLogExporter } from '@opentelemetry/exporter-logs-otlp-http';
-import { Logger as OtelLogger, SeverityNumber } from '@opentelemetry/api-logs';
+import { Logger as OtelLogger } from '@opentelemetry/api-logs';
 import {
-  Resource,
-  defaultServiceName,
-  detectResourcesSync,
-  envDetectorSync,
-  hostDetectorSync,
-  osDetectorSync,
+  resourceFromAttributes,
+  detectResources as otelDetectResources,
+  envDetector,
+  hostDetector,
+  osDetector,
   processDetector,
 } from '@opentelemetry/resources';
-import { SEMRESATTRS_SERVICE_NAME } from '@opentelemetry/semantic-conventions';
+import { ATTR_SERVICE_NAME } from '@opentelemetry/semantic-conventions';
 
 import hdx, { LOG_PREFIX as _LOG_PREFIX } from './debug';
 import { version as PKG_VERSION } from '../package.json';
 
-const otelEnv = getEnvWithoutDefaults();
+const env = process.env;
+
+// Helper to parse numeric env vars
+const getNumEnv = (key: string): number | undefined => {
+  const val = env[key];
+  if (val == null || val === '') return undefined;
+  const num = Number(val);
+  return Number.isNaN(num) ? undefined : num;
+};
 
 // DEBUG otel modules
-if (otelEnv.OTEL_LOG_LEVEL) {
+if (env.OTEL_LOG_LEVEL) {
   diag.setLogger(new DiagConsoleLogger(), {
-    logLevel: otelEnv.OTEL_LOG_LEVEL,
+    logLevel: env.OTEL_LOG_LEVEL as any,
   });
 }
 
 // TO EXTRACT ENV VARS [https://github.com/open-telemetry/opentelemetry-js/blob/3ab4f765d8d696327b7d139ae6a45e7bd7edd924/experimental/packages/sdk-logs/src/export/BatchLogRecordProcessorBase.ts#L50]
 // TO EXTRACT DEFAULTS [https://github.com/open-telemetry/opentelemetry-js/blob/3ab4f765d8d696327b7d139ae6a45e7bd7edd924/experimental/packages/sdk-logs/src/types.ts#L49]
 const DEFAULT_EXPORTER_BATCH_SIZE =
-  otelEnv.OTEL_BLRP_MAX_EXPORT_BATCH_SIZE ?? 512;
-const DEFAULT_EXPORTER_TIMEOUT_MS = otelEnv.OTEL_BLRP_EXPORT_TIMEOUT ?? 30000;
-const DEFAULT_MAX_QUEUE_SIZE = otelEnv.OTEL_BLRP_MAX_QUEUE_SIZE ?? 2048;
+  getNumEnv('OTEL_BLRP_MAX_EXPORT_BATCH_SIZE') ?? 512;
+const DEFAULT_EXPORTER_TIMEOUT_MS =
+  getNumEnv('OTEL_BLRP_EXPORT_TIMEOUT') ?? 30000;
+const DEFAULT_MAX_QUEUE_SIZE = getNumEnv('OTEL_BLRP_MAX_QUEUE_SIZE') ?? 2048;
 const DEFAULT_OTEL_LOGS_EXPORTER_URL =
-  otelEnv.OTEL_EXPORTER_OTLP_LOGS_ENDPOINT ??
-  (otelEnv.OTEL_EXPORTER_OTLP_ENDPOINT
-    ? `${otelEnv.OTEL_EXPORTER_OTLP_ENDPOINT}/v1/logs`
+  env.OTEL_EXPORTER_OTLP_LOGS_ENDPOINT ??
+  (env.OTEL_EXPORTER_OTLP_ENDPOINT
+    ? `${env.OTEL_EXPORTER_OTLP_ENDPOINT}/v1/logs`
     : 'https://in-otel.hyperdx.io/v1/logs');
-const DEFAULT_SEND_INTERVAL_MS = otelEnv.OTEL_BLRP_SCHEDULE_DELAY ?? 2000;
-const DEFAULT_SERVICE_NAME = otelEnv.OTEL_SERVICE_NAME ?? defaultServiceName();
+const DEFAULT_SEND_INTERVAL_MS = getNumEnv('OTEL_BLRP_SCHEDULE_DELAY') ?? 2000;
+const DEFAULT_SERVICE_NAME = env.OTEL_SERVICE_NAME ?? 'unknown_service';
 
 const LOG_PREFIX = `⚠️  ${_LOG_PREFIX}`;
 
@@ -100,9 +106,9 @@ export class Logger {
       maxQueueSize = maxExportBatchSize;
     }
 
-    const detectedResource = detectResourcesSync({
+    const detectedResource = otelDetectResources({
       detectors: detectResources
-        ? [envDetectorSync, hostDetectorSync, osDetectorSync, processDetector]
+        ? [envDetector, hostDetector, osDetector, processDetector]
         : [],
     });
 
@@ -124,15 +130,15 @@ export class Logger {
     });
     const loggerProvider = new LoggerProvider({
       resource: detectedResource.merge(
-        new Resource({
+        resourceFromAttributes({
           // TODO: should use otel semantic conventions
           'hyperdx.distro.version': PKG_VERSION,
-          [SEMRESATTRS_SERVICE_NAME]: service ?? DEFAULT_SERVICE_NAME,
+          [ATTR_SERVICE_NAME]: service ?? DEFAULT_SERVICE_NAME,
           ...resourceAttributes,
         }),
       ),
+      processors: [this.processor],
     });
-    loggerProvider.addLogRecordProcessor(this.processor);
 
     this.logger = loggerProvider.getLogger('node-logger');
     console.log(`${LOG_PREFIX} started!`);

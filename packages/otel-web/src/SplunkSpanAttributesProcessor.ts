@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-import { Attributes } from '@opentelemetry/api';
-import { Span, SpanProcessor } from '@opentelemetry/sdk-trace-base';
+import { Attributes, Span } from '@opentelemetry/api';
+import { SpanProcessor } from '@opentelemetry/sdk-trace-base';
 
 export class SplunkSpanAttributesProcessor implements SpanProcessor {
   private readonly _globalAttributes: Attributes;

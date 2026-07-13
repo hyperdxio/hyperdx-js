@@ -16,8 +16,15 @@ limitations under the License.
 
 import { propagation, context, trace } from '@opentelemetry/api';
 import { WebTracerProvider as BaseWebTracerProvider } from '@opentelemetry/sdk-trace-web';
+import type { Resource } from '@opentelemetry/resources';
 
 export class SplunkWebTracerProvider extends BaseWebTracerProvider {
+  // In OTel SDK v2, BasicTracerProvider made `resource` private (`_resource`).
+  // Re-expose it so our code and session-recorder can access resource attributes.
+  get resource(): Resource {
+    return (this as any)._resource;
+  }
+
   shutdown(): Promise<void> {
     return new Promise<void>((resolve) => {
       // TODO: upstream

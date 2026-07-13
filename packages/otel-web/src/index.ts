@@ -69,9 +69,13 @@ import {
   ContextManagerConfig,
   SplunkContextManager,
 } from './SplunkContextManager';
-import { Resource, ResourceAttributes } from '@opentelemetry/resources';
-import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions';
-import { SDK_INFO, _globalThis } from '@opentelemetry/core';
+import { resourceFromAttributes } from '@opentelemetry/resources';
+import { SDK_INFO } from '@opentelemetry/core';
+import {
+  ATTR_SERVICE_NAME,
+  ATTR_TELEMETRY_SDK_NAME,
+  ATTR_TELEMETRY_SDK_VERSION,
+} from '@opentelemetry/semantic-conventions';
 import { VERSION } from './version';
 import { getSyntheticsRunId, SYNTHETICS_RUN_ID_ATTRIBUTE } from './synthetics';
 import { SplunkSpanAttributesProcessor } from './SplunkSpanAttributesProcessor';
@@ -194,7 +198,7 @@ export interface RumOtelWebConfig {
    * Additional resource attributes to be added to all spans.
    * These will be merged with default SDK resource attributes.
    */
-  resourceAttributes?: ResourceAttributes;
+  resourceAttributes?: Attributes;
 }
 
 interface RumOtelWebConfigInternal extends RumOtelWebConfig {
@@ -423,11 +427,6 @@ export const Rum: RumOtelWebType = {
   },
 
   init: function (options) {
-    // "env" based config still a bad idea for web
-    if (!('OTEL_TRACES_EXPORTER' in _globalThis)) {
-      _globalThis.OTEL_TRACES_EXPORTER = 'none';
-    }
-
     const isOriginalConsole = (fn: Function, name: string) => {
       // Sometimes __wrapped isn't defined on overwritten method, so we check if the fn name matches as a backup
       // I've only seen this occur in HMR environments
@@ -536,42 +535,33 @@ export const Rum: RumOtelWebType = {
       processedOptions.cookieDomain,
     ).deinit;
 
-    const { ignoreUrls, applicationName, deploymentEnvironment, version, resourceAttributes } =
-      processedOptions;
+    const {
+      ignoreUrls,
+      applicationName,
+      deploymentEnvironment,
+      version,
+      resourceAttributes,
+    } = processedOptions;
     // enabled: false prevents registerInstrumentations from enabling instrumentations in constructor
     // they will be enabled in registerInstrumentations
     const pluginDefaults = { ignoreUrls, enabled: false };
 
-    const resourceAttrs: ResourceAttributes = {
+    const resourceAttrs: Attributes = {
       // User-provided resource attributes
       ...(resourceAttributes || {}),
       ...SDK_INFO,
-      [SemanticResourceAttributes.TELEMETRY_SDK_NAME]: '@hyperdx/otel-web',
-      [SemanticResourceAttributes.TELEMETRY_SDK_VERSION]: VERSION,
-      [SemanticResourceAttributes.SERVICE_NAME]: applicationName,
+      [ATTR_TELEMETRY_SDK_NAME]: '@hyperdx/otel-web',
+      [ATTR_TELEMETRY_SDK_VERSION]: VERSION,
+      [ATTR_SERVICE_NAME]: applicationName,
       // Splunk specific attributes
       'rum.version': VERSION,
       'rum.scriptInstance': instanceId,
-
     };
 
     const syntheticsRunId = getSyntheticsRunId();
     if (syntheticsRunId) {
       resourceAttrs[SYNTHETICS_RUN_ID_ATTRIBUTE] = syntheticsRunId;
     }
-
-    const provider = new SplunkWebTracerProvider({
-      ...processedOptions.tracer,
-      resource: new Resource(resourceAttrs),
-    });
-
-    Object.defineProperty(provider.resource.attributes, 'rum.sessionId', {
-      get() {
-        return getRumSessionId();
-      },
-      configurable: true,
-      enumerable: true,
-    });
 
     const instrumentations = INSTRUMENTATIONS.map(
       ({ Instrument, confKey, disable }) => {
@@ -612,7 +602,8 @@ export const Rum: RumOtelWebType = {
       ...(version ? { 'app.version': version } : {}),
       ...(processedOptions.globalAttributes || {}),
     });
-    provider.addSpanProcessor(this.attributesProcessor);
+
+    const spanProcessors: SpanProcessor[] = [this.attributesProcessor];
 
     if (processedOptions.url) {
       const exporter = buildExporter(processedOptions);
@@ -620,20 +611,32 @@ export const Rum: RumOtelWebType = {
         scheduledDelayMillis: processedOptions.bufferTimeout,
         maxExportBatchSize: processedOptions.bufferSize,
       });
-      provider.addSpanProcessor(spanProcessor);
+      spanProcessors.push(spanProcessor);
       this._processor = spanProcessor;
     }
     if (processedOptions.debug) {
-      provider.addSpanProcessor(
-        new SimpleSpanProcessor(new ConsoleSpanExporter()),
-      );
+      spanProcessors.push(new SimpleSpanProcessor(new ConsoleSpanExporter()));
     }
+
+    const provider = new SplunkWebTracerProvider({
+      ...processedOptions.tracer,
+      resource: resourceFromAttributes(resourceAttrs),
+      spanProcessors,
+    });
+
+    Object.defineProperty(provider.resource.attributes, 'rum.sessionId', {
+      get() {
+        return getRumSessionId();
+      },
+      configurable: true,
+      enumerable: true,
+    });
 
     window.addEventListener('visibilitychange', () => {
       // this condition applies when the page is hidden or when it's closed
       // see for more details: https://developers.google.com/web/updates/2018/07/page-lifecycle-api#developer-recommendations-for-each-state
       if (document.visibilityState === 'hidden') {
-        this._processor.forceFlush();
+        this._processor?.forceFlush();
       }
     });
 

@@ -41,6 +41,12 @@ HyperDX.init({
   replay (default `false`).
 - `maskAllText` - (Optional) Whether to mask all text in session replay (default
   `false`).
+- `blockClass` - (Optional) Elements with this CSS class name are blocked from
+  session replay (their contents are not recorded and render as a placeholder).
+  Use this to exclude sensitive regions from replay.
+- `blockSelector` - (Optional) A CSS selector for elements to block from session
+  replay. Like `blockClass`, but lets you target elements by any selector (ex.
+  `'[data-private], .secret'`) instead of a single class name.
 - `disableIntercom` - (Optional) Whether to disable Intercom integration (default `false`)
 - `otelResourceAttributes` - (Optional) Object containing OpenTelemetry resource attributes to be added to all spans. These are set at the resource level and merged with default SDK attributes. Example:
   ```js

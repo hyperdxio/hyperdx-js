@@ -141,8 +141,6 @@ This ensures that OpenTelemetry can properly access and patch the original modul
 
 ### (Optional) Attach User Information or Metadata (BETA)
 
-> WARNING: ONLY WORKS WITH NODE 14.8.0+
-
 To easily tag all events related to a given attribute or identifier (ex. user id or email), you can call the `setTraceAttributes` function which will tag every log/span associated with the current trace after the call with the declared attributes. It's recommended to call this function as early as possible within a given request/trace (ex. as early in an Express middleware stack as possible).
 
 This is a convenient way to ensure all logs/spans are automatically tagged with the right identifiers to be searched on later, instead of needing to manually tagging and propagating identifiers yourself.

@@ -1,6 +1,6 @@
 import { ExceptionInstrumentation } from '@hyperdx/instrumentation-exception';
 import { SentryNodeInstrumentation } from '@hyperdx/instrumentation-sentry-node';
-import { Attributes, diag, DiagLogLevel } from '@opentelemetry/api';
+import { Attributes, diag } from '@opentelemetry/api';
 import {
   getNodeAutoInstrumentations,
   InstrumentationConfigMap,
@@ -12,7 +12,7 @@ import {
   InstrumentationModuleDefinition,
 } from '@opentelemetry/instrumentation';
 import { RuntimeNodeInstrumentation } from '@opentelemetry/instrumentation-runtime-node';
-import { Resource, ResourceAttributes } from '@opentelemetry/resources';
+import { resourceFromAttributes } from '@opentelemetry/resources';
 import { MetricReader } from '@opentelemetry/sdk-metrics';
 import { NodeSDK } from '@opentelemetry/sdk-node';
 import cliSpinners from 'cli-spinners';
@@ -59,7 +59,7 @@ const IS_LOCAL = env.NODE_ENV === 'development' || !env.NODE_ENV;
 
 export type SDKConfig = {
   additionalInstrumentations?: InstrumentationBase[];
-  additionalResourceAttributes?: ResourceAttributes;
+  additionalResourceAttributes?: Attributes;
   advancedNetworkCapture?: boolean;
   apiKey?: string;
   betaMode?: boolean;
@@ -229,7 +229,7 @@ export const initSDK = (config: SDKConfig) => {
 
   let defaultConsoleCapture =
     config.consoleCapture ?? DEFAULT_HDX_NODE_CONSOLE_CAPTURE;
-  if (DEFAULT_OTEL_LOG_LEVEL === DiagLogLevel.DEBUG) {
+  if (DEFAULT_OTEL_LOG_LEVEL === 'debug') {
     // FIXME: better to disable console instrumentation if otel log is enabled
     defaultConsoleCapture = false;
     ui.warn(
@@ -333,7 +333,7 @@ export const initSDK = (config: SDKConfig) => {
   ];
 
   sdk = new NodeSDK({
-    resource: new Resource({
+    resource: resourceFromAttributes({
       ...config.additionalResourceAttributes,
       // https://opentelemetry.io/docs/specs/semconv/resource/#telemetry-sdk-experimental
       'telemetry.distro.name': 'hyperdx',

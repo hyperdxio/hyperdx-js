@@ -19,6 +19,7 @@ import Rum from '../src/index';
 import { context, diag, trace } from '@opentelemetry/api';
 import * as tracing from '@opentelemetry/sdk-trace-base';
 import {
+  addTestSpanProcessor,
   deinit,
   initWithDefaultConfig,
   SpanCapturer,
@@ -28,7 +29,7 @@ import sinon from 'sinon';
 import { expect } from 'chai';
 
 function doesBeaconUrlEndWith(suffix) {
-  const sps = (Rum.provider.getActiveSpanProcessor() as any)._spanProcessors;
+  const sps = (Rum.provider as any)._activeSpanProcessor._spanProcessors;
   // TODO: refactor to make beaconUrl field private
   const beaconUrl = sps[1]._exporter.beaconUrl;
   assert.ok(
@@ -114,7 +115,7 @@ describe('test init', () => {
         apiKey: undefined,
       });
       assert.ok(Rum.inited);
-      Rum.provider.addSpanProcessor(capturer);
+      addTestSpanProcessor(Rum.provider, capturer);
       setTimeout(() => {
         assert.ok(capturer.spans.length >= 3);
         const docLoadTraceId = capturer.spans

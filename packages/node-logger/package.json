@@ -2,7 +2,7 @@
   "name": "@hyperdx/node-logger",
   "author": "Warren <warren@users.noreply.github.com>",
   "license": "MIT",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "description": "",
   "homepage": "https://www.hyperdx.io",
   "repository": {
@@ -29,14 +29,18 @@
     "dev:unit": "jest --watch",
     "prettier": "prettier --config .prettierrc --write ."
   },
+  "engines": {
+    "node": ">=22.0.0"
+  },
   "dependencies": {
     "@nestjs/common": "^9.4.2",
-    "@opentelemetry/api-logs": "~0.51.0",
-    "@opentelemetry/core": "~1.24.0",
-    "@opentelemetry/exporter-logs-otlp-http": "~0.51.0",
-    "@opentelemetry/resources": "~1.24.0",
-    "@opentelemetry/sdk-logs": "~0.51.0",
-    "@opentelemetry/semantic-conventions": "~1.24.0",
+    "@opentelemetry/api": "^1.9.1",
+    "@opentelemetry/api-logs": "^0.218.0",
+    "@opentelemetry/core": "^2.8.0",
+    "@opentelemetry/exporter-logs-otlp-http": "^0.218.0",
+    "@opentelemetry/resources": "^2.7.1",
+    "@opentelemetry/sdk-logs": "^0.218.0",
+    "@opentelemetry/semantic-conventions": "^1.41.1",
     "debug": "^4.3.4",
     "json-stringify-safe": "^5.0.1",
     "lodash.isplainobject": "^4.0.6",
@@ -50,7 +54,8 @@
     "winston-transport": "^4.7.0"
   },
   "devDependencies": {
-    "@types/lodash.isstring": "^4.0.9"
+    "@types/lodash.isstring": "^4.0.9",
+    "pino": "^8.14.1"
   },
   "peerDependencies": {},
   "keywords": [
