@@ -85,14 +85,40 @@ module.exports = async ({ github, context }) => {
     const tier = determineTier(signals);
     const body = buildTierComment(tier, signals);
 
-    // Apply the tier label (remove any stale tier label first)
-    for (const label of currentLabels) {
-      if (label.name.startsWith('review/tier-') && label.name !== TIER_LABELS[tier].name) {
-        await github.rest.issues.removeLabel({ owner, repo, issue_number: prNumber, name: label.name });
-      }
+    // ── Staleness guard ─────────────────────────────────────────────────────
+    // GitHub concurrency only serializes runs sharing a group, and bulk runs
+    // (group `…-bulk`) never share a group with per-PR runs (`…-<number>`), so
+    // the two can process the same PR concurrently. Re-read the PR head SHA
+    // just before writing and bail if the PR advanced since we snapshotted its
+    // files — the run that produced that newer commit will (re)classify it.
+    //
+    // This narrows but does not fully close the race: the GitHub REST API has
+    // no compare-and-set for labels/comments, so a head that advances *during*
+    // the multi-step write below can still interleave with another run. The
+    // add-then-remove ordering and 404-tolerant removal below keep the PR in a
+    // consistent state (never unlabeled) even when that happens.
+    const { data: freshPr } = await github.rest.pulls.get({ owner, repo, pull_number: prNumber });
+    if (freshPr.head.sha !== pr.head.sha) {
+      console.log(`PR #${prNumber}: head advanced ${pr.head.sha.slice(0, 7)} → ${freshPr.head.sha.slice(0, 7)} during classification — skipping stale write`);
+      return;
     }
+
+    // Apply the tier label. Add the target label FIRST, then remove stale tier
+    // labels — so a mid-sequence failure leaves the PR with an extra label
+    // rather than none. removeLabel tolerates 404 (a concurrent run may have
+    // already removed the same label), which would otherwise fail the run.
     if (!currentLabelNames.has(TIER_LABELS[tier].name)) {
       await github.rest.issues.addLabels({ owner, repo, issue_number: prNumber, labels: [TIER_LABELS[tier].name] });
+    }
+    for (const label of currentLabels) {
+      if (label.name.startsWith('review/tier-') && label.name !== TIER_LABELS[tier].name) {
+        try {
+          await github.rest.issues.removeLabel({ owner, repo, issue_number: prNumber, name: label.name });
+        } catch (err) {
+          if (err.status !== 404) throw err;
+          console.log(`PR #${prNumber}: label ${label.name} already removed — ignoring 404`);
+        }
+      }
     }
 
     // Post or update the triage comment

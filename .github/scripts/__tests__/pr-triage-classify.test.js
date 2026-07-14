@@ -9,6 +9,7 @@ const assert = require('node:assert/strict');
 
 const {
   isTestFile, isTrivialFile, isCriticalFile,
+  parseSemver, versionBumpNeedsReview, depBumpNeedsReview,
   computeSignals, determineTier, buildTierComment,
 } = require('../pr-triage-classify');
 
@@ -18,8 +19,17 @@ function makePR(login, ref) {
   return { user: { login }, head: { ref } };
 }
 
-function makeFile(filename, additions = 10, deletions = 5) {
-  return { filename, additions, deletions };
+function makeFile(filename, additions = 10, deletions = 5, patch) {
+  return { filename, additions, deletions, patch };
+}
+
+// Builds a minimal package.json diff patch that bumps `name` from → to.
+function bumpPatch(name, from, to) {
+  return [
+    '@@ -1,1 +1,1 @@',
+    `-    "${name}": "${from}",`,
+    `+    "${name}": "${to}",`,
+  ].join('\n');
 }
 
 function classify(login, ref, files) {
@@ -157,6 +167,143 @@ describe('isCriticalFile', () => {
   });
 });
 
+// ── Dependency-bump detection ────────────────────────────────────────────────
+
+describe('parseSemver', () => {
+  it('parses a plain version', () => {
+    assert.deepEqual(parseSemver('1.2.3'), { major: 1, minor: 2 });
+  });
+
+  it('strips range operators', () => {
+    assert.deepEqual(parseSemver('^2.5.0'), { major: 2, minor: 5 });
+    assert.deepEqual(parseSemver('~0.30.1'), { major: 0, minor: 30 });
+    assert.deepEqual(parseSemver('>=3.0.0'), { major: 3, minor: 0 });
+  });
+
+  it('parses abbreviated ranges (missing minor/patch), defaulting minor to 0', () => {
+    assert.deepEqual(parseSemver('^1'), { major: 1, minor: 0 });
+    assert.deepEqual(parseSemver('2'), { major: 2, minor: 0 });
+    assert.deepEqual(parseSemver('1.x'), { major: 1, minor: 0 });
+    assert.deepEqual(parseSemver('v3.4.5'), { major: 3, minor: 4 });
+  });
+
+  it('returns null for unparseable ranges', () => {
+    assert.equal(parseSemver('*'), null);
+    assert.equal(parseSemver('workspace:^'), null);
+    assert.equal(parseSemver('latest'), null);
+  });
+
+  it('returns null for non-semver targets whose digits are not leading', () => {
+    // Anchored match: a stray digit mid-string (git ref, npm alias) must not be
+    // misread as the major version.
+    assert.equal(parseSemver('git+https://example.com/x#v1'), null);
+    assert.equal(parseSemver('npm:other-pkg@1.2.3'), null);
+  });
+});
+
+describe('versionBumpNeedsReview', () => {
+  it('flags an OTel major/minor change and ignores an OTel patch change', () => {
+    assert.ok(versionBumpNeedsReview('@opentelemetry/api', '^1.7.0', '^1.8.0'));
+    assert.ok(versionBumpNeedsReview('@opentelemetry/api', '^1.7.0', '^2.0.0'));
+    assert.ok(!versionBumpNeedsReview('@opentelemetry/api', '^1.7.0', '^1.7.1'));
+  });
+
+  it('flags only a major change for non-OTel deps', () => {
+    assert.ok(versionBumpNeedsReview('winston', '^3.9.0', '^4.0.0'));
+    assert.ok(!versionBumpNeedsReview('winston', '^3.9.0', '^3.10.0'));
+  });
+
+  it('fails closed for a watched OTel dep with unparseable versions that changed', () => {
+    assert.ok(versionBumpNeedsReview('@opentelemetry/api', 'git+https://x#v1', 'git+https://x#v2'));
+  });
+
+  it('does NOT fail closed for a non-OTel dep with unparseable versions', () => {
+    assert.ok(!versionBumpNeedsReview('lodash', 'git+https://x#v1', 'git+https://x#v2'));
+  });
+
+  it('ignores an unparseable OTel version that did not actually change', () => {
+    assert.ok(!versionBumpNeedsReview('@opentelemetry/api', 'workspace:^', 'workspace:^'));
+  });
+});
+
+describe('depBumpNeedsReview', () => {
+  it('flags an OpenTelemetry minor bump', () => {
+    assert.ok(depBumpNeedsReview(bumpPatch('@opentelemetry/api', '^1.7.0', '^1.8.0')));
+  });
+
+  it('flags an OpenTelemetry major bump', () => {
+    assert.ok(depBumpNeedsReview(bumpPatch('@opentelemetry/sdk-node', '^1.9.0', '^2.0.0')));
+  });
+
+  it('does NOT flag an OpenTelemetry patch-only bump', () => {
+    assert.ok(!depBumpNeedsReview(bumpPatch('@opentelemetry/api', '^1.7.0', '^1.7.1')));
+  });
+
+  it('flags a major bump of a non-OpenTelemetry dependency', () => {
+    assert.ok(depBumpNeedsReview(bumpPatch('winston', '^3.9.0', '^4.0.0')));
+  });
+
+  it('does NOT flag a minor bump of a non-OpenTelemetry dependency', () => {
+    assert.ok(!depBumpNeedsReview(bumpPatch('winston', '^3.9.0', '^3.10.0')));
+  });
+
+  it('does NOT flag a patch bump of a non-OpenTelemetry dependency', () => {
+    assert.ok(!depBumpNeedsReview(bumpPatch('lodash', '4.17.20', '4.17.21')));
+  });
+
+  it('ignores newly added dependencies (no prior version)', () => {
+    const patch = ['@@ -1,0 +1,1 @@', '+    "@opentelemetry/api": "^1.8.0",'].join('\n');
+    assert.ok(!depBumpNeedsReview(patch));
+  });
+
+  it('returns false for an empty or missing patch', () => {
+    assert.ok(!depBumpNeedsReview(''));
+    assert.ok(!depBumpNeedsReview(undefined));
+  });
+
+  it('flags when any one dep in a multi-dep patch crosses the threshold', () => {
+    const patch = [
+      '@@ -1,2 +1,2 @@',
+      '-    "lodash": "4.17.20",',
+      '+    "lodash": "4.17.21",',
+      '-    "@opentelemetry/core": "^1.7.0",',
+      '+    "@opentelemetry/core": "^1.9.0",',
+    ].join('\n');
+    assert.ok(depBumpNeedsReview(patch));
+  });
+
+  it('flags an abbreviated-range major bump that previously escaped (^1 → ^2)', () => {
+    assert.ok(depBumpNeedsReview(bumpPatch('lodash', '^1', '^2')));
+  });
+
+  it('does NOT flag the package\'s own "version" field bump', () => {
+    assert.ok(!depBumpNeedsReview(bumpPatch('version', '1.9.0', '2.0.0')));
+  });
+
+  it('does NOT flag other reserved metadata keys (name, packageManager)', () => {
+    assert.ok(!depBumpNeedsReview(bumpPatch('name', 'old-pkg', 'new-pkg')));
+    assert.ok(!depBumpNeedsReview(bumpPatch('packageManager', 'yarn@3.0.0', 'yarn@4.0.0')));
+  });
+
+  it('does NOT lose a risky bump when a dep name repeats across blocks (major then patch)', () => {
+    // Same name in dependencies (major bump) and resolutions (patch bump). The
+    // major change must not be masked by the later benign entry.
+    const patch = [
+      '@@ -1,4 +1,4 @@',
+      '-    "foo": "^1.0.0",',
+      '+    "foo": "^2.0.0",',
+      '-    "foo": "^3.0.0",',
+      '+    "foo": "^3.0.1",',
+    ].join('\n');
+    assert.ok(depBumpNeedsReview(patch));
+  });
+
+  it('fails closed for a non-semver OTel bump (git URL), but not for a non-OTel one', () => {
+    assert.ok(depBumpNeedsReview(bumpPatch('@opentelemetry/api', 'git+https://x#v1', 'git+https://x#v2')));
+    assert.ok(!depBumpNeedsReview(bumpPatch('lodash', 'git+https://x#v1', 'git+https://x#v2')));
+  });
+});
+
 // ── computeSignals ───────────────────────────────────────────────────────────
 
 describe('computeSignals', () => {
@@ -266,6 +413,20 @@ describe('computeSignals', () => {
       assert.ok(!s.touchesCorePackageJson, `expected !touchesCorePackageJson for ${pkg}`);
     }
   });
+
+  it('sets risksDepBump for a reviewable package.json bump', () => {
+    const s = computeSignals(makePR('dependabot[bot]', 'dependabot/npm/otel'), [
+      makeFile('packages/cli/package.json', 1, 1, bumpPatch('@opentelemetry/api', '^1.7.0', '^1.8.0')),
+    ]);
+    assert.ok(s.risksDepBump);
+  });
+
+  it('does NOT set risksDepBump for a patch-only bump', () => {
+    const s = computeSignals(makePR('dependabot[bot]', 'dependabot/npm/lodash'), [
+      makeFile('package.json', 1, 1, bumpPatch('lodash', '4.17.20', '4.17.21')),
+    ]);
+    assert.ok(!s.risksDepBump);
+  });
 });
 
 // ── determineTier ────────────────────────────────────────────────────────────
@@ -310,6 +471,20 @@ describe('determineTier', () => {
       assert.equal(classify('alice', 'chore/config', [
         makeFile('.prettierrc', 2, 1),
         makeFile('nx.json', 5, 3),
+      ]), 1);
+    });
+
+    it('dependabot patch-only bump stays Tier 1', () => {
+      assert.equal(classify('dependabot[bot]', 'dependabot/npm/lodash', [
+        makeFile('yarn.lock', 8, 8),
+        makeFile('package.json', 1, 1, bumpPatch('lodash', '4.17.20', '4.17.21')),
+      ]), 1);
+    });
+
+    it('dependabot minor bump of a non-OpenTelemetry dep stays Tier 1', () => {
+      assert.equal(classify('dependabot[bot]', 'dependabot/npm/winston', [
+        makeFile('yarn.lock', 8, 8),
+        makeFile('package.json', 1, 1, bumpPatch('winston', '^3.9.0', '^3.10.0')),
       ]), 1);
     });
   });
@@ -372,6 +547,13 @@ describe('determineTier', () => {
         makeFile('packages/node-logger/src/BigFeature.ts', 300, 120),
       ]), 4);
     });
+
+    it('a risky dep bump does NOT downgrade a critical-source PR out of Tier 4', () => {
+      assert.equal(classify('dependabot[bot]', 'dependabot/npm/otel', [
+        makeFile('packages/node-opentelemetry/src/otel.ts', 5, 1),
+        makeFile('packages/node-opentelemetry/package.json', 1, 1, bumpPatch('@opentelemetry/api', '^1.7.0', '^2.0.0')),
+      ]), 4);
+    });
   });
 
   describe('Tier 2', () => {
@@ -421,6 +603,20 @@ describe('determineTier', () => {
     it('agent branch at exactly 49 prod lines qualifies for Tier 2', () => {
       assert.equal(classify('alice', 'claude/fix', [
         makeFile('packages/cli/src/index.ts', 49, 0),
+      ]), 2);
+    });
+
+    it('escalates a dependabot OpenTelemetry minor bump from Tier 1 to Tier 2', () => {
+      assert.equal(classify('dependabot[bot]', 'dependabot/npm/otel', [
+        makeFile('yarn.lock', 40, 40),
+        makeFile('packages/cli/package.json', 1, 1, bumpPatch('@opentelemetry/api', '^1.7.0', '^1.8.0')),
+      ]), 2);
+    });
+
+    it('escalates a major bump of a non-OpenTelemetry dep from Tier 1 to Tier 2', () => {
+      assert.equal(classify('dependabot[bot]', 'dependabot/npm/winston', [
+        makeFile('yarn.lock', 20, 20),
+        makeFile('packages/node-logger/package.json', 1, 1, bumpPatch('winston', '^3.9.0', '^4.0.0')),
       ]), 2);
     });
   });
@@ -516,6 +712,7 @@ describe('buildTierComment', () => {
       isCrossPackage: false,
       packageDirs: new Set(['cli']),
       agentBlocksTier2: false,
+      risksDepBump: false,
       ...overrides,
     };
   }
@@ -609,5 +806,10 @@ describe('buildTierComment', () => {
   it('includes bot-author trigger for Tier 1 bot PRs', () => {
     const body = buildTierComment(1, makeSignals({ isBotAuthor: true, author: 'dependabot[bot]' }));
     assert.ok(body.includes('Bot author'));
+  });
+
+  it('explains the dependency-bump trigger for escalated Tier 2 PRs', () => {
+    const body = buildTierComment(2, makeSignals({ risksDepBump: true, isBotAuthor: true, author: 'dependabot[bot]' }));
+    assert.ok(body.includes('Dependency bump requiring review'));
   });
 });
