@@ -26,10 +26,12 @@ integrations, and the sourcemap-upload CLI.
 
 ## Development
 
-This is a [Yarn Classic](https://classic.yarnpkg.com/) workspaces monorepo,
+This is a [Yarn](https://yarnpkg.com/) workspaces monorepo,
 orchestrated with [Nx](https://nx.dev/) and versioned with
 [Changesets](https://github.com/changesets/changesets). Node `v25` is
-recommended (see `.nvmrc`).
+recommended (see `.nvmrc`). The Yarn version is pinned via the `packageManager`
+field in `package.json` and provided by [Corepack](https://nodejs.org/api/corepack.html);
+run `corepack enable` once so the correct Yarn version is used automatically.
 
 ```sh
 # Install dependencies (from the repo root)

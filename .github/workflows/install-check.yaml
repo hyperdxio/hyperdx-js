@@ -16,13 +16,16 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
+      - name: Enable Corepack
+        run: corepack enable
       - name: Setup node
         uses: actions/setup-node@v4
         with:
           node-version-file: '.nvmrc'
           cache: 'yarn'
+          cache-dependency-path: 'yarn.lock'
       - name: Install root dependencies
-        run: yarn
+        run: yarn install --immutable
       # Only the Node packages the load check requires. Avoids building @hyperdx/deno,
       # which needs the deno binary (not installed here); nx pulls in any deps.
       - name: Build Node packages
