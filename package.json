@@ -10,12 +10,12 @@
     "packages/*"
   ],
   "scripts": {
-    "ci:build": "npx nx run-many --target=build",
+    "ci:build": "npx nx run-many --targets=build,postbuild",
     "ci:unit": "npx nx run-many --target=ci:unit",
     "ci:lint": "npx nx run-many --target=ci:lint",
     "version": "changeset version && npx nx run-many --target=postversion",
-    "release": "npx nx run-many --target=build && yarn changeset publish && git push --follow-tags",
-    "release:next": "npx nx run-many --target=build && yarn changeset version --snapshot next && npx nx run-many --target=postversion && yarn changeset publish --tag next",
+    "release": "npx nx run-many --targets=build,postbuild && yarn changeset publish && git push --follow-tags",
+    "release:next": "npx nx run-many --targets=build,postbuild && yarn changeset version --snapshot next && npx nx run-many --target=postversion && yarn changeset publish --tag next",
     "prepare": "husky install"
   },
   "devDependencies": {

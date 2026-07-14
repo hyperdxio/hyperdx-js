@@ -57,7 +57,7 @@ yarn ci:build
 Run across all packages from the repo root:
 
 ```sh
-yarn ci:build   # npx nx run-many --target=build
+yarn ci:build   # npx nx run-many --targets=build,postbuild
 yarn ci:lint    # npx nx run-many --target=ci:lint
 yarn ci:unit    # npx nx run-many --target=ci:unit
 ```

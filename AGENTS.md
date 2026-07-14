@@ -28,7 +28,7 @@ corepack enable
 yarn install
 
 # Build all packages (respects dependency order via Nx)
-yarn ci:build            # npx nx run-many --target=build
+yarn ci:build            # npx nx run-many --targets=build,postbuild
 
 # Build a single package
 npx nx run @hyperdx/node-opentelemetry:build
