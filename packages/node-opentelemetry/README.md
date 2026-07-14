@@ -106,11 +106,12 @@ import { initSDK } from '@hyperdx/node-opentelemetry';
 initSDK({
   consoleCapture: true, // optional, default: true
   additionalInstrumentations: [], // optional, default: []
-  additionalResourceAttributes: { // optional, default: {}
+  additionalResourceAttributes: {
+    // optional, default: {}
     // Add custom resource attributes to all telemetry data
-    'environment': 'production',
+    environment: 'production',
     'deployment.version': '1.0.0',
-    'custom.attribute': 'value'
+    'custom.attribute': 'value',
   },
 });
 
@@ -185,7 +186,7 @@ initSDK({
     'cloud.region': process.env.AWS_REGION,
     // Add any custom attributes your organization needs
     'team.name': 'backend-team',
-    'feature.flag': 'new-checkout-flow'
+    'feature.flag': 'new-checkout-flow',
   },
 });
 ```
@@ -286,3 +287,7 @@ functions.cloudEvent(
   }),
 );
 ```
+
+## License
+
+MIT
