@@ -8,7 +8,7 @@ For the detailed code style, naming, and testing conventions, see
 
 ## Repository layout
 
-This is a [Yarn Classic](https://classic.yarnpkg.com/) workspaces monorepo. All
+This is a [Yarn](https://yarnpkg.com/) workspaces monorepo. All
 packages live under `packages/`:
 
 ```
@@ -35,10 +35,16 @@ Tooling:
 - **[Changesets](https://github.com/changesets/changesets)** manages versioning
   and publishing.
 - Node **v25** is recommended (see `.nvmrc`).
+- **[Yarn](https://yarnpkg.com/)** is the package manager, pinned via
+  the `packageManager` field in `package.json` and provided by
+  [Corepack](https://nodejs.org/api/corepack.html).
 
 ## Getting started
 
 ```sh
+# Enable Corepack once so the pinned Yarn version is used automatically
+corepack enable
+
 # Install dependencies (from the repo root)
 yarn install
 
@@ -51,7 +57,7 @@ yarn ci:build
 Run across all packages from the repo root:
 
 ```sh
-yarn ci:build   # npx nx run-many --target=build
+yarn ci:build   # npx nx run-many --targets=build,postbuild
 yarn ci:lint    # npx nx run-many --target=ci:lint
 yarn ci:unit    # npx nx run-many --target=ci:unit
 ```

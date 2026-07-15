@@ -41,7 +41,8 @@
     "@opentelemetry/api": "^1.9.1",
     "@sentry/node": "7.x",
     "@sentry/types-v7": "npm:@sentry/types@7.x",
-    "@sentry/types-v8": "npm:@sentry/types@8.x"
+    "@sentry/types-v8": "npm:@sentry/types@8.x",
+    "typescript": "^5.1.3"
   },
   "peerDependencies": {
     "@opentelemetry/api": "^1.9.1"

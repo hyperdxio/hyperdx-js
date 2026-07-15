@@ -55,9 +55,9 @@
   },
   "devDependencies": {
     "@types/lodash.isstring": "^4.0.9",
-    "pino": "^8.14.1"
+    "pino": "^8.14.1",
+    "typescript": "^5.1.3"
   },
-  "peerDependencies": {},
   "keywords": [
     "winston",
     "transport",
