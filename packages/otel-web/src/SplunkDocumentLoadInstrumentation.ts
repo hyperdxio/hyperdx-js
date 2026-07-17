@@ -33,6 +33,14 @@ export interface SplunkDocLoadInstrumentationConfig
 
 const excludedInitiatorTypes = ['beacon', 'fetch', 'xmlhttprequest'];
 
+// `performance.memory` is a non-standard, Chromium-only API and is not part of the
+// standard DOM lib types, so we declare the shape we read here (values are in bytes).
+interface PerformanceMemory {
+  usedJSHeapSize: number;
+  totalJSHeapSize: number;
+  jsHeapSizeLimit: number;
+}
+
 function addExtraDocLoadTags(span: api.Span) {
   if (document.referrer && document.referrer !== '') {
     span.setAttribute('document.referrer', document.referrer);
@@ -41,6 +49,23 @@ function addExtraDocLoadTags(span: api.Span) {
     span.setAttribute(
       'screen.xy',
       window.screen.width + 'x' + window.screen.height,
+    );
+  }
+  // Chromium-only; absent in Firefox/Safari, so feature-detect before reading.
+  const memory = (performance as Performance & { memory?: PerformanceMemory })
+    .memory;
+  if (memory) {
+    span.setAttribute(
+      'performance.memory.usedJSHeapSize',
+      memory.usedJSHeapSize,
+    );
+    span.setAttribute(
+      'performance.memory.totalJSHeapSize',
+      memory.totalJSHeapSize,
+    );
+    span.setAttribute(
+      'performance.memory.jsHeapSizeLimit',
+      memory.jsHeapSizeLimit,
     );
   }
 }
