@@ -1,5 +1,12 @@
 # @hyperdx/otel-web-session-recorder
 
+## 4.0.0
+
+### Patch Changes
+
+- Updated dependencies [3f6bace]
+  - @hyperdx/otel-web@0.20.0
+
 ## 3.0.0
 
 ### Minor Changes
