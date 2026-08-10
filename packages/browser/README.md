@@ -1,3 +1,8 @@
+# HyperDX Browser SDK
+
+Browser SDK for [HyperDX](https://www.hyperdx.io/) — real user monitoring
+(RUM), tracing, and session replay for web applications.
+
 ## Getting Started
 
 ### Install
@@ -41,6 +46,12 @@ HyperDX.init({
   replay (default `false`).
 - `maskAllText` - (Optional) Whether to mask all text in session replay (default
   `false`).
+- `blockClass` - (Optional) Elements with this CSS class name are blocked from
+  session replay (their contents are not recorded and render as a placeholder).
+  Use this to exclude sensitive regions from replay.
+- `blockSelector` - (Optional) A CSS selector for elements to block from session
+  replay. Like `blockClass`, but lets you target elements by any selector (ex.
+  `'[data-private], .secret'`) instead of a single class name.
 - `disableIntercom` - (Optional) Whether to disable Intercom integration (default `false`)
 - `otelResourceAttributes` - (Optional) Object containing OpenTelemetry resource attributes to be added to all spans. These are set at the resource level and merged with default SDK attributes. Example:
   ```js
@@ -52,7 +63,24 @@ HyperDX.init({
   ```
 - `disableReplay` - (Optional) Whether to disable session replay (default `false`)
 - `recordCanvas` - (Optional) Whether to record canvas elements (default `false`)
-- `sampling` - (Optional) The sampling [config](https://github.com/rrweb-io/rrweb/blob/5fbb904edb653f3da17e6775ee438d81ef0bba83/docs/recipes/optimize-storage.md?plain=1#L22) in the session recording 
+- `sampling` - (Optional) The sampling [config](https://github.com/rrweb-io/rrweb/blob/5fbb904edb653f3da17e6775ee438d81ef0bba83/docs/recipes/optimize-storage.md?plain=1#L22) in the session recording
+- `replay` - (Optional) A passthrough for the underlying rrweb recorder
+  options, including `hooks` for observing events as rrweb captures them.
+  Explicit options (`maskAllInputs`, `recordCanvas`, `sampling`, etc.) take
+  precedence over the same fields set here. Example:
+  ```js
+  HyperDX.init({
+    apiKey: '<YOUR_API_KEY_HERE>',
+    service: 'my-frontend-app',
+    replay: {
+      hooks: {
+        mutation: (...mutations) => {
+          // consumer-defined observation / filtering logic
+        },
+      },
+    },
+  });
+  ```
 
 ## Additional Configuration
 
@@ -80,7 +108,7 @@ HyperDX.setGlobalAttributes({
 ### Auto Capture React Error Boundary Errors
 
 If you're using React, you can automatically capture errors that occur within
-React error boundaries by passing your error boundary component 
+React error boundaries by passing your error boundary component
 into the `attachToReactErrorBoundary` function.
 
 ```js
@@ -166,3 +194,6 @@ To retrieve the current session ID, you can call the `getSessionId` function.
 const sessionId = HyperDX.getSessionId();
 ```
 
+## License
+
+Apache 2.0

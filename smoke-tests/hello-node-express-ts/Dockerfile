@@ -1,5 +1,10 @@
 FROM node:24
 
+# The repo root pins Yarn 4 via the "packageManager" field; Corepack must be
+# enabled so the root `yarn install` in the setup step uses it (the base image
+# ships Yarn 1 globally).
+RUN corepack enable
+
 # Create app directory
 WORKDIR /usr/src/app
 

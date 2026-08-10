@@ -27,3 +27,7 @@ log.setup({
 
 log.getLogger('my-otel-logger').info('Hello from Deno!');
 ```
+
+## License
+
+MIT

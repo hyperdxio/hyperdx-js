@@ -1,5 +1,11 @@
 # @hyperdx/node-logger
 
+## 0.5.0
+
+### Minor Changes
+
+- aedb9ea: Upgrade all OpenTelemetry dependencies to latest versions (core/resources/sdk-trace-base/sdk-metrics to ^2.7.1, semantic-conventions to ^1.41.1, api to ^1.9.1). Migrates to v2 APIs: `resourceFromAttributes()` replaces `new Resource()`, updated semantic convention constants, updated resource detectors, and span processors passed via constructor options.
+
 ## 0.4.0
 
 ### Minor Changes

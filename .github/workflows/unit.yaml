@@ -19,13 +19,16 @@ jobs:
       - uses: denoland/setup-deno@v1
         with:
           deno-version: v1.x
+      - name: Enable Corepack
+        run: corepack enable
       - name: Setup node
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version-file: '.nvmrc'
           cache: 'yarn'
+          cache-dependency-path: 'yarn.lock'
       - name: Install root dependencies
-        run: yarn
+        run: yarn install --immutable
       - name: Build
         run: yarn ci:build
       - name: Run lint + type check

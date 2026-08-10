@@ -23,7 +23,12 @@ jest.mock('@opentelemetry/exporter-trace-otlp-http', () => ({
   },
 }));
 
+import SessionRecorder from '@hyperdx/otel-web-session-recorder';
+
 import HyperDX from '../src/index';
+
+// Handle to the mocked SessionRecorder.init (see jest.mock above).
+const mockRecorderInit = SessionRecorder.init as jest.Mock;
 
 // ---------------------------------------------------------------------------
 // SpanCapturer -- mirrors the one in otel-web/test/utils.ts
@@ -260,7 +265,76 @@ describe('Browser SDK (@hyperdx/browser)', () => {
     });
   });
 
-  // -- 9. deinit ----------------------------------------------------------------
+  // -- 9. session recorder config -----------------------------------------------
+  describe('session recorder config', () => {
+    const REPLAY_CONFIG = {
+      apiKey: 'test-api-key',
+      service: 'test-service',
+      disableIntercom: true,
+      disableReplay: false,
+    };
+
+    beforeEach(() => mockRecorderInit.mockClear());
+
+    it('does not init the recorder when replay is disabled', () => {
+      HyperDX.init({ ...REPLAY_CONFIG, disableReplay: true });
+
+      expect(mockRecorderInit).not.toHaveBeenCalled();
+    });
+
+    it('forwards blocking/masking config to SessionRecorder.init', () => {
+      HyperDX.init({
+        ...REPLAY_CONFIG,
+        blockSelector: '.sensitive',
+        blockClass: 'hdx-block',
+        ignoreClass: 'hdx-ignore',
+        maskAllInputs: true,
+        recordCanvas: true,
+      });
+
+      expect(mockRecorderInit).toHaveBeenCalledTimes(1);
+      expect(mockRecorderInit).toHaveBeenCalledWith(
+        expect.objectContaining({
+          blockSelector: '.sensitive',
+          blockClass: 'hdx-block',
+          ignoreClass: 'hdx-ignore',
+          maskAllInputs: true,
+          recordCanvas: true,
+        }),
+      );
+    });
+
+    it('omits optional selectors when not provided', () => {
+      HyperDX.init(REPLAY_CONFIG);
+
+      expect(mockRecorderInit).toHaveBeenCalledWith(
+        expect.objectContaining({
+          blockSelector: undefined,
+          blockClass: undefined,
+          maskTextSelector: undefined,
+        }),
+      );
+    });
+
+    // Testing the mapping logic
+    it('maps maskClass onto maskTextClass', () => {
+      HyperDX.init({ ...REPLAY_CONFIG, maskClass: 'hdx-mask' });
+
+      expect(mockRecorderInit).toHaveBeenCalledWith(
+        expect.objectContaining({ maskTextClass: 'hdx-mask' }),
+      );
+    });
+
+    it('maps maskAllText onto a wildcard maskTextSelector', () => {
+      HyperDX.init({ ...REPLAY_CONFIG, maskAllText: true });
+
+      expect(mockRecorderInit).toHaveBeenCalledWith(
+        expect.objectContaining({ maskTextSelector: '*' }),
+      );
+    });
+  });
+
+  // -- 10. deinit ----------------------------------------------------------------
   describe('deinit', () => {
     it('should mark the SDK as not inited after deinit', () => {
       HyperDX.init(MINIMAL_CONFIG);
