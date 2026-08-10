@@ -3,7 +3,7 @@
 ## Repository Overview
 
 Monorepo for the HyperDX JavaScript/TypeScript SDKs built on OpenTelemetry.
-9 packages under `packages/` managed with **Yarn Classic** workspaces, **Nx** for
+9 packages under `packages/` managed with **Yarn** workspaces, **Nx** for
 task orchestration, and **Changesets** for versioning/publishing.
 
 | Package                       | Name                                   | Build Tool   |
@@ -21,11 +21,14 @@ task orchestration, and **Changesets** for versioning/publishing.
 ## Build Commands
 
 ```bash
+# Enable Corepack once so the pinned Yarn version is used
+corepack enable
+
 # Install dependencies (from repo root)
 yarn install
 
 # Build all packages (respects dependency order via Nx)
-yarn ci:build            # npx nx run-many --target=build
+yarn ci:build            # npx nx run-many --targets=build,postbuild
 
 # Build a single package
 npx nx run @hyperdx/node-opentelemetry:build
@@ -183,8 +186,8 @@ hyperdx-js/
 ## CI/CD
 
 - **Unit/lint** (`.github/workflows/unit.yaml`): Runs on push/PR to `main`.
-  Uses Nx affected analysis. Steps: `yarn install` → `yarn ci:build` →
-  `yarn ci:lint` → `yarn ci:unit`
+  Uses Nx affected analysis. Steps: `corepack enable` →
+  `yarn install --immutable` → `yarn ci:build` → `yarn ci:lint` → `yarn ci:unit`
 - **Smoke tests** (`.github/workflows/smoke.yaml`): Docker-based BATS tests
 - **Release** (`.github/workflows/release.yaml`): Changesets action creates
   release PRs or publishes. Supports `next` snapshot/canary releases.

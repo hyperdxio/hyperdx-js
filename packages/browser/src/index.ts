@@ -12,10 +12,13 @@ type ErrorBoundaryComponent = any; // TODO: Define ErrorBoundary type
 type Instrumentations = RumOtelWebConfig['instrumentations'];
 type IgnoreUrls = RumOtelWebConfig['ignoreUrls'];
 
+type ReplayConfig = Omit<RumRecorderConfig, 'apiKey' | 'url' | 'debug'>;
+
 type BrowserSDKConfig = {
   advancedNetworkCapture?: boolean;
   apiKey: string;
   blockClass?: string;
+  blockSelector?: string;
   captureConsole?: boolean; // deprecated
   consoleCapture?: boolean;
   debug?: boolean;
@@ -28,6 +31,7 @@ type BrowserSDKConfig = {
   maskAllText?: boolean;
   maskClass?: string;
   recordCanvas?: boolean;
+  replay?: ReplayConfig;
   sampling?: RumRecorderConfig['sampling'];
   service: string;
   tracePropagationTargets?: (string | RegExp)[];
@@ -51,6 +55,7 @@ class Browser {
     advancedNetworkCapture = false,
     apiKey,
     blockClass,
+    blockSelector,
     captureConsole, // deprecated
     consoleCapture,
     debug = false,
@@ -63,6 +68,7 @@ class Browser {
     maskAllText = false,
     maskClass,
     recordCanvas = false,
+    replay,
     sampling,
     service,
     tracePropagationTargets,
@@ -126,8 +132,10 @@ class Browser {
 
     if (disableReplay !== true) {
       SessionRecorder.init({
+        ...replay,
         apiKey,
         blockClass,
+        blockSelector,
         debug,
         ignoreClass,
         maskAllInputs: maskAllInputs,

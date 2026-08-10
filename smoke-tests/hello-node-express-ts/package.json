@@ -7,7 +7,7 @@
   "main": "dist/index.js",
   "scripts": {
     "build": "tsc --build",
-    "setup": "yarn install && cd ../.. && yarn install && npx nx build @hyperdx/node-opentelemetry --skip-nx-cache && cd ./packages/node-opentelemetry && yarn link && cd ../../smoke-tests/hello-node-express-ts && yarn link @hyperdx/node-opentelemetry",
+    "setup": "cd ../.. && corepack yarn install && corepack yarn nx run-many --targets=build,postbuild --projects=@hyperdx/node-opentelemetry --skip-nx-cache && cd ./smoke-tests/hello-node-express-ts && yarn add file:../../packages/node-opentelemetry",
     "start": "ts-node -r ./instrumentation.ts index.ts",
     "start-js": "node -r ./dist/instrumentation.js ./dist/index.js"
   },
@@ -22,5 +22,6 @@
     "@types/express": "^4.17.21",
     "@types/node": "^20.10.8",
     "ts-node": "^10.9.2"
-  }
+  },
+  "packageManager": "yarn@1.22.22"
 }

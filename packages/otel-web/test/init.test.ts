@@ -149,6 +149,35 @@ describe('test init', () => {
           ),
         );
 
+        // `performance.memory` is Chromium-only; the heap attributes should be
+        // present (as numbers) when the API exists and absent otherwise, matching
+        // the feature-detect guard in addExtraDocLoadTags.
+        const memory = (
+          performance as Performance & { memory?: Record<string, number> }
+        ).memory;
+        const heapKeys = [
+          'performance.memory.usedJSHeapSize',
+          'performance.memory.totalJSHeapSize',
+          'performance.memory.jsHeapSizeLimit',
+        ];
+        if (memory) {
+          heapKeys.forEach((key) => {
+            assert.strictEqual(
+              typeof documentLoadSpan.attributes[key],
+              'number',
+              `${key} should be a number when performance.memory is available`,
+            );
+          });
+        } else {
+          heapKeys.forEach((key) => {
+            assert.strictEqual(
+              documentLoadSpan.attributes[key],
+              undefined,
+              `${key} should be absent when performance.memory is unavailable`,
+            );
+          });
+        }
+
         const resourceFetchSpan = capturer.spans.find(
           (span) => span.name === 'resourceFetch',
         );

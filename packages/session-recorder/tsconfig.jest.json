@@ -2,7 +2,7 @@
   "compilerOptions": {
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
-    "types": ["jest"]
+    "types": ["jest", "node"]
   },
   "extends": "./tsconfig.base.json"
 }

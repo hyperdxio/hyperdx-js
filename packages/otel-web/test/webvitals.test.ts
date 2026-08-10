@@ -80,18 +80,61 @@ describe('webvitals', () => {
       callback: CallbackName;
       attribute: string;
       value: number;
+      id: string;
+      navigationType: Metric['navigationType'];
     }> = [
-      { callback: 'onFID', attribute: 'fid', value: 12 },
-      { callback: 'onCLS', attribute: 'cls', value: 0.05 },
-      { callback: 'onLCP', attribute: 'lcp', value: 1234 },
-      { callback: 'onINP', attribute: 'inp', value: 56 },
-      { callback: 'onFCP', attribute: 'fcp', value: 789 },
-      { callback: 'onTTFB', attribute: 'ttfb', value: 100 },
+      {
+        callback: 'onFID',
+        attribute: 'fid',
+        value: 12,
+        id: 'v3-fid',
+        navigationType: 'navigate',
+      },
+      {
+        callback: 'onCLS',
+        attribute: 'cls',
+        value: 0.05,
+        id: 'v3-cls',
+        navigationType: 'reload',
+      },
+      {
+        callback: 'onLCP',
+        attribute: 'lcp',
+        value: 1234,
+        id: 'v3-lcp',
+        navigationType: 'back-forward',
+      },
+      {
+        callback: 'onINP',
+        attribute: 'inp',
+        value: 56,
+        id: 'v3-inp',
+        navigationType: 'back-forward-cache',
+      },
+      {
+        callback: 'onFCP',
+        attribute: 'fcp',
+        value: 789,
+        id: 'v3-fcp',
+        navigationType: 'prerender',
+      },
+      {
+        callback: 'onTTFB',
+        attribute: 'ttfb',
+        value: 100,
+        id: 'v3-ttfb',
+        navigationType: 'restore',
+      },
     ];
 
     for (const c of cases) {
       const cb = fakes[c.callback].firstCall.args[0] as (m: Metric) => void;
-      cb({ name: c.attribute.toUpperCase(), value: c.value } as Metric);
+      cb({
+        name: c.attribute.toUpperCase(),
+        value: c.value,
+        id: c.id,
+        navigationType: c.navigationType,
+      } as Metric);
     }
 
     assert.strictEqual(captured.length, cases.length);
@@ -101,21 +144,68 @@ describe('webvitals', () => {
       );
       assert.ok(span, `Expected a 'webvitals' span carrying '${c.attribute}'`);
       assert.strictEqual(span.attrs[c.attribute], c.value);
+      assert.strictEqual(span.attrs['webvitals.metric_id'], c.id);
+      assert.strictEqual(
+        span.attrs['webvitals.navigation_type'],
+        c.navigationType,
+      );
     }
   });
 
-  it('reports each metric only once even if its callback fires repeatedly', () => {
+  it('reports each metric instance only once even if its callback fires repeatedly', () => {
     const captured: CapturedSpan[] = [];
     const fakes = makeFakeCallbacks();
     initWebVitals(makeCapturingProvider(captured), fakes as never);
 
+    // Same metric instance (same id) firing twice, e.g. an updated CLS value
+    // reported again when the page is hidden a second time.
     const cb = fakes.onLCP.firstCall.args[0] as (m: Metric) => void;
-    cb({ name: 'LCP', value: 1234 } as Metric);
-    cb({ name: 'LCP', value: 5678 } as Metric);
+    cb({ name: 'LCP', value: 1234, id: 'v3-lcp-1' } as Metric);
+    cb({ name: 'LCP', value: 5678, id: 'v3-lcp-1' } as Metric);
 
     const lcpSpans = captured.filter((s) => 'lcp' in s.attrs);
     assert.strictEqual(lcpSpans.length, 1);
     assert.strictEqual(lcpSpans[0].attrs.lcp, 1234);
+  });
+
+  it('emits a separate span for a new metric instance from a bfcache restore', () => {
+    const captured: CapturedSpan[] = [];
+    const fakes = makeFakeCallbacks();
+    initWebVitals(makeCapturingProvider(captured), fakes as never);
+
+    // The back/forward cache restore produces a brand-new metric instance
+    // (new id) for the same metric name. Keying dedup on the name would drop
+    // this valid measurement; keying on the instance id keeps it.
+    const cb = fakes.onLCP.firstCall.args[0] as (m: Metric) => void;
+    cb({
+      name: 'LCP',
+      value: 1234,
+      id: 'v3-lcp-1',
+      navigationType: 'navigate',
+    } as Metric);
+    cb({
+      name: 'LCP',
+      value: 4321,
+      id: 'v3-lcp-2',
+      navigationType: 'back-forward-cache',
+    } as Metric);
+
+    const lcpSpans = captured.filter((s) => 'lcp' in s.attrs);
+    assert.strictEqual(lcpSpans.length, 2);
+    assert.deepStrictEqual(
+      lcpSpans
+        .map((s) => s.attrs.lcp)
+        .sort((a, b) => (a as number) - (b as number)),
+      [1234, 4321],
+    );
+    assert.deepStrictEqual(
+      lcpSpans.map((s) => s.attrs['webvitals.metric_id']).sort(),
+      ['v3-lcp-1', 'v3-lcp-2'],
+    );
+    assert.deepStrictEqual(
+      lcpSpans.map((s) => s.attrs['webvitals.navigation_type']).sort(),
+      ['back-forward-cache', 'navigate'],
+    );
   });
 });
 
@@ -172,6 +262,11 @@ describe('webvitals (real browser)', function () {
       (fcpSpan.attrs.fcp as number) > 0,
       `FCP should be a positive duration in ms, got ${fcpSpan.attrs.fcp}`,
     );
+    assert.strictEqual(typeof fcpSpan.attrs['webvitals.metric_id'], 'string');
+    assert.strictEqual(
+      typeof fcpSpan.attrs['webvitals.navigation_type'],
+      'string',
+    );
 
     assert.ok(ttfbSpan, 'TTFB span should be emitted');
     assert.strictEqual(ttfbSpan.name, 'webvitals');
@@ -179,6 +274,11 @@ describe('webvitals (real browser)', function () {
     assert.ok(
       (ttfbSpan.attrs.ttfb as number) >= 0,
       `TTFB should be a non-negative duration in ms, got ${ttfbSpan.attrs.ttfb}`,
+    );
+    assert.strictEqual(typeof ttfbSpan.attrs['webvitals.metric_id'], 'string');
+    assert.strictEqual(
+      typeof ttfbSpan.attrs['webvitals.navigation_type'],
+      'string',
     );
   });
 });

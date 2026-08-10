@@ -28,16 +28,15 @@ This key is necessary for sending logs to your account.
 
 Create a new HyperDX Winston Transport and append it to your list of transports. Example:
 
-```
+```ts
 import winston from 'winston';
 import { HyperDXWinston } from '@hyperdx/node-logger';
 
 const hyperdxTransport = new HyperDXWinston({
-  apiKey: ***HYPERDX_API_KEY***,
+  apiKey: process.env.HYPERDX_API_KEY,
   maxLevel: 'info',
   service: 'my-app',
 });
-
 
 const logger = winston.createLogger({
   level: 'info',
@@ -63,7 +62,7 @@ export default logger;
 
 Create a new HyperDX Pino Transport and append it to your list of transports. Example:
 
-```
+```ts
 import pino from 'pino';
 
 const logger = pino(
@@ -72,7 +71,7 @@ const logger = pino(
       {
         target: '@hyperdx/node-logger/build/src/pino',
         options: {
-          apiKey: ***HYPERDX_API_KEY***,
+          apiKey: process.env.HYPERDX_API_KEY,
           service: 'my-app',
         },
         level: 'info',
@@ -99,14 +98,14 @@ export default logger;
 
 Import HyperDXNestLoggerModule into the root AppModule and use the forRoot() method to configure it.
 
-```
+```ts
 import { Module } from '@nestjs/common';
 import { HyperDXNestLoggerModule } from '@hyperdx/node-logger';
 
 @Module({
   imports: [
     HyperDXNestLoggerModule.forRoot({
-      apiKey: ***HYPERDX_API_KEY***,
+      apiKey: process.env.HYPERDX_API_KEY,
       maxLevel: 'info',
       service: 'my-app',
     }),
@@ -117,16 +116,19 @@ export class AppModule {}
 
 Afterward, the winston instance will be available to inject across entire project using the `HDX_LOGGER_MODULE_PROVIDER` injection token:
 
-```
+```ts
 import { Controller, Inject } from '@nestjs/common';
-import { HyperDXNestLoggerModule, HyperDXNestLogger } from '@hyperdx/node-logger';
+import {
+  HyperDXNestLoggerModule,
+  HyperDXNestLogger,
+} from '@hyperdx/node-logger';
 
 @Controller('cats')
 export class CatsController {
   constructor(
     @Inject(HyperDXNestLoggerModule.HDX_LOGGER_MODULE_PROVIDER)
     private readonly logger: HyperDXNestLogger,
-  ) { }
+  ) {}
 
   meow() {
     this.logger.info({ message: '🐱' });
@@ -149,16 +151,16 @@ Nest will then wrap our custom logger (the same instance returned by the createL
 
 Create the logger in the `main.ts` file
 
-```
+```ts
 import { HyperDXNestLoggerModule } from '@hyperdx/node-logger';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
     logger: HyperDXNestLoggerModule.createLogger({
-      apiKey: ***HYPERDX_API_KEY***,
+      apiKey: process.env.HYPERDX_API_KEY,
       maxLevel: 'info',
       service: 'my-app',
-    })
+    }),
   });
   await app.listen(3000);
 }
@@ -167,7 +169,7 @@ bootstrap();
 
 Change your main module to provide the Logger service:
 
-```
+```ts
 import { Logger, Module } from '@nestjs/common';
 
 @Module({
@@ -178,7 +180,7 @@ export class AppModule {}
 
 Then inject the logger simply by type hinting it with Logger from @nestjs/common:
 
-```
+```ts
 import { Controller, Logger } from '@nestjs/common';
 
 @Controller('cats')

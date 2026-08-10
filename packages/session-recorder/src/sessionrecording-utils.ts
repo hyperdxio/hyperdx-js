@@ -21,10 +21,12 @@ Source: https://github.com/PostHog/posthog-js/blob/b6e3855a7f4339fba011e9a747be6
 */
 
 import type {
+  DataURLOptions,
   KeepIframeSrcFn,
   RecordPlugin,
   SamplingStrategy,
   blockClass,
+  eventWithTime,
   hooksParam,
   maskTextClass,
   mutationCallbackParam,
@@ -34,10 +36,8 @@ import type {
   MaskInputFn,
   MaskTextFn,
   SlimDOMOptions,
-  DataURLOptions,
 } from 'rrweb-snapshot';
 import type { record } from 'rrweb';
-import type { eventWithTime } from 'rrweb/typings/types';
 
 type rrwebRecord = typeof record;
 

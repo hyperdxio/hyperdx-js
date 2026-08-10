@@ -4,8 +4,17 @@
     "libsDir": "packages"
   },
   "targetDefaults": {
+    "prebuild": {
+      "cache": false
+    },
     "build": {
-      "dependsOn": ["^build"],
+      "dependsOn": ["^build", "^postbuild", "prebuild"],
+      "outputs": ["{projectRoot}/build", "{projectRoot}/dist"],
+      "cache": true
+    },
+    "postbuild": {
+      "dependsOn": ["build"],
+      "outputs": ["{projectRoot}/build", "{projectRoot}/dist"],
       "cache": true
     },
     "lint": {
