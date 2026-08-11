@@ -1,4 +1,4 @@
-import { build, emptyDir } from 'https://deno.land/x/dnt/mod.ts';
+import { build, emptyDir } from 'jsr:@deno/dnt@0.41.3';
 
 async function getJson(filePath: string) {
   return JSON.parse(await Deno.readTextFile(filePath));

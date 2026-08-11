@@ -71,6 +71,7 @@ import {
 } from './SplunkContextManager';
 import { resourceFromAttributes } from '@opentelemetry/resources';
 import { SDK_INFO } from '@opentelemetry/core';
+import { getBrowserContextResourceAttributes } from './browserContext';
 import {
   ATTR_SERVICE_NAME,
   ATTR_TELEMETRY_SDK_NAME,
@@ -547,6 +548,10 @@ export const Rum: RumOtelWebType = {
     const pluginDefaults = { ignoreUrls, enabled: false };
 
     const resourceAttrs: Attributes = {
+      // Approximate locale/region signals (browser.language, hyperdx.browser.timezone).
+      // Honest proxies, NOT IP geolocation; placed first so user-provided
+      // resourceAttributes can override them.
+      ...getBrowserContextResourceAttributes(),
       // User-provided resource attributes
       ...(resourceAttributes || {}),
       ...SDK_INFO,
