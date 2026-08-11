@@ -16,6 +16,7 @@ limitations under the License.
 */
 
 import {
+  diag,
   ProxyTracerProvider,
   TracerProvider,
   trace,
@@ -31,6 +32,7 @@ import type { Resource } from '@opentelemetry/resources';
 import {
   MutationRateLimiter,
   ensureStringifiedMaxMessageSize,
+  splitIntoChunks,
 } from './sessionrecording-utils';
 
 interface BasicTracerProvider extends TracerProvider {
@@ -53,8 +55,9 @@ export type RumRecorderConfig = RRWebOptions & {
 // Hard limit of 4 hours of maximum recording during one session
 const MAX_RECORDING_LENGTH = (4 * 60 + 1) * 60 * 1000;
 const MAX_CHUNK_SIZE = 950 * 1024; // ~950KB
-const encoder = new TextEncoder();
-const decoder = new TextDecoder();
+// Stop recording instead of erroring on every rrweb flush forever if emit
+// keeps failing (e.g. a corrupted WebKit TextDecoder, see splitIntoChunks)
+const maxConsecutiveEmitFailures = 10;
 
 let inited: (() => void) | false | undefined = false;
 let tracer: Tracer;
@@ -65,6 +68,7 @@ let eventCounter = 1;
 let logCounter = 1;
 let mutationRateLimiter: MutationRateLimiter | undefined;
 let queuedFullSnapshotTimeout;
+let consecutiveEmitFailures = 0;
 
 const RumRecorder = {
   get inited(): boolean {
@@ -156,6 +160,11 @@ const RumRecorder = {
         },
       });
 
+    // A previous breaker trip (or stop()) must not leak into this
+    // recording lifetime
+    paused = false;
+    consecutiveEmitFailures = 0;
+
     inited = record({
       maskAllInputs: true,
       maskTextSelector: '*',
@@ -194,30 +203,61 @@ const RumRecorder = {
 
         const time = event.timestamp;
         const eventI = eventCounter++;
-        // Research found that stringifying the rr-web event here is
-        // more efficient for otlp + gzip exporting
-
-        // Blob is unicode aware for size calculation (eg emoji.length = 1 vs blob.size() = 4)
-        const body = encoder.encode(
-          ensureStringifiedMaxMessageSize(JSON.stringify(event)),
-        );
-        const totalC = Math.ceil(body.byteLength / MAX_CHUNK_SIZE);
-        for (let i = 0; i < totalC; i++) {
-          const start = i * MAX_CHUNK_SIZE;
-          const end = (i + 1) * MAX_CHUNK_SIZE;
-          const log = convert(decoder.decode(body.slice(start, end)), time, {
-            'rr-web.offset': logCounter++,
-            'rr-web.event': eventI,
-            'rr-web.chunk': i + 1,
-            'rr-web.total-chunks': totalC,
-          });
-          if (debug) {
-            console.log(log);
+        try {
+          // Research found that stringifying the rr-web event here is
+          // more efficient for otlp + gzip exporting
+          const chunks = splitIntoChunks(
+            ensureStringifiedMaxMessageSize(JSON.stringify(event)),
+            MAX_CHUNK_SIZE,
+          );
+          // Convert every chunk before sending any, so a mid-loop failure
+          // can't export a partial (unreassemblable) chunk set
+          const logs = chunks.map((chunk, i) =>
+            convert(chunk, time, {
+              'rr-web.offset': logCounter++,
+              'rr-web.event': eventI,
+              'rr-web.chunk': i + 1,
+              'rr-web.total-chunks': chunks.length,
+            }),
+          );
+          for (const log of logs) {
+            if (debug) {
+              console.log(log);
+            }
+            processor.onLog(log);
           }
-          processor.onLog(log);
+          consecutiveEmitFailures = 0;
+        } catch (e) {
+          consecutiveEmitFailures++;
+          // Each failure drops a whole rrweb event always surface it
+          diag.error('OpenTelemetry Session Recorder: emit failed', e);
+          if (consecutiveEmitFailures >= maxConsecutiveEmitFailures) {
+            diag.error(
+              'OpenTelemetry Session Recorder: stopping recording after repeated errors',
+              e,
+            );
+            paused = true;
+            try {
+              RumRecorder.deinit();
+            } catch (stopError) {
+              // rrweb's stop() can throw when called from inside its own
+              // emit; never let that escape back into rrweb
+              diag.error(
+                'OpenTelemetry Session Recorder: failed to stop recording',
+                stopError,
+              );
+            }
+          }
         }
       },
     });
+
+    // If the breaker tripped during rrweb's synchronous initial snapshot,
+    // the deinit() above was a no-op (`inited` was still unset) finish
+    // the teardown now that we hold the stop function
+    if (consecutiveEmitFailures >= maxConsecutiveEmitFailures) {
+      RumRecorder.deinit();
+    }
   },
   resume(): void {
     if (!inited) {
@@ -247,8 +287,10 @@ const RumRecorder = {
       return;
     }
 
-    inited();
+    // Clear `inited` first so state stays consistent even if stop throws
+    const stopRecording = inited;
     inited = false;
+    stopRecording();
   },
 };
 
