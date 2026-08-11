@@ -1,8 +1,12 @@
-import { BatchSpanProcessor, Span } from '@opentelemetry/sdk-trace-base';
+import { Context } from '@opentelemetry/api';
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-proto';
+import {
+  BatchSpanProcessor,
+  ReadableSpan,
+  Span,
+} from '@opentelemetry/sdk-trace-base';
 
 import type { MutableAsyncLocalStorageContextManager } from './MutableAsyncLocalStorageContextManager';
-import { Context } from '@opentelemetry/api';
 
 export default class HyperDXSpanProcessor extends BatchSpanProcessor {
   private readonly enableHDXGlobalContext: boolean;
@@ -57,12 +61,12 @@ export default class HyperDXSpanProcessor extends BatchSpanProcessor {
 
   // This is done on a best-effort basis, and we can't guarantee that the attributes
   // will get set successfully at this point due to instrumentation-specific quirks
-  onEnd(_span: Span): void {
+  onEnd(_span: ReadableSpan): void {
     // Allow us to set attributes on the span after it is ended from the span itself
     // @ts-ignore
     _span._ended = false;
 
-    this._setTraceAttributes(_span);
+    this._setTraceAttributes(_span as Span);
 
     // @ts-ignore
     _span._ended = true;

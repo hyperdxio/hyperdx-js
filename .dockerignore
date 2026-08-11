@@ -1,0 +1,14 @@
+node_modules
+dist
+.nx
+.git
+.github
+*.md
+.vscode
+.idea
+*.log
+coverage
+.eslintcache
+smoke-tests/collector/data.json
+smoke-tests/collector/data-results
+smoke-tests/report.*

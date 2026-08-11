@@ -1,3 +1,6 @@
+import { getEventProcessor } from '@hyperdx/instrumentation-sentry-node';
+import { Attributes, diag, Span, trace, Tracer } from '@opentelemetry/api';
+import { inboundFiltersIntegration, prepareEvent } from '@sentry/core';
 import type {
   Client,
   ClientOptions,
@@ -5,23 +8,16 @@ import type {
   EventHint,
   Integration,
 } from '@sentry/types';
-import {
-  SDK_VERSION,
-  inboundFiltersIntegration,
-  prepareEvent,
-} from '@sentry/core';
-import { Attributes, Span, Tracer, diag, trace } from '@opentelemetry/api';
 import { eventFromUnknownInput } from '@sentry/utils';
-import { getEventProcessor } from '@hyperdx/instrumentation-sentry-node';
 
+import { name as PKG_NAME, version as PKG_VERSION } from '../../package.json';
+import { nodeContextIntegration } from './integrations/context';
 import { contextLinesIntegration } from './integrations/contextlines';
-import { defaultStackParser } from './sdk/api';
 import { hyperdxIntegration } from './integrations/hyperdx';
-import { isCjs } from './utils/commonjs';
 import { localVariablesIntegration } from './integrations/local-variables';
 import { modulesIntegration } from './integrations/modules';
-import { nodeContextIntegration } from './integrations/context';
-import { name as PKG_NAME, version as PKG_VERSION } from '../../package.json';
+import { defaultStackParser } from './sdk/api';
+import { isCjs } from './utils/commonjs';
 
 // TODO: does it make sense to have a default tracer here?
 const defaultTracer = trace.getTracer(PKG_NAME, PKG_VERSION);
@@ -89,22 +85,24 @@ export const buildEventFromException = async (
 
 export const recordException = async (
   e: any,
-  hint?: EventHint,
-  tracer?: Tracer,
-  span?: Span,
-  attributes?: Attributes,
+  hint?: EventHint & {
+    tracer?: Tracer;
+    span?: Span;
+    attributes?: Attributes;
+  },
 ) => {
-  const _hint = hint ?? {
-    mechanism: {
-      type: 'generic',
-      handled: true,
-    },
-  };
   try {
-    const _eventProcessor = getEventProcessor(
-      tracer ?? defaultTracer,
-      SDK_VERSION,
-    );
+    const { tracer, span, attributes, ...eventHint } = hint ?? {};
+    const _hint =
+      Object.keys(eventHint).length > 0
+        ? eventHint
+        : {
+            mechanism: {
+              type: 'generic',
+              handled: true,
+            },
+          };
+    const _eventProcessor = getEventProcessor(tracer ?? defaultTracer);
     const event = await buildEventFromException(e, {
       data: _hint,
     });

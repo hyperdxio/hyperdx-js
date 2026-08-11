@@ -1,4 +1,5 @@
 import type { Integration } from '@sentry/types';
+
 import { NODE_VERSION } from '../../nodeVersion';
 import type { LocalVariablesIntegrationOptions } from './common';
 import { localVariablesAsyncIntegration } from './local-variables-async';

@@ -1,8 +1,16 @@
-import { SemanticAttributes } from '@opentelemetry/semantic-conventions';
-import { SpanKind, context, trace } from '@opentelemetry/api';
+import { context, SpanKind, trace } from '@opentelemetry/api';
+import {
+  SEMATTRS_MESSAGING_DESTINATION,
+  SEMATTRS_MESSAGING_DESTINATION_KIND,
+  SEMATTRS_MESSAGING_MESSAGE_ID,
+  SEMATTRS_MESSAGING_MESSAGE_PAYLOAD_SIZE_BYTES,
+  SEMATTRS_MESSAGING_OPERATION,
+  SEMATTRS_MESSAGING_PROTOCOL,
+  SEMATTRS_MESSAGING_SYSTEM,
+} from '@opentelemetry/semantic-conventions';
 
-import { SDKConfig, initSDK } from './otel';
 import { name as PKG_NAME, version as PKG_VERSION } from '../package.json';
+import { initSDK, SDKConfig } from './otel';
 
 export const registerGCPCloudFunctionEventHandler = (
   handler: (event: any) => Promise<void>,
@@ -35,14 +43,13 @@ export const registerGCPCloudFunctionEventHandler = (
         deliveryAttempt: message.deliveryAttempt,
         //
         // based on https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/trace/semantic_conventions/messaging.md#topic-with-multiple-consumers
-        [SemanticAttributes.MESSAGING_SYSTEM]: 'pubsub',
-        [SemanticAttributes.MESSAGING_OPERATION]: 'process',
-        [SemanticAttributes.MESSAGING_DESTINATION]: event.data.subscription,
-        [SemanticAttributes.MESSAGING_DESTINATION_KIND]: 'topic',
-        [SemanticAttributes.MESSAGING_MESSAGE_ID]: message.id,
-        [SemanticAttributes.MESSAGING_PROTOCOL]: 'pubsub',
-        [SemanticAttributes.MESSAGING_MESSAGE_PAYLOAD_SIZE_BYTES]:
-          message.data.length,
+        [SEMATTRS_MESSAGING_SYSTEM]: 'pubsub',
+        [SEMATTRS_MESSAGING_OPERATION]: 'process',
+        [SEMATTRS_MESSAGING_DESTINATION]: event.data.subscription,
+        [SEMATTRS_MESSAGING_DESTINATION_KIND]: 'topic',
+        [SEMATTRS_MESSAGING_MESSAGE_ID]: message.id,
+        [SEMATTRS_MESSAGING_PROTOCOL]: 'pubsub',
+        [SEMATTRS_MESSAGING_MESSAGE_PAYLOAD_SIZE_BYTES]: message.data.length,
         // Not in Opentelemetry semantic convention but mimics naming
         'messaging.pubsub.received_at': message.received,
         'messaging.pubsub.acknowlege_id': message.ackId,

@@ -1,0 +1,5 @@
+{
+  "extension": ["ts"],
+  "spec": ["test/nodejs.test.ts", "test/browserContext.test.ts"],
+  "require": "ts-node/register"
+}

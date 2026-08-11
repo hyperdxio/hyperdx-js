@@ -1,34 +1,44 @@
+import type { RumOtelWebConfig } from '@hyperdx/otel-web';
 import Rum from '@hyperdx/otel-web';
-import SessionRecorder from '@hyperdx/otel-web-session-recorder';
+import SessionRecorder, {
+  RumRecorderConfig,
+} from '@hyperdx/otel-web-session-recorder';
 import opentelemetry, { Attributes } from '@opentelemetry/api';
 
 import { resolveAsyncGlobal } from './utils';
-
-import type { RumOtelWebConfig } from '@hyperdx/otel-web';
 
 type ErrorBoundaryComponent = any; // TODO: Define ErrorBoundary type
 
 type Instrumentations = RumOtelWebConfig['instrumentations'];
 type IgnoreUrls = RumOtelWebConfig['ignoreUrls'];
 
+type ReplayConfig = Omit<RumRecorderConfig, 'apiKey' | 'url' | 'debug'>;
+
 type BrowserSDKConfig = {
   advancedNetworkCapture?: boolean;
   apiKey: string;
   blockClass?: string;
+  blockSelector?: string;
   captureConsole?: boolean; // deprecated
   consoleCapture?: boolean;
   debug?: boolean;
   disableIntercom?: boolean;
   disableReplay?: boolean;
   ignoreClass?: string;
-  instrumentations?: Instrumentations;
   ignoreUrls?: IgnoreUrls;
+  instrumentations?: Instrumentations;
   maskAllInputs?: boolean;
   maskAllText?: boolean;
   maskClass?: string;
+  recordCanvas?: boolean;
+  replay?: ReplayConfig;
+  sampling?: RumRecorderConfig['sampling'];
   service: string;
   tracePropagationTargets?: (string | RegExp)[];
   url?: string;
+  tracesUrl?: string;
+  logsUrl?: string;
+  otelResourceAttributes?: Attributes;
 };
 
 const URL_BASE = 'https://in-otel.hyperdx.io';
@@ -45,20 +55,27 @@ class Browser {
     advancedNetworkCapture = false,
     apiKey,
     blockClass,
+    blockSelector,
     captureConsole, // deprecated
     consoleCapture,
     debug = false,
     disableIntercom = false,
     disableReplay = false,
     ignoreClass,
-    instrumentations = {},
     ignoreUrls,
+    instrumentations = {},
     maskAllInputs = true,
     maskAllText = false,
     maskClass,
+    recordCanvas = false,
+    replay,
+    sampling,
     service,
     tracePropagationTargets,
     url,
+    tracesUrl,
+    logsUrl,
+    otelResourceAttributes,
   }: BrowserSDKConfig) {
     if (!hasWindow()) {
       return;
@@ -77,16 +94,19 @@ class Browser {
     }
 
     const urlBase = url ?? URL_BASE;
+    const resolvedTracesUrl = tracesUrl ?? `${urlBase}/v1/traces`;
+    const resolvedLogsUrl = logsUrl ?? `${urlBase}/v1/logs`;
 
     this._advancedNetworkCapture = advancedNetworkCapture;
 
     Rum.init({
       debug,
-      url: `${urlBase}/v1/traces`,
+      url: resolvedTracesUrl,
       allowInsecureUrl: true,
       apiKey,
-      app: service,
+      applicationName: service,
       ignoreUrls,
+      resourceAttributes: otelResourceAttributes,
       instrumentations: {
         visibility: true,
         console: captureConsole ?? consoleCapture ?? false,
@@ -112,14 +132,18 @@ class Browser {
 
     if (disableReplay !== true) {
       SessionRecorder.init({
-        debug,
-        url: `${urlBase}/v1/logs`,
+        ...replay,
         apiKey,
-        maskTextSelector: maskAllText ? '*' : undefined,
-        maskAllInputs: maskAllInputs,
         blockClass,
+        blockSelector,
+        debug,
         ignoreClass,
+        maskAllInputs: maskAllInputs,
         maskTextClass: maskClass,
+        maskTextSelector: maskAllText ? '*' : undefined,
+        recordCanvas,
+        sampling,
+        url: resolvedLogsUrl,
       });
     }
 
@@ -153,6 +177,22 @@ class Browser {
           // Ignore if intercom isn't installed or can't be used
         });
     }
+  }
+
+  stopSessionRecorder(): void {
+    if (!hasWindow()) {
+      return;
+    }
+
+    SessionRecorder.stop();
+  }
+
+  resumeSessionRecorder(): void {
+    if (!hasWindow()) {
+      return;
+    }
+
+    SessionRecorder.resume();
   }
 
   addAction(name: string, attributes?: Attributes): void {
@@ -190,6 +230,10 @@ class Browser {
     }
 
     Rum.setGlobalAttributes(attributes);
+  }
+
+  getSessionId(): string | undefined {
+    return Rum.getSessionId();
   }
 
   getSessionUrl(): string | undefined {

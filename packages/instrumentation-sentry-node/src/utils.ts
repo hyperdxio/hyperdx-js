@@ -1,5 +1,5 @@
-import stringifySafe from 'json-stringify-safe';
 import { diag } from '@opentelemetry/api';
+import stringifySafe from 'json-stringify-safe';
 
 export const jsonToString = (json) => {
   try {

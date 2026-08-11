@@ -1,33 +1,30 @@
-import fetch from 'node-fetch';
-import path from 'path';
-
-import * as semver from 'semver';
-import cliSpinners from 'cli-spinners';
-import ora from 'ora';
-import { wrap } from 'shimmer';
-import { Attributes, DiagLogLevel, diag } from '@opentelemetry/api';
 import { ExceptionInstrumentation } from '@hyperdx/instrumentation-exception';
-import { RuntimeNodeInstrumentation } from '@opentelemetry/instrumentation-runtime-node';
 import { SentryNodeInstrumentation } from '@hyperdx/instrumentation-sentry-node';
+import { Attributes, diag } from '@opentelemetry/api';
+import {
+  getNodeAutoInstrumentations,
+  InstrumentationConfigMap,
+} from '@opentelemetry/auto-instrumentations-node';
+import { OTLPTraceExporter as OTLPTraceExporterGRPC } from '@opentelemetry/exporter-trace-otlp-grpc';
+import { OTLPTraceExporter as OTLPTraceExporterHTTP } from '@opentelemetry/exporter-trace-otlp-proto';
 import {
   InstrumentationBase,
-  Instrumentation,
   InstrumentationModuleDefinition,
 } from '@opentelemetry/instrumentation';
-import { NodeSDK } from '@opentelemetry/sdk-node';
-import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-proto';
-import { Resource } from '@opentelemetry/resources';
-import {
-  InstrumentationConfigMap,
-  getNodeAutoInstrumentations,
-} from '@opentelemetry/auto-instrumentations-node';
+import { RuntimeNodeInstrumentation } from '@opentelemetry/instrumentation-runtime-node';
+import { resourceFromAttributes } from '@opentelemetry/resources';
 import { MetricReader } from '@opentelemetry/sdk-metrics';
+import { NodeSDK } from '@opentelemetry/sdk-node';
+import cliSpinners from 'cli-spinners';
+import fetch from 'node-fetch';
+import ora from 'ora';
+import path from 'path';
+import * as semver from 'semver';
+import { wrap } from 'shimmer';
 
-import HyperDXConsoleInstrumentation from './instrumentations/console';
-import HyperDXSpanProcessor from './spanProcessor';
-import { Logger as OtelLogger } from './otel-logger';
-import { getHyperDXHTTPInstrumentationConfig } from './instrumentations/http';
+import { version as PKG_VERSION } from '../package.json';
 import {
+  DEFAULT_HDX_API_KEY,
   DEFAULT_HDX_NODE_ADVANCED_NETWORK_CAPTURE,
   DEFAULT_HDX_NODE_BETA_MODE,
   DEFAULT_HDX_NODE_CONSOLE_CAPTURE,
@@ -36,8 +33,8 @@ import {
   DEFAULT_HDX_NODE_STOP_ON_TERMINATION_SIGNALS,
   DEFAULT_HDX_STARTUP_LOGS,
   DEFAULT_OTEL_EXPORTER_OTLP_TRACES_TIMEOUT,
-  DEFAULT_OTEL_LOGS_EXPORTER,
   DEFAULT_OTEL_LOG_LEVEL,
+  DEFAULT_OTEL_LOGS_EXPORTER,
   DEFAULT_OTEL_METRICS_EXPORTER,
   DEFAULT_OTEL_METRICS_EXPORTER_URL,
   DEFAULT_OTEL_TRACES_EXPORTER,
@@ -46,9 +43,13 @@ import {
   DEFAULT_OTEL_TRACES_SAMPLER_ARG,
   DEFAULT_SERVICE_NAME,
 } from './constants';
-import { MutableAsyncLocalStorageContextManager } from './MutableAsyncLocalStorageContextManager';
+import HyperDXConsoleInstrumentation from './instrumentations/console';
+import { getHyperDXHTTPInstrumentationConfig } from './instrumentations/http';
 import { getHyperDXMetricReader } from './metrics';
-import { version as PKG_VERSION } from '../package.json';
+import { MutableAsyncLocalStorageContextManager } from './MutableAsyncLocalStorageContextManager';
+import { Logger as OtelLogger } from './otel-logger';
+import HyperDXSpanProcessor from './spanProcessor';
+import { parseOtlpHeaders } from './utils';
 
 const UI_LOG_PREFIX = '[⚡HyperDX]';
 
@@ -58,6 +59,7 @@ const IS_LOCAL = env.NODE_ENV === 'development' || !env.NODE_ENV;
 
 export type SDKConfig = {
   additionalInstrumentations?: InstrumentationBase[];
+  additionalResourceAttributes?: Attributes;
   advancedNetworkCapture?: boolean;
   apiKey?: string;
   betaMode?: boolean;
@@ -65,6 +67,7 @@ export type SDKConfig = {
   detectResources?: boolean;
   disableLogs?: boolean;
   disableMetrics?: boolean;
+  disableStartupLogs?: boolean;
   disableTracing?: boolean;
   enableInternalProfiling?: boolean;
   experimentalExceptionCapture?: boolean;
@@ -72,7 +75,7 @@ export type SDKConfig = {
   metricReader?: MetricReader;
   programmaticImports?: boolean; // TEMP
   sentryIntegrationEnabled?: boolean;
-  serviceName?: string;
+  service?: string;
   stopOnTerminationSignals?: boolean;
 };
 
@@ -81,19 +84,19 @@ const setOtelEnvs = ({
   disableLogs,
   disableMetrics,
   disableTracing,
-  serviceName,
+  service,
 }: {
   apiKey?: string;
   disableLogs: boolean;
   disableMetrics: boolean;
   disableTracing: boolean;
-  serviceName: string;
+  service: string;
 }) => {
   // set default otel env vars
   env.OTEL_NODE_RESOURCE_DETECTORS = env.OTEL_NODE_RESOURCE_DETECTORS ?? 'all';
   env.OTEL_TRACES_SAMPLER = DEFAULT_OTEL_TRACES_SAMPLER;
   env.OTEL_TRACES_SAMPLER_ARG = DEFAULT_OTEL_TRACES_SAMPLER_ARG;
-  env.OTEL_SERVICE_NAME = serviceName;
+  env.OTEL_SERVICE_NAME = service;
   if (disableLogs) {
     env.OTEL_LOGS_EXPORTER = 'none';
   }
@@ -168,14 +171,17 @@ const healthCheckUrl = async (
 };
 
 export const initSDK = (config: SDKConfig) => {
+  const defaultDisableStartupLogs =
+    config.disableStartupLogs ?? !DEFAULT_HDX_STARTUP_LOGS;
+
   const ui = ora({
-    isSilent: !DEFAULT_HDX_STARTUP_LOGS,
+    isSilent: defaultDisableStartupLogs,
     prefixText: UI_LOG_PREFIX,
     spinner: cliSpinners.dots,
     text: 'Initializing OpenTelemetry SDK...',
   }).start();
 
-  const defaultApiKey = config.apiKey ?? env.HYPERDX_API_KEY;
+  const defaultApiKey = config.apiKey ?? DEFAULT_HDX_API_KEY();
   const defaultDetectResources = config.detectResources ?? true;
   const defaultDisableLogs =
     config.disableLogs ?? DEFAULT_OTEL_LOGS_EXPORTER === 'none';
@@ -185,7 +191,7 @@ export const initSDK = (config: SDKConfig) => {
     config.disableTracing ?? DEFAULT_OTEL_TRACES_EXPORTER === 'none';
   const defaultEnableInternalProfiling =
     config.enableInternalProfiling ?? false;
-  const defaultServiceName = config.serviceName ?? DEFAULT_SERVICE_NAME;
+  const defaultServiceName = config.service ?? DEFAULT_SERVICE_NAME();
 
   ui.succeed(`Service name is configured to be "${defaultServiceName}"`);
 
@@ -206,9 +212,16 @@ export const initSDK = (config: SDKConfig) => {
     disableLogs: defaultDisableLogs,
     disableMetrics: defaultDisableMetrics,
     disableTracing: defaultDisableTracing,
-    serviceName: defaultServiceName,
+    service: defaultServiceName,
   });
   ui.succeed('Set default otel envs');
+
+  // Parse OTLP headers from environment variable
+  const otlpHeaders = parseOtlpHeaders(env.OTEL_EXPORTER_OTLP_HEADERS);
+  const healthCheckHeaders = {
+    'Content-Type': 'application/json',
+    ...otlpHeaders,
+  };
 
   const stopOnTerminationSignals =
     config.stopOnTerminationSignals ??
@@ -216,7 +229,7 @@ export const initSDK = (config: SDKConfig) => {
 
   let defaultConsoleCapture =
     config.consoleCapture ?? DEFAULT_HDX_NODE_CONSOLE_CAPTURE;
-  if (DEFAULT_OTEL_LOG_LEVEL === DiagLogLevel.DEBUG) {
+  if (DEFAULT_OTEL_LOG_LEVEL === 'debug') {
     // FIXME: better to disable console instrumentation if otel log is enabled
     defaultConsoleCapture = false;
     ui.warn(
@@ -227,42 +240,34 @@ export const initSDK = (config: SDKConfig) => {
   //--------------------------------------------------
   // ------------------- LOGGER ----------------------
   //--------------------------------------------------
-  let _t = process.hrtime();
   ui.text = 'Initializing OpenTelemetry Logger...';
   const _logger = new OtelLogger({
     detectResources: defaultDetectResources,
     service: defaultServiceName,
   });
-  const t0 = process.hrtime(_t);
-  ui.succeed(`Initialized OpenTelemetry Logger in ${hrtimeToMs(t0)} ms`);
+  ui.succeed('Initialized OpenTelemetry Logger');
   //--------------------------------------------------
 
   // Health check
   Promise.all([
     healthCheckUrl(ui, DEFAULT_OTEL_TRACES_EXPORTER_URL, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: healthCheckHeaders,
       body: JSON.stringify({}),
     }),
     healthCheckUrl(ui, _logger.getExporterUrl(), {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: healthCheckHeaders,
       body: JSON.stringify({}),
     }),
     healthCheckUrl(ui, DEFAULT_OTEL_METRICS_EXPORTER_URL, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: healthCheckHeaders,
       body: JSON.stringify({}),
     }),
   ]);
 
-  const defaultBetaMode = config.betaMode ?? DEFAULT_HDX_NODE_BETA_MODE;
+  const defaultBetaMode = config.betaMode ?? DEFAULT_HDX_NODE_BETA_MODE();
   const defaultAdvancedNetworkCapture =
     config.advancedNetworkCapture ?? DEFAULT_HDX_NODE_ADVANCED_NETWORK_CAPTURE;
 
@@ -317,12 +322,19 @@ export const initSDK = (config: SDKConfig) => {
     ...(defaultSentryIntegrationEnabled
       ? [new SentryNodeInstrumentation()]
       : []),
-    ...(defaultExceptionCapture ? [new ExceptionInstrumentation()] : []),
+    ...(defaultExceptionCapture
+      ? [
+          new ExceptionInstrumentation({
+            _internalForceFlush: shutdown,
+          }),
+        ]
+      : []),
     ...(config.additionalInstrumentations ?? []),
   ];
 
   sdk = new NodeSDK({
-    resource: new Resource({
+    resource: resourceFromAttributes({
+      ...config.additionalResourceAttributes,
       // https://opentelemetry.io/docs/specs/semconv/resource/#telemetry-sdk-experimental
       'telemetry.distro.name': 'hyperdx',
       'telemetry.distro.version': PKG_VERSION,
@@ -336,20 +348,26 @@ export const initSDK = (config: SDKConfig) => {
         ? []
         : [
             new HyperDXSpanProcessor({
-              exporter: new OTLPTraceExporter({
-                timeoutMillis: DEFAULT_OTEL_EXPORTER_OTLP_TRACES_TIMEOUT,
-                url: DEFAULT_OTEL_TRACES_EXPORTER_URL,
-              }),
+              exporter:
+                env.OTEL_EXPORTER_OTLP_PROTOCOL === 'grpc'
+                  ? new OTLPTraceExporterGRPC({
+                      timeoutMillis: DEFAULT_OTEL_EXPORTER_OTLP_TRACES_TIMEOUT,
+                      url: DEFAULT_OTEL_TRACES_EXPORTER_URL,
+                    })
+                  : new OTLPTraceExporterHTTP({
+                      timeoutMillis: DEFAULT_OTEL_EXPORTER_OTLP_TRACES_TIMEOUT,
+                      url: DEFAULT_OTEL_TRACES_EXPORTER_URL,
+                    }),
               enableHDXGlobalContext: defaultBetaMode,
               contextManager,
             }),
           ]),
     ],
-    instrumentations: allInstrumentations,
+    instrumentations: config.programmaticImports ? [] : allInstrumentations,
     contextManager: contextManager,
   });
-  const t1 = process.hrtime(_t);
-  ui.succeed(`Initialized instrumentations packages in ${hrtimeToMs(t1)} ms`);
+
+  ui.succeed('Initialized instrumentations packages');
 
   if (defaultEnableInternalProfiling) {
     ui.text = 'Enabling internal profiling...';
@@ -410,14 +428,11 @@ export const initSDK = (config: SDKConfig) => {
     }
   }
 
-  _t = process.hrtime();
   ui.text = 'Starting OpenTelemetry Node SDK...';
   sdk.start();
-  const t2 = process.hrtime(_t);
-  ui.succeed(`Started OpenTelemetry Node SDK in ${hrtimeToMs(t2)} ms`);
+  ui.succeed('Started OpenTelemetry Node SDK');
 
   if (config.programmaticImports) {
-    _t = process.hrtime();
     ui.text = 'Repatching instrumentation packages...';
     for (const instrumentation of allInstrumentations) {
       const modules = (instrumentation as any)
@@ -524,8 +539,7 @@ export const initSDK = (config: SDKConfig) => {
         }
       }
     }
-    const t3 = process.hrtime(_t);
-    ui.succeed(`Repatched instrumentation packages in ${hrtimeToMs(t3)} ms`);
+    ui.succeed('Repatched instrumentation packages');
   }
 
   function handleTerminationSignal(signal: string) {
@@ -610,10 +624,10 @@ export const initSDK = (config: SDKConfig) => {
     symbol: '🦄',
   });
 
-  if (DEFAULT_HDX_STARTUP_LOGS) {
+  if (!defaultDisableStartupLogs) {
     setTimeout(() => {
-      const _targetUrl = `https://hyperdx.io/search?q=${encodeURIComponent(
-        `service:"${defaultServiceName}"`,
+      const _targetUrl = `https://www.hyperdx.io/services?service=${encodeURIComponent(
+        defaultServiceName,
       )}`;
       ui.info(`
 
@@ -655,14 +669,17 @@ export const init = (config?: Omit<SDKConfig, 'programmaticImports'>) =>
 
 const _shutdown = () => {
   const ui = ora({
-    isSilent: !DEFAULT_HDX_STARTUP_LOGS,
     spinner: cliSpinners.dots,
     text: 'Shutting down OpenTelemetry SDK...',
   }).start();
   return (
     sdk?.shutdown()?.then(
-      () => ui.succeed('OpenTelemetry SDK shut down successfully'),
-      (err) => ui.fail(`Error shutting down OpenTeLoader SDK: ${err}`),
+      () => {
+        ui.succeed('OpenTelemetry SDK shut down successfully');
+      },
+      (err) => {
+        ui.fail(`Error shutting down OpenTeLoader SDK: ${err}`);
+      },
     ) ?? Promise.resolve() // in case SDK isn't init'd yet
   );
 };

@@ -1,5 +1,204 @@
 # @hyperdx/node-opentelemetry
 
+## 0.11.0
+
+### Minor Changes
+
+- aedb9ea: Upgrade all OpenTelemetry dependencies to latest versions (core/resources/sdk-trace-base/sdk-metrics to ^2.7.1, semantic-conventions to ^1.41.1, api to ^1.9.1). Migrates to v2 APIs: `resourceFromAttributes()` replaces `new Resource()`, updated semantic convention constants, updated resource detectors, and span processors passed via constructor options.
+
+### Patch Changes
+
+- Updated dependencies [aedb9ea]
+  - @hyperdx/instrumentation-exception@0.3.0
+  - @hyperdx/instrumentation-sentry-node@0.2.0
+
+## 0.10.5
+
+### Patch Changes
+
+- 43874fd: chore: Upgrade dependencies
+
+## 0.10.4
+
+### Patch Changes
+
+- Updated dependencies [65be0bd]
+  - @hyperdx/instrumentation-exception@0.2.0
+
+## 0.10.3
+
+### Patch Changes
+
+- d91383a: Fix issue where OTEL_EXPORTER_OTLP_HEADERS are not passed to health check endpoints
+
+## 0.10.2
+
+### Patch Changes
+
+- 3552a79: revert: fix: setTraceAttributes cross trace attributes leakage issue
+
+## 0.10.1
+
+### Patch Changes
+
+- 7038775: fix: setTraceAttributes cross trace attributes leakage issue
+
+## 0.10.0
+
+### Minor Changes
+
+- 88a79d6: Allows setting user defined resource attributes when initializing the SDK.
+
+## 0.9.0
+
+### Minor Changes
+
+- 2833fae: migration: follow telemetry.distro semantic convention (logs)
+
+### Patch Changes
+
+- aee67bc: feat: support gRPC protocol
+- aee67bc: fix: pino trace linking issue
+
+## 0.8.2
+
+### Patch Changes
+
+- 728e922: chore: update opentelemetry packages to v0.57
+
+## 0.8.1
+
+### Patch Changes
+
+- 26ae2d9: feat: support OTEL_METRIC_EXPORT_INTERVAL and OTEL_METRIC_EXPORT_TIMEOUT
+
+## 0.8.0
+
+### Minor Changes
+
+- f7cb5f9: feat: introduce exception capture - BETA
+- 1092fca: style: deprecate hyperdx debug flag
+
+### Patch Changes
+
+- a574521: style: rename 'serviceName' to 'service'
+- c7e012c: chore: bump pino-abstract-transport to v1.2.0
+- 133dfd7: dx: init sdk programmatically - pt1
+- 67a3a56: fix: read api key before init call (logger transports)
+- 24a581e: feat: config logger
+- 6b6ddd2: fix: sdk double patching issue
+- 8a46140: feat: expose getEventProcessor api
+- 70c8508: fix: revert browser error span changes + remove sentry.version semantic attribute
+- 6b82cb1: feat: introduce internal profiling
+- 7ec128c: style: move 'tracer', 'span', 'attributes' args to hint (recordException method)
+- 1c956d4: fix: missing stacktrace context bug
+- 7ce9e08: feat: add more exception tags
+- 84612d5: feat: add disableStartupLogs flag
+- d515c5a: fix: exception mechanism override bug
+- 8125482: feat: introduce init func for programmatic imports
+- 5614cc4: fix: remove sentry/core dep
+- 606dd8e: chore: bump otel core to v1.24.1 + semantic-conventions to v1.24.1
+- c8ecaea: fix: enable strictNullChecks
+- d332c32: fix: console log uncaught exceptions
+- 242afb2: fix: attach trace attributes onStart of span as well, dont overwrite attributes
+- c7ea13c: fix: show service health dashboard URL
+- f7183db: fix: rename onuncaughtexception error handler internal tag
+- 1b37576: fix: check if addIntegration method exists
+- ec4c4bb: fix: load api key and service name dynamically
+- aee31d1: style: use HyperDXSpanProcessor
+- 73a7d84: fix: sdk shutdown exception flushing issue
+- 24dfee2: feat: Add mutable context manager for setTraceAttributes
+- f84fd61: fix: introduce pino mixin function to handle trace/span id injection issue
+- 93da1df: feat: import @hyperdx/instrumentation-exception pkg
+- 34bb72b: fix: support sentry node v8
+- 52dca89: fix: introduce exception.parsed_stacktrace semattr
+- 24a581e: feat: improve CLI UI
+- 7c9bd6a: feat: add instrumentation-exception pkg to node-opentelemetry
+- 511a488: feat: install @hyperdx/instrumentation-sentry-node
+- f47620f: feat: instrument console in the otel way
+- Updated dependencies [a574521]
+- Updated dependencies [5f6af95]
+- Updated dependencies [a93c519]
+- Updated dependencies [8a46140]
+- Updated dependencies [70c8508]
+- Updated dependencies [feb4ef1]
+- Updated dependencies [7ec128c]
+- Updated dependencies [535410c]
+- Updated dependencies [52dca89]
+- Updated dependencies [1c956d4]
+- Updated dependencies [eb04eb3]
+- Updated dependencies [d515c5a]
+- Updated dependencies [93da1df]
+- Updated dependencies [5614cc4]
+- Updated dependencies [606dd8e]
+- Updated dependencies [6b6ddd2]
+- Updated dependencies [feb4ef1]
+- Updated dependencies [d332c32]
+- Updated dependencies [eb04eb3]
+- Updated dependencies [f7183db]
+- Updated dependencies [a574521]
+- Updated dependencies [1b37576]
+- Updated dependencies [73a7d84]
+- Updated dependencies [e582ad1]
+- Updated dependencies [c05e520]
+- Updated dependencies [3bca092]
+- Updated dependencies [52dca89]
+- Updated dependencies [e9f867f]
+- Updated dependencies [e36309d]
+  - @hyperdx/instrumentation-exception@0.1.0
+  - @hyperdx/instrumentation-sentry-node@0.1.0
+
+## 0.8.0-next.15
+
+### Patch Changes
+
+- 84612d5: feat: add disableStartupLogs flag
+- c7ea13c: fix: show service health dashboard URL
+
+## 0.8.0-next.14
+
+### Patch Changes
+
+- 6b6ddd2: fix: sdk double patching issue
+- d332c32: fix: console log uncaught exceptions
+- f7183db: fix: rename onuncaughtexception error handler internal tag
+- 1b37576: fix: check if addIntegration method exists
+- 73a7d84: fix: sdk shutdown exception flushing issue
+- f84fd61: fix: introduce pino mixin function to handle trace/span id injection issue
+- Updated dependencies [6b6ddd2]
+- Updated dependencies [d332c32]
+- Updated dependencies [f7183db]
+- Updated dependencies [1b37576]
+- Updated dependencies [73a7d84]
+  - @hyperdx/instrumentation-sentry-node@0.1.0-next.8
+  - @hyperdx/instrumentation-exception@0.1.0-next.12
+
+## 0.8.0-next.13
+
+### Patch Changes
+
+- 7ec128c: style: move 'tracer', 'span', 'attributes' args to hint (recordException method)
+- Updated dependencies [7ec128c]
+  - @hyperdx/instrumentation-exception@0.1.0-next.11
+
+## 0.8.0-next.12
+
+### Patch Changes
+
+- a574521: style: rename 'serviceName' to 'service'
+- 67a3a56: fix: read api key before init call (logger transports)
+- 70c8508: fix: revert browser error span changes + remove sentry.version semantic attribute
+- 606dd8e: chore: bump otel core to v1.24.1 + semantic-conventions to v1.24.1
+- 242afb2: fix: attach trace attributes onStart of span as well, dont overwrite attributes
+- ec4c4bb: fix: load api key and service name dynamically
+- Updated dependencies [a574521]
+- Updated dependencies [5f6af95]
+- Updated dependencies [70c8508]
+- Updated dependencies [606dd8e]
+- Updated dependencies [a574521]
+  - @hyperdx/instrumentation-exception@0.1.0-next.9
+  - @hyperdx/instrumentation-sentry-node@0.1.0-next.7
+
 ## 0.8.0-next.11
 
 ### Patch Changes

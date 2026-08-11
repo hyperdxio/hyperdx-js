@@ -1,13 +1,10 @@
-import {
-  InstrumentationNodeModuleDefinition,
-  InstrumentationBase,
-} from '@opentelemetry/instrumentation';
-import { TracerProvider, diag, trace } from '@opentelemetry/api';
+import { diag, trace, TracerProvider } from '@opentelemetry/api';
+import { InstrumentationBase } from '@opentelemetry/instrumentation';
 
-import { ExceptionInstrumentationConfig } from './types';
 import { name as PKG_NAME, version as PKG_VERSION } from '../package.json';
 import { onUncaughtExceptionIntegration } from './node/integrations/onuncaughtexception';
 import { onUnhandledRejectionIntegration } from './node/integrations/onunhandledrejection';
+import { ExceptionInstrumentationConfig } from './types';
 
 /** Exception instrumentation for OpenTelemetry */
 export class ExceptionInstrumentation extends InstrumentationBase {
@@ -55,24 +52,25 @@ export class ExceptionInstrumentation extends InstrumentationBase {
     const flushers = [];
     if (this._traceForceFlusher) {
       flushers.push(this._traceForceFlusher());
-      // TODO: a hack to make sure we flush all
-      flushers.push(new Promise((resolve) => setTimeout(resolve, 2000)));
     } else {
       diag.error(
-        'Spans may not be exported for the lambda function because we are not force flushing before callback.',
+        'Spans may not be exported because we are not force flushing before callback.',
       );
     }
     await Promise.all(flushers);
   }
 
   override enable() {
+    const config = this.getConfig();
+    const ff = config._internalForceFlush ?? this.forceFlush;
     onUncaughtExceptionIntegration({
-      exitEvenIfOtherHandlersAreRegistered: true,
-      forceFlush: () => this.forceFlush(),
+      exitEvenIfOtherHandlersAreRegistered:
+        config.exitEvenIfOtherHandlersAreRegistered,
+      forceFlush: () => ff(),
     }).setup({} as any);
     onUnhandledRejectionIntegration({
-      mode: 'warn',
-      forceFlush: () => this.forceFlush(),
+      mode: config.unhandledRejectionMode,
+      forceFlush: () => ff(),
     }).setup({} as any);
   }
 

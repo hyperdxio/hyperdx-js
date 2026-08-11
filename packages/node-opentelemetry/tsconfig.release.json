@@ -4,5 +4,6 @@
     "sourceMap": false,
     "removeComments": true
   },
-  "include": ["src/**/*", "bin/**/*"]
+  "include": ["src/**/*", "bin/**/*"],
+  "exclude": ["**/__tests__/**"]
 }

@@ -9,6 +9,7 @@ const config: Config = {
   moduleNameMapper: {
     '^(\\.{1,2}/.*)\\.(m)?js$': '$1',
   },
+  modulePathIgnorePatterns: ['<rootDir>/build/'],
   testRegex: '(/__tests__/.*|(\\.|/)(test|spec))\\.(m)?ts$',
   coverageDirectory: 'coverage',
   collectCoverageFrom: [

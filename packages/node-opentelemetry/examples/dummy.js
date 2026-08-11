@@ -25,17 +25,14 @@ const mongoose = require('mongoose');
 const mysql = require('mysql');
 const mysql2 = require('mysql2');
 const pg = require('pg');
-const pino = require('pino');
 const winston = require('winston');
+const pino = require('pino');
 
-const {
-  getPinoTransport,
-  getWinstonTransport,
-} = require('../build/src/logger');
 const HyperDX = require('../build/src');
 
 HyperDX.init({
-  apiKey: 'blabla',
+  apiKey: '',
+  disableStartupLogs: true,
 });
 
 // setTimeout(() => {
@@ -78,20 +75,21 @@ const logger = winston.createLogger({
   level: 'info',
   format: winston.format.json(),
   transports: [
-    getWinstonTransport('info', {
+    HyperDX.getWinstonTransport('info', {
       detectResources: true,
     }), // append this to the existing transports
   ],
 });
 
-const pinoLogger = pino(
-  pino.transport({
+const pinoLogger = pino({
+  mixin: HyperDX.getPinoMixinFunction,
+  transport: {
     targets: [
-      getPinoTransport('info'),
+      HyperDX.getPinoTransport('info'),
       // other transports
     ],
-  }),
-);
+  },
+});
 
 const bunyanLogger = bunyan.createLogger({ name: 'myapp' });
 
@@ -294,22 +292,30 @@ app.get('/instruments', async (req, res) => {
 });
 
 app.get('/logs', async (req, res) => {
-  console.debug({
+  const nestedObj = {
     headers: req.headers,
     method: req.method,
     url: req.url,
-    query: req.query,
+    nested: [
+      {
+        foo: 'bar',
+      },
+    ],
+    nested2: {
+      nested3: {
+        foo: 'bar',
+      },
+    },
+  };
+  console.error({
+    message: 'Console 🍕',
+    ...nestedObj,
   });
-  console.error('BANG !!!');
-  console.log('Console 🍕');
-  logger.info({
-    message: 'Winston 🍕',
-    headers: req.headers,
-    method: req.method,
-    url: req.url,
+  logger.info('Winston 🍕', nestedObj);
+  pinoLogger.info({
+    message: 'Pino 🍕',
+    ...nestedObj,
   });
-  pinoLogger.info('Pino 🍕');
-
   bunyanLogger.info('Bunyan 🍕');
 
   console.log(await sendGetRequest());

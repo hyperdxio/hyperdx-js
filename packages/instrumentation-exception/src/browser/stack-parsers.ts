@@ -28,7 +28,7 @@ import type {
   StackLineParser,
   StackLineParserFn,
 } from '@sentry/types';
-import { UNKNOWN_FUNCTION, createStackParser } from '@sentry/utils';
+import { createStackParser, UNKNOWN_FUNCTION } from '@sentry/utils';
 
 const OPERA10_PRIORITY = 10;
 const OPERA11_PRIORITY = 20;

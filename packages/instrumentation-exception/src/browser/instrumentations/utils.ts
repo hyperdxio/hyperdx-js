@@ -1,3 +1,32 @@
+export function stringifyValue(value: unknown): string {
+  if (value === undefined) {
+    return '(undefined)';
+  }
+
+  if (value === null) {
+    return 'null';
+  }
+
+  if (value instanceof Error) {
+    return value.message || value.toString();
+  }
+
+  if (typeof value === 'object') {
+    try {
+      const result = JSON.stringify(value);
+      // Empty objects/arrays carry no useful error info
+      if (result === '{}' || result === '[]') {
+        return '';
+      }
+      return result;
+    } catch (e) {
+      return value.toString();
+    }
+  }
+
+  return value.toString();
+}
+
 export function limitLen(s: string, cap: number): string {
   if (s.length > cap) {
     return s.substring(0, cap);

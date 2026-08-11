@@ -1,0 +1,27 @@
+{
+  "name": "hello-node-express-ts",
+  "version": "0.0.1",
+  "description": "HyperDX OpenTelemetry Distro for JavaScript",
+  "author": "HyperDX <support@hyperdx.io> (https://www.hyperdx.io/)",
+  "license": "Apache-2.0",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc --build",
+    "setup": "cd ../.. && corepack yarn install && corepack yarn nx run-many --targets=build,postbuild --projects=@hyperdx/node-opentelemetry --skip-nx-cache && cd ./smoke-tests/hello-node-express-ts && yarn add file:../../packages/node-opentelemetry",
+    "start": "ts-node -r ./instrumentation.ts index.ts",
+    "start-js": "node -r ./dist/instrumentation.js ./dist/index.js"
+  },
+  "dependencies": {
+    "@opentelemetry/api": "^1.9.1",
+    "@opentelemetry/resources": "^2.7.1",
+    "express": "^4.20.0",
+    "pino": "^10.0.0",
+    "pino-pretty": "^13.0.0"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "@types/node": "^20.10.8",
+    "ts-node": "^10.9.2"
+  },
+  "packageManager": "yarn@1.22.22"
+}

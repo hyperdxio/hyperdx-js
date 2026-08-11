@@ -9,34 +9,37 @@ const pj = require('../package.json');
 
 export const uploadSourcemaps = async ({
   allowNoop,
-  apiKey,
+  serviceKey,
   apiUrl,
+  apiVersion,
   basePath,
   path,
   releaseId,
 }: {
   allowNoop?: boolean;
-  apiKey: string;
+  serviceKey: string;
   apiUrl?: string;
+  apiVersion?: string;
   basePath?: string;
   path: string;
   releaseId?: string;
 }) => {
-  if (!apiKey || apiKey === '') {
-    if (process.env.HYPERDX_API_ACCESS_KEY) {
-      apiKey = process.env.HYPERDX_API_ACCESS_KEY;
+  if (!serviceKey || serviceKey === '') {
+    if (process.env.HYPERDX_SERVICE_KEY) {
+      serviceKey = process.env.HYPERDX_SERVICE_KEY;
     } else {
-      throw new Error('api key cannot be empty');
+      throw new Error('service key cannot be empty');
     }
   }
 
   const backend = apiUrl || 'https://api.hyperdx.io';
+  const version = apiVersion || 'v1';
 
-  const res = await fetch(join(backend, 'api', 'v1'), {
+  const res = await fetch(join(backend, 'api', version), {
     method: 'get',
     headers: {
       'Content-Type': 'application/json',
-      Authorization: `Bearer ${apiKey}`,
+      Authorization: `Bearer ${serviceKey}`,
     },
   })
     .then((response) => response.json())
@@ -49,7 +52,7 @@ export const uploadSourcemaps = async ({
 
   const teamId = res?.user?.team;
   if (!teamId) {
-    throw new Error('invalid api key');
+    throw new Error('invalid service key');
   }
 
   console.info(`Starting to upload source maps from ${path}`);
@@ -71,12 +74,12 @@ export const uploadSourcemaps = async ({
   }));
 
   const urlRes = await fetch(
-    join(backend, 'api', 'v1', 'sourcemaps', 'upload-presigned-urls'),
+    join(backend, 'api', version, 'sourcemaps', 'upload-presigned-urls'),
     {
       method: 'post',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${apiKey}`,
+        Authorization: `Bearer ${serviceKey}`,
       },
       body: JSON.stringify({
         pkgVersion: pj.version,

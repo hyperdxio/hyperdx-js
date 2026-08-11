@@ -1,15 +1,15 @@
-import isObject from 'lodash.isobject';
-import isPlainObject from 'lodash.isplainobject';
 import opentelemetry, { Attributes } from '@opentelemetry/api';
 import {
   InstrumentationBase,
   InstrumentationConfig,
   InstrumentationNodeModuleDefinition,
 } from '@opentelemetry/instrumentation';
+import isObject from 'lodash.isobject';
+import isPlainObject from 'lodash.isplainobject';
 
+import { MutableAsyncLocalStorageContextManager } from '../MutableAsyncLocalStorageContextManager';
 import { Logger, LoggerOptions } from '../otel-logger';
 import { parseWinstonLog } from '../otel-logger/winston';
-import { MutableAsyncLocalStorageContextManager } from '../MutableAsyncLocalStorageContextManager';
 
 const PACKAGE_NAME = '@hyperdx/instrumentation-console';
 const PACKAGE_VERSION = '0.1.0';

@@ -1,8 +1,8 @@
 import { defineIntegration } from '@sentry/core';
 import type { Event, IntegrationFn, StackFrame } from '@sentry/types';
 import {
-  GLOBAL_OBJ,
   addContextToFrame,
+  GLOBAL_OBJ,
   stripUrlQueryAndFragment,
 } from '@sentry/utils';
 

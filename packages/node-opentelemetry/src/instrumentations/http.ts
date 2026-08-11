@@ -1,9 +1,9 @@
+import { diag, Span } from '@opentelemetry/api';
+import { SemconvStability } from '@opentelemetry/instrumentation';
+import { headerCapture } from '@opentelemetry/instrumentation-http/build/src/utils';
 import * as http from 'http';
-import zlib from 'zlib';
 import { PassThrough, Readable } from 'stream';
-
-import { Span, diag } from '@opentelemetry/api';
-import { headerCapture } from '@opentelemetry/instrumentation-http';
+import zlib from 'zlib';
 
 const SENSITIVE_DATA_SUBSTITUTE = '[Filtered]';
 // https://github.com/getsentry/sentry-python/blob/1.18.0/sentry_sdk/scrubber.py#L17
@@ -85,9 +85,12 @@ export const _handleHttpOutgoingClientRequest = (
     const headers =
       splitCommaSeparatedStrings(httpCaptureHeadersClientRequest) ??
       request.getRawHeaderNames();
-    headerCapture('request', headers)(span, (header) =>
-      request.getHeader(header),
-    );
+    const attrs = headerCapture(
+      'request',
+      headers,
+      SemconvStability.STABLE,
+    )((header) => request.getHeader(header));
+    span.setAttributes(attrs);
   } catch (e) {
     diag.debug(`error parsing outgoing-request headers in requestHook: ${e}`);
   }
@@ -143,10 +146,12 @@ export const _handleHttpIncomingServerRequest = (
     const headers =
       splitCommaSeparatedStrings(httpCaptureHeadersServerRequest) ??
       request.headers;
-    headerCapture('request', Object.keys(headers))(
-      span,
-      (header) => headers[header],
-    );
+    const attrs = headerCapture(
+      'request',
+      Object.keys(headers),
+      SemconvStability.STABLE,
+    )((header) => headers[header]);
+    span.setAttributes(attrs);
   } catch (e) {
     diag.debug(`error parsing incoming-request headers in requestHook: ${e}`);
   }
@@ -234,9 +239,12 @@ export const _handleHttpIncomingServerResponse = (
       const headers =
         splitCommaSeparatedStrings(httpCaptureHeadersServerResponse) ??
         response.getHeaderNames();
-      headerCapture('response', headers)(span, (header) =>
-        response.getHeader(header),
-      );
+      const attrs = headerCapture(
+        'response',
+        headers,
+        SemconvStability.STABLE,
+      )((header) => response.getHeader(header));
+      span.setAttributes(attrs);
     } catch (e) {
       diag.debug(
         `error parsing incoming-response headers in responseHook: ${e}`,
@@ -257,10 +265,12 @@ export const _handleHttpOutgoingClientResponse = (
     const headers =
       splitCommaSeparatedStrings(httpCaptureHeadersClientResponse) ??
       response.headers;
-    headerCapture('response', Object.keys(headers))(
-      span,
-      (header) => headers[header],
-    );
+    const attrs = headerCapture(
+      'response',
+      Object.keys(headers),
+      SemconvStability.STABLE,
+    )((header) => headers[header]);
+    span.setAttributes(attrs);
   } catch (e) {
     diag.debug(`error parsing outgoing-response headers in responseHook: ${e}`);
   }

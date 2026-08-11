@@ -2,10 +2,11 @@
 
 import type { StackParser } from '@sentry/types';
 import {
-  GLOBAL_OBJ,
   createStackParser,
+  GLOBAL_OBJ,
   nodeStackLineParser,
 } from '@sentry/utils';
+
 import { createGetModuleFromFilename } from '../utils/module';
 
 /**

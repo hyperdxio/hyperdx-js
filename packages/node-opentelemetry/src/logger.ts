@@ -1,18 +1,14 @@
 import opentelemetry, { diag } from '@opentelemetry/api';
 
-import HyperDXWinston from './otel-logger/winston';
-
+import {
+  DEFAULT_HDX_API_KEY,
+  DEFAULT_HDX_NODE_BETA_MODE,
+  DEFAULT_SERVICE_NAME,
+} from './constants';
 import type { HyperDXPinoOptions } from './otel-logger/pino';
+import * as HyperDXPino from './otel-logger/pino';
 import type { HyperDXWinstonOptions } from './otel-logger/winston';
-
-import { DEFAULT_SERVICE_NAME } from './constants';
-import { stringToBoolean } from './utils';
-
-const env = process.env;
-
-const HYPERDX_API_KEY = env.HYPERDX_API_KEY;
-
-const BETA_MODE = stringToBoolean(env.HDX_NODE_BETA_MODE);
+import HyperDXWinston from './otel-logger/winston';
 
 type WinstonTransportOptions = Omit<
   HyperDXWinstonOptions,
@@ -42,15 +38,16 @@ export const getWinstonTransport = (
   options: WinstonTransportOptions = {},
 ) => {
   diag.debug('Initializing winston transport');
+  const apiKey = DEFAULT_HDX_API_KEY();
   return new HyperDXWinston({
-    ...(HYPERDX_API_KEY && {
+    ...(apiKey && {
       headers: {
-        Authorization: HYPERDX_API_KEY,
+        Authorization: apiKey,
       },
     }),
     maxLevel,
-    service: DEFAULT_SERVICE_NAME,
-    getCustomMeta: BETA_MODE ? getCustomMeta : () => ({}),
+    service: DEFAULT_SERVICE_NAME(),
+    getCustomMeta: DEFAULT_HDX_NODE_BETA_MODE() ? getCustomMeta : () => ({}),
     ...options,
   });
 };
@@ -58,22 +55,27 @@ export const getWinstonTransport = (
 // TODO: WILL BE DEPRECATED
 export const getWinsonTransport = getWinstonTransport;
 
+export const getPinoMixinFunction = HyperDXPino.getMixinFunction;
 export const getPinoTransport = (
   maxLevel = 'info',
   options: PinotTransportOptions = {},
-) => ({
-  target: '@hyperdx/node-opentelemetry/build/src/otel-logger/pino',
-  options: {
-    ...(HYPERDX_API_KEY && {
-      headers: {
-        Authorization: HYPERDX_API_KEY,
-      },
-    }),
-    service: DEFAULT_SERVICE_NAME,
-    // getCustomMeta, // FIXME: DOMException [DataCloneError]
-    // this seems to be because pino does not allow functions in transport options
-    // Ref: https://github.com/pinojs/pino/issues/1511
-    ...options,
-  },
-  level: maxLevel,
-});
+) => {
+  const apiKey = DEFAULT_HDX_API_KEY();
+
+  return {
+    target: '@hyperdx/node-opentelemetry/build/src/otel-logger/pino',
+    options: {
+      ...(apiKey && {
+        headers: {
+          Authorization: apiKey,
+        },
+      }),
+      service: DEFAULT_SERVICE_NAME(),
+      // getCustomMeta, // FIXME: DOMException [DataCloneError]
+      // this seems to be because pino does not allow functions in transport options
+      // Ref: https://github.com/pinojs/pino/issues/1511
+      ...options,
+    },
+    level: maxLevel,
+  };
+};

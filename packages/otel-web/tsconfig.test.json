@@ -1,0 +1,5 @@
+{
+  "include": ["test/*.ts"],
+  "extends": "./tsconfig.base.json",
+  "exclude": ["test/synthetics.test.ts"]
+}

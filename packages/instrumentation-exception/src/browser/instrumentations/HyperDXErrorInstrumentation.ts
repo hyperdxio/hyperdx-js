@@ -1,26 +1,29 @@
-import * as shimmer from 'shimmer';
+import { Span } from '@opentelemetry/api';
 import {
   InstrumentationBase,
   InstrumentationConfig,
 } from '@opentelemetry/instrumentation';
+import * as shimmer from 'shimmer';
 
 import { recordException } from '../';
-import { limitLen, getElementXPath } from './utils';
+import { getElementXPath, limitLen, stringifyValue } from './utils';
 
 // FIXME take timestamps from events?
 
+const STACK_LIMIT = 4096;
 const MESSAGE_LIMIT = 1024;
 
 function useful(s) {
   return s && s.trim() !== '' && !s.startsWith('[object') && s !== 'error';
 }
 
-function stringifyValue(value: unknown) {
-  if (value === undefined) {
-    return '(undefined)';
+function addStackIfUseful(span: Span, err: Error) {
+  if (err && err.stack && useful(err.stack)) {
+    span.setAttribute(
+      'error.stack',
+      limitLen(err.stack.toString(), STACK_LIMIT),
+    );
   }
-
-  return value.toString();
 }
 
 export const ERROR_INSTRUMENTATION_NAME = 'errors';
@@ -29,7 +32,7 @@ export const ERROR_INSTRUMENTATION_VERSION = '1';
 export class HyperDXErrorInstrumentation extends InstrumentationBase {
   private readonly _consoleErrorHandler = (original: Console['error']) => {
     return (...args: any[]) => {
-      this.report('console.error', args);
+      this.hdxReport('console.error', args);
       return original.apply(this, args);
     };
   };
@@ -37,15 +40,15 @@ export class HyperDXErrorInstrumentation extends InstrumentationBase {
   private readonly _unhandledRejectionListener = (
     event: PromiseRejectionEvent,
   ) => {
-    this.report('unhandledrejection', event.reason);
+    this.hdxReport('unhandledrejection', event.reason);
   };
 
   private readonly _errorListener = (event: ErrorEvent) => {
-    this.report('onerror', event);
+    this.hdxReport('onerror', event);
   };
 
   private readonly _documentErrorListener = (event: ErrorEvent) => {
-    this.report('eventListener.error', event);
+    this.hdxReport('eventListener.error', event);
   };
 
   constructor(config: InstrumentationConfig) {
@@ -83,16 +86,35 @@ export class HyperDXErrorInstrumentation extends InstrumentationBase {
     );
   }
 
-  protected reportError(source: string, err: Error): void {
+  protected hdxReportError(source: string, err: Error): void {
     const msg = err.message || err.toString();
     if (!useful(msg) && !err.stack) {
       return;
     }
 
-    recordException(err, {}, this.tracer);
+    const now = Date.now();
+    const span = this.tracer.startSpan(source, { startTime: now });
+    span.setAttribute('component', 'error');
+    span.setAttribute('error', true);
+    span.setAttribute(
+      'error.object',
+      useful(err.name)
+        ? err.name
+        : err.constructor && err.constructor.name
+          ? err.constructor.name
+          : 'Error',
+    );
+    span.setAttribute('error.message', limitLen(msg, MESSAGE_LIMIT));
+    addStackIfUseful(span, err);
+    recordException(err, {
+      tracer: this.tracer,
+      span,
+    }).finally(() => {
+      span.end(now);
+    });
   }
 
-  protected reportString(
+  protected hdxReportString(
     source: string,
     message: string,
     firstError?: Error,
@@ -101,23 +123,35 @@ export class HyperDXErrorInstrumentation extends InstrumentationBase {
       return;
     }
 
-    const e = new Error(limitLen(message, MESSAGE_LIMIT));
-    if (firstError && firstError.stack && useful(firstError.stack)) {
-      e.stack = firstError.stack;
+    const now = Date.now();
+    const span = this.tracer.startSpan(source, { startTime: now });
+    span.setAttribute('component', 'error');
+    span.setAttribute('error', true);
+    span.setAttribute('error.object', 'String');
+    span.setAttribute('error.message', limitLen(message, MESSAGE_LIMIT));
+    if (firstError) {
+      addStackIfUseful(span, firstError);
+      // FIXME: record only the first error?
+      recordException(firstError, {
+        tracer: this.tracer,
+        span,
+      }).finally(() => {
+        span.end(now);
+      });
+    } else {
+      span.end(now);
     }
-
-    recordException(e, {}, this.tracer);
   }
 
-  protected reportErrorEvent(source: string, ev: ErrorEvent): void {
+  protected hdxReportErrorEvent(source: string, ev: ErrorEvent): void {
     if (ev.error) {
-      this.report(source, ev.error);
+      this.hdxReport(source, ev.error);
     } else if (ev.message) {
-      this.report(source, ev.message);
+      this.hdxReport(source, ev.message);
     }
   }
 
-  protected reportEvent(source: string, ev: Event): void {
+  protected hdxReportEvent(source: string, ev: Event): void {
     // FIXME consider other sources of global 'error' DOM callback - what else can be captured here?
     if (!ev.target && !useful(ev.type)) {
       return;
@@ -125,18 +159,23 @@ export class HyperDXErrorInstrumentation extends InstrumentationBase {
 
     const now = Date.now();
     const span = this.tracer.startSpan(source, { startTime: now });
+    span.setAttribute('component', 'error');
+    span.setAttribute('error.type', ev.type);
     if (ev.target) {
       // TODO: find types to match this
       span.setAttribute('target_element', (ev.target as any).tagName);
       span.setAttribute('target_xpath', getElementXPath(ev.target, true));
       span.setAttribute('target_src', (ev.target as any).src);
     }
-    span.end(now);
-
-    recordException(ev, {}, this.tracer, span);
+    recordException(ev, {
+      tracer: this.tracer,
+      span,
+    }).finally(() => {
+      span.end(now);
+    });
   }
 
-  public report(
+  public hdxReport(
     source: string,
     arg: string | Event | ErrorEvent | Array<any>,
   ): void {
@@ -147,23 +186,23 @@ export class HyperDXErrorInstrumentation extends InstrumentationBase {
       arg = arg[0];
     }
     if (arg instanceof Error) {
-      this.reportError(source, arg);
+      this.hdxReportError(source, arg);
     } else if (arg instanceof ErrorEvent) {
-      this.reportErrorEvent(source, arg);
+      this.hdxReportErrorEvent(source, arg);
     } else if (arg instanceof Event) {
-      this.reportEvent(source, arg);
+      this.hdxReportEvent(source, arg);
     } else if (typeof arg === 'string') {
-      this.reportString(source, arg);
+      this.hdxReportString(source, arg);
     } else if (arg instanceof Array) {
       // if any arguments are Errors then add the stack trace even though the message is handled differently
       const firstError = arg.find((x) => x instanceof Error);
-      this.reportString(
+      this.hdxReportString(
         source,
         arg.map((x) => stringifyValue(x)).join(' '),
         firstError,
       );
     } else {
-      this.reportString(source, stringifyValue(arg)); // FIXME or JSON.stringify?
+      this.hdxReportString(source, stringifyValue(arg));
     }
   }
 }
