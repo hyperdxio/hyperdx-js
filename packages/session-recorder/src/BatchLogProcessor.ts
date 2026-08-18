@@ -34,7 +34,16 @@ export class BatchLogProcessor {
     this.scheduledDelayMillis = config?.scheduledDelayMillis || 5000;
     this.exporter = exporter;
 
-    window.addEventListener('unload', () => {
+    // Flush on visibilitychange/pagehide instead of the deprecated unload
+    // event, which Chrome blocks via Permissions Policy and which makes the
+    // page ineligible for the back/forward cache.
+    // https://developer.chrome.com/docs/web-platform/deprecating-unload
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'hidden') {
+        this._flushAll();
+      }
+    });
+    window.addEventListener('pagehide', () => {
       this._flushAll();
     });
   }
