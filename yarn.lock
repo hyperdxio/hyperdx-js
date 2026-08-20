@@ -3525,7 +3525,7 @@ __metadata:
     "@rollup/plugin-json": "npm:^4.1.0"
     "@rollup/plugin-node-resolve": "npm:^14.1.0"
     "@rollup/plugin-typescript": "npm:^8.5.0"
-    "@rrweb/types": "npm:^2.1.0"
+    "@rrweb/types": "npm:^2.1.1"
     "@types/jest": "npm:^29.5.10"
     fflate: "npm:0.7.4"
     jest: "npm:^29.7.0"
@@ -3537,8 +3537,8 @@ __metadata:
     rollup-plugin-polyfill-node: "npm:^0.10.2"
     rollup-plugin-re: "npm:^1.0.7"
     rollup-plugin-terser: "npm:^7.0.2"
-    rrweb: "npm:^2.1.0"
-    rrweb-snapshot: "npm:^2.1.0"
+    rrweb: "npm:^2.1.1"
+    rrweb-snapshot: "npm:^2.1.1"
     ts-jest: "npm:^29.1.1"
     ts-proto: "npm:^1.165.0"
     type-fest: "npm:4.20.1"
@@ -5989,17 +5989,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@rrweb/types@npm:^2.1.0":
-  version: 2.1.0
-  resolution: "@rrweb/types@npm:2.1.0"
-  checksum: 10c0/957fa27546ebd55276ae079a5d3a07aec255162b5be760ecae37f6777b5c6caa060973416a620566fdcc2e0cb213fef60b05b08a1db36ec9e3da0355e31ebdc6
+"@rrweb/types@npm:^2.1.1":
+  version: 2.1.1
+  resolution: "@rrweb/types@npm:2.1.1"
+  checksum: 10c0/86715c8c664399cccc11f7dbcff86592756aefcd7a29aaf8b9eb6457230b564e387ea003362d1cae2402f9511f73ba39bb341d29aba7ac14d0c3b8d52e2fb433
   languageName: node
   linkType: hard
 
-"@rrweb/utils@npm:^2.1.0":
-  version: 2.1.0
-  resolution: "@rrweb/utils@npm:2.1.0"
-  checksum: 10c0/56bc88ab791619753ef014efd9cb28c1b0c12decc994b09f2ec0d32a6766d93d87c774f2592687c562c8276186ab4a8eb9fe203c5e38ec857fb5136ac3f00ca8
+"@rrweb/utils@npm:^2.1.1":
+  version: 2.1.1
+  resolution: "@rrweb/utils@npm:2.1.1"
+  checksum: 10c0/1a6aba8663628807df60fe1f2b5cd218584446d4cb988dbac464a59c4a9c3e5d3790ebc9f7a43cefbc52c9685c7c0d6134fcb38b89faf7e38df6c41fb6079af8
   languageName: node
   linkType: hard
 
@@ -18936,12 +18936,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"rrdom@npm:^2.1.0":
-  version: 2.1.0
-  resolution: "rrdom@npm:2.1.0"
+"rrdom@npm:^2.1.1":
+  version: 2.1.1
+  resolution: "rrdom@npm:2.1.1"
   dependencies:
-    rrweb-snapshot: "npm:^2.1.0"
-  checksum: 10c0/87b6ef3807adbf577c8aa260a99958ee485a032b42e11edb062b9c75a263643a7fe3becd6fcd6b9909ebac59aabb2983b407e5d05a8c3d85a55a3c495fe7fd1a
+    rrweb-snapshot: "npm:^2.1.1"
+  checksum: 10c0/8b52d7c91b30275e56f61bd14f54cb6ccb68d5b48c721d06de4f355ff4872b74ee03838fb19b525da97468cde3064ac36f700a0f983bcff1466a4c2cc8f9e47e
   languageName: node
   linkType: hard
 
@@ -18952,28 +18952,28 @@ __metadata:
   languageName: node
   linkType: hard
 
-"rrweb-snapshot@npm:^2.1.0":
-  version: 2.1.0
-  resolution: "rrweb-snapshot@npm:2.1.0"
+"rrweb-snapshot@npm:^2.1.1":
+  version: 2.1.1
+  resolution: "rrweb-snapshot@npm:2.1.1"
   dependencies:
     postcss: "npm:^8.4.38"
-  checksum: 10c0/5f9ce6bf626f0e2ed2d113976b12545d2741a853d094e9e2c45f136c427fadeea793902999c7d1a3095036624e3d58304638499e12cf6f0c070c46ee4b99c8ac
+  checksum: 10c0/1253b4f6229e9ba140ed1887980b06037379fb99ddccb188f6840216fa9b6149610818daaa46e936a49eab48bac95d3f8ccd40aae251e6292f7c3074e5669f92
   languageName: node
   linkType: hard
 
-"rrweb@npm:^2.1.0":
-  version: 2.1.0
-  resolution: "rrweb@npm:2.1.0"
+"rrweb@npm:^2.1.1":
+  version: 2.1.1
+  resolution: "rrweb@npm:2.1.1"
   dependencies:
-    "@rrweb/types": "npm:^2.1.0"
-    "@rrweb/utils": "npm:^2.1.0"
+    "@rrweb/types": "npm:^2.1.1"
+    "@rrweb/utils": "npm:^2.1.1"
     "@types/css-font-loading-module": "npm:0.0.7"
     "@xstate/fsm": "npm:^1.4.0"
     base64-arraybuffer: "npm:^1.0.1"
     mitt: "npm:^3.0.0"
-    rrdom: "npm:^2.1.0"
-    rrweb-snapshot: "npm:^2.1.0"
-  checksum: 10c0/116ab80d2dbff76a31f50e5c1371d0456b360f126ffbac662c0992ec787709dd5d9f4884be19411066a2615de1f29657d9d53f52cf83b927eac2dcf3d05a80c1
+    rrdom: "npm:^2.1.1"
+    rrweb-snapshot: "npm:^2.1.1"
+  checksum: 10c0/cb49a1381055643bf69906f20d7d9e3bc05494dbfff677f6d516142a46857fad3ba60115d19c262287f4e90ad9f9c4482fa1cf2adf1c57b1a01f14df1ebe94f7
   languageName: node
   linkType: hard
 
