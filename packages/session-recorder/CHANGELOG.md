@@ -1,5 +1,15 @@
 # @hyperdx/otel-web-session-recorder
 
+## 4.0.0
+
+### Patch Changes
+
+- 342434e: Bump rrweb, rrweb-snapshot, and @rrweb/types to ^2.1.1
+- Updated dependencies [3f6bace]
+- Updated dependencies [3ad7fa8]
+- Updated dependencies [2586101]
+  - @hyperdx/otel-web@0.20.0
+
 ## 3.0.0
 
 ### Minor Changes
