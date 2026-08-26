@@ -47,12 +47,13 @@ export function generateId(bits: number): string {
 }
 
 export function findCookieValue(cookieName: string): string | undefined {
-  const decodedCookie = decodeURIComponent(document.cookie);
-  const cookies = decodedCookie.split(';');
+  const cookies = document.cookie.split(';');
   for (let i = 0; i < cookies.length; i++) {
     const c = cookies[i].trim();
     if (c.indexOf(cookieName + '=') === 0) {
-      return c.substring((cookieName + '=').length, c.length);
+      return decodeURIComponent(
+        c.substring((cookieName + '=').length, c.length),
+      );
     }
   }
   return undefined;
