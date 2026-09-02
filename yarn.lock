@@ -3335,8 +3335,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@hyperdx/browser@workspace:packages/browser"
   dependencies:
-    "@hyperdx/otel-web": "npm:0.19.0"
-    "@hyperdx/otel-web-session-recorder": "npm:3.0.0"
+    "@hyperdx/otel-web": "npm:0.20.0"
+    "@hyperdx/otel-web-session-recorder": "npm:4.0.0"
     "@rollup/plugin-commonjs": "npm:^24.1.0"
     "@rollup/plugin-json": "npm:^6.0.0"
     "@rollup/plugin-node-resolve": "npm:^15.0.2"
@@ -3510,7 +3510,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@hyperdx/otel-web-session-recorder@npm:3.0.0, @hyperdx/otel-web-session-recorder@workspace:packages/session-recorder":
+"@hyperdx/otel-web-session-recorder@npm:4.0.0, @hyperdx/otel-web-session-recorder@workspace:packages/session-recorder":
   version: 0.0.0-use.local
   resolution: "@hyperdx/otel-web-session-recorder@workspace:packages/session-recorder"
   dependencies:
@@ -3543,11 +3543,11 @@ __metadata:
     ts-proto: "npm:^1.165.0"
     type-fest: "npm:4.20.1"
   peerDependencies:
-    "@hyperdx/otel-web": ^0.19.0
+    "@hyperdx/otel-web": ^0.20.0
   languageName: unknown
   linkType: soft
 
-"@hyperdx/otel-web@npm:0.19.0, @hyperdx/otel-web@workspace:packages/otel-web":
+"@hyperdx/otel-web@npm:0.20.0, @hyperdx/otel-web@workspace:packages/otel-web":
   version: 0.0.0-use.local
   resolution: "@hyperdx/otel-web@workspace:packages/otel-web"
   dependencies:
