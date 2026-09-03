@@ -1,5 +1,27 @@
 # @hyperdx/browser
 
+## 0.26.0
+
+### Minor Changes
+
+- 3ad7fa8: Emit approximate locale/region resource attributes from the browser RUM
+  SDK: `browser.language` (OTel semconv, from `navigator.language`) and
+  `hyperdx.browser.timezone` (IANA zone from `Intl`). These are honest proxies for
+  where a user is — they are NOT IP geolocation (the browser can't
+  determine country without a permission prompt; true geo is derived in the
+  collector from the client IP). Added before user-provided
+  `resourceAttributes` so callers can override them.
+
+### Patch Changes
+
+- 2586101: Align the browser OpenTelemetry dependencies with the patched 0.219.0 and 2.8.0 release lines so consumers no longer install vulnerable `@opentelemetry/core` 2.7.1 copies.
+- Updated dependencies [342434e]
+- Updated dependencies [3f6bace]
+- Updated dependencies [3ad7fa8]
+- Updated dependencies [2586101]
+  - @hyperdx/otel-web-session-recorder@4.0.0
+  - @hyperdx/otel-web@0.20.0
+
 ## 0.25.1
 
 ### Patch Changes
