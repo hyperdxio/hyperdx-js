@@ -85,6 +85,61 @@ export declare type recordOptions<T> = {
 };
 
 /*
+ * Split a serialized event into chunks of roughly maxChunkSize bytes
+ * (UTF-8): a chunk can exceed it by up to 3 bytes when a multi-byte
+ * character spans a chunk boundary (the streaming decoder defers the
+ * character to the following chunk), so callers must leave a few bytes
+ * of headroom below any hard payload limit. A single-chunk payload is
+ * returned as-is without any encode/decode round-trip this keeps the
+ * hot path off TextDecoder entirely, which matters because WebKit's
+ * TextDecoder can permanently corrupt after high cumulative decode
+ * volume and then throw `RangeError: Bad value` on valid input
+ * (https://bugs.webkit.org/show_bug.cgi?id=286266).
+ * For multi-chunk payloads a fresh TextDecoder is used per call, with
+ * `{ stream: true }` so multi-byte characters spanning a chunk boundary
+ * aren't mangled into U+FFFD replacement characters. If decoding still
+ * throws, it is retried once from the start with another new decoder.
+ */
+export function splitIntoChunks(
+  serialized: string,
+  maxChunkSize: number,
+): string[] {
+  // 3 bytes is the max UTF-8 width of a single UTF-16 code unit, so this
+  // proves the common small event fits in one chunk without paying for a
+  // full encode on every rrweb flush
+  if (serialized.length * 3 <= maxChunkSize) {
+    return [serialized];
+  }
+  const body = new TextEncoder().encode(serialized);
+  const totalChunks = Math.ceil(body.byteLength / maxChunkSize);
+  if (totalChunks <= 1) {
+    return [serialized];
+  }
+  const decodeAll = (): string[] => {
+    const chunkDecoder = new TextDecoder();
+    const chunks: string[] = [];
+    for (let i = 0; i < totalChunks; i++) {
+      chunks.push(
+        chunkDecoder.decode(
+          body.slice(i * maxChunkSize, (i + 1) * maxChunkSize),
+          {
+            stream: i < totalChunks - 1,
+          },
+        ),
+      );
+    }
+    return chunks;
+  };
+  try {
+    return decodeAll();
+  } catch (e) {
+    // Restart from chunk 0 with a brand-new decoder so the streaming
+    // state stays consistent
+    return decodeAll();
+  }
+}
+
+/*
  * Check whether a data payload is nearing 5mb. If it is, it checks the data for
  * data URIs (the likely culprit for large payloads). If it finds data URIs, it either replaces
  * it with a generic image (if it's an image) or removes it.
