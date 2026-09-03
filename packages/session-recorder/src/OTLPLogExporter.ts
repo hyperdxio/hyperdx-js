@@ -136,10 +136,16 @@ export default class OTLPLogExporter {
       ? Object.assign({}, defaultHeaders, this.config.headers)
       : defaultHeaders;
 
+    // keepalive lets the request outlive the page on pagehide/visibility
+    // flushes, but its body limit is 64 KiB, so guard on the payload size.
+    const keepalive =
+      compressed.byteLength < 65536 && document.visibilityState === 'hidden';
+
     fetch(this.config.beaconUrl, {
       method: 'POST',
       body: compressed,
       headers: updatedHeaders,
+      keepalive,
     }).catch(() => {
       // TODO remove this once we have ingest with correct cors headers
     });
