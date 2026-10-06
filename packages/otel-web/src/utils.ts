@@ -196,7 +196,11 @@ export function waitForGlobal(
 }
 
 // https://github.com/open-telemetry/opentelemetry-js/blob/b400c2e5d9729c3528482781a93393602dc6dc9f/experimental/packages/opentelemetry-instrumentation-http/src/utils.ts#L573
-export function headerCapture(type: 'request' | 'response', headers: string[]) {
+export function headerCapture(
+  type: 'request' | 'response',
+  headers: string[],
+  redactConfig: RedactableKey[] | undefined = undefined,
+) {
   const normalizedHeaders = new Map(
     headers.map((header) => [header, header.toLowerCase().replace(/-/g, '_')]),
   );
@@ -213,14 +217,37 @@ export function headerCapture(type: 'request' | 'response', headers: string[]) {
       }
 
       const key = `http.${type}.header.${normalizedHeader}`;
+      // normalized_header uses "_" instead of "-" but the ui shows "-"?
+      const maybeRedactedValue = shouldRedactKey(normalizedHeader, redactConfig)
+        ? '[REDACTED]'
+        : value;
 
-      if (typeof value === 'string') {
-        span.setAttribute(key, [value]);
-      } else if (Array.isArray(value)) {
-        span.setAttribute(key, value);
+      if (typeof maybeRedactedValue === 'string') {
+        span.setAttribute(key, [maybeRedactedValue]);
+      } else if (Array.isArray(maybeRedactedValue)) {
+        span.setAttribute(key, maybeRedactedValue);
       } else {
-        span.setAttribute(key, [value]);
+        span.setAttribute(key, [maybeRedactedValue]);
       }
     }
   };
+}
+
+export type RedactableKey = string | RegExp;
+
+export function shouldRedactKey(
+  key: string,
+  redactConfig: RedactableKey[] | undefined,
+): boolean {
+  if (!redactConfig) return false;
+
+  return redactConfig.some((pattern) => {
+    if (typeof pattern === 'string') {
+      return key === pattern;
+    }
+    if (pattern instanceof RegExp) {
+      return pattern.test(key);
+    }
+    return false;
+  });
 }
