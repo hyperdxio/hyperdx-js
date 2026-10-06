@@ -16,7 +16,6 @@ limitations under the License.
 */
 
 import {
-  diag,
   ProxyTracerProvider,
   TracerProvider,
   trace,
@@ -230,9 +229,9 @@ const RumRecorder = {
         } catch (e) {
           consecutiveEmitFailures++;
           // Each failure drops a whole rrweb event always surface it
-          diag.error('OpenTelemetry Session Recorder: emit failed', e);
+          console.error('OpenTelemetry Session Recorder: emit failed', e);
           if (consecutiveEmitFailures >= maxConsecutiveEmitFailures) {
-            diag.error(
+            console.error(
               'OpenTelemetry Session Recorder: stopping recording after repeated errors',
               e,
             );
@@ -242,7 +241,7 @@ const RumRecorder = {
             } catch (stopError) {
               // rrweb's stop() can throw when called from inside its own
               // emit; never let that escape back into rrweb
-              diag.error(
+              console.error(
                 'OpenTelemetry Session Recorder: failed to stop recording',
                 stopError,
               );

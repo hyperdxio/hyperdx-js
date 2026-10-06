@@ -13,7 +13,8 @@
     "otlp:compile:pbts": "pbjs -t static-module --force-number opentelemetry-proto/opentelemetry/proto/common/v1/common.proto opentelemetry-proto/opentelemetry/proto/resource/v1/resource.proto opentelemetry-proto/opentelemetry/proto/logs/v1/logs.proto | pbts -o src/LogsProto.d.ts -",
     "postversion": "node ./scripts/version-update.mjs",
     "protoc": "protoc --plugin=../../node_modules/.bin/protoc-gen-ts_proto  --ts_proto_opt=useOptionals=all --ts_proto_opt= --ts_proto_out=./src opentelemetry-proto/opentelemetry/proto/logs/v1/logs.proto --proto_path=./opentelemetry-proto --ts_proto_opt=forceLong=number --ts_proto_opt=esModuleInterop=true",
-    "test": "jest"
+    "test": "jest",
+    "ci:unit": "jest --ci"
   },
   "license": "Apache-2.0",
   "main": "dist/cjs/index.js",
@@ -38,7 +39,7 @@
     "@opentelemetry/core": "^2.8.0",
     "@opentelemetry/resources": "^2.7.1",
     "@rrweb/types": "^2.1.1",
-    "fflate": "0.7.4",
+    "fflate": "0.7.5",
     "long": "^5.2.3",
     "protobufjs": "~7.6.5",
     "rrweb": "^2.1.1",

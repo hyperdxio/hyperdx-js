@@ -56,8 +56,6 @@ jest.mock('../src/sessionrecording-utils', () => {
   return { ...actual, splitIntoChunks: jest.fn(actual.splitIntoChunks) };
 });
 
-import { diag } from '@opentelemetry/api';
-
 import RumRecorder from '../src';
 import { splitIntoChunks } from '../src/sessionrecording-utils';
 
@@ -88,7 +86,7 @@ describe('emit error handling', () => {
     // for the code paths under test
     (global as any).window = {};
     (global as any).document = { hidden: false };
-    diagError = jest.spyOn(diag, 'error').mockImplementation(() => {});
+    diagError = jest.spyOn(console, 'error').mockImplementation(() => {});
   });
 
   beforeEach(() => {
