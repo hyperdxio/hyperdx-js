@@ -89,7 +89,7 @@
     "chrome-launcher": "^0.15.1",
     "chromedriver": "^119.0.1",
     "codecov": "^3.8.2",
-    "compression": "^1.7.4",
+    "compression": "^1.8.2",
     "cors": "^2.8.5",
     "express": "^4.22.0",
     "geckodriver": "^3.2.0",
