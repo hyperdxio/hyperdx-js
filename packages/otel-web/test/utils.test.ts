@@ -28,7 +28,36 @@ describe('generateId', () => {
   });
 });
 describe('findCookieValue', () => {
+  const expireCookie = (name: string) => {
+    document.cookie = name + '=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/';
+  };
+
   it('should not find unset cookie', () => {
     assert.ok(findCookieValue('nosuchCookie') === undefined);
+  });
+
+  it('should decode the value of the requested cookie', () => {
+    document.cookie =
+      'testDecoded=' + encodeURIComponent('{"a":"b c"}') + ';path=/';
+    try {
+      assert.strictEqual(findCookieValue('testDecoded'), '{"a":"b c"}');
+    } finally {
+      expireCookie('testDecoded');
+    }
+  });
+
+  it('should not throw when an unrelated cookie is not percent-encoded', () => {
+    // Cookie values may legally contain a bare '%'. Decoding the whole
+    // document.cookie string made any such cookie throw a URIError here,
+    // which propagated out of session tracking and into the host page.
+    document.cookie = 'testMalformed=100%;path=/';
+    document.cookie = 'testNeighbour=' + encodeURIComponent('ok') + ';path=/';
+    try {
+      assert.strictEqual(findCookieValue('testNeighbour'), 'ok');
+      assert.ok(findCookieValue('nosuchCookie') === undefined);
+    } finally {
+      expireCookie('testMalformed');
+      expireCookie('testNeighbour');
+    }
   });
 });
