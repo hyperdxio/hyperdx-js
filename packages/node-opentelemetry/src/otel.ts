@@ -35,6 +35,7 @@ import {
   DEFAULT_OTEL_EXPORTER_OTLP_TRACES_TIMEOUT,
   DEFAULT_OTEL_LOG_LEVEL,
   DEFAULT_OTEL_LOGS_EXPORTER,
+  DEFAULT_OTEL_LOGS_EXPORTER_URL,
   DEFAULT_OTEL_METRICS_EXPORTER,
   DEFAULT_OTEL_METRICS_EXPORTER_URL,
   DEFAULT_OTEL_TRACES_EXPORTER,
@@ -77,6 +78,7 @@ export type SDKConfig = {
   sentryIntegrationEnabled?: boolean;
   service?: string;
   stopOnTerminationSignals?: boolean;
+  url?: string;
 };
 
 const setOtelEnvs = ({
@@ -193,6 +195,12 @@ export const initSDK = (config: SDKConfig) => {
     config.enableInternalProfiling ?? false;
   const defaultServiceName = config.service ?? DEFAULT_SERVICE_NAME();
 
+  // Override OTLP endpoint URLs if config.url is provided
+  const otlpEndpoint = config.url ?? env.OTEL_EXPORTER_OTLP_ENDPOINT;
+  const tracesUrl = otlpEndpoint ? `${otlpEndpoint}/v1/traces` : DEFAULT_OTEL_TRACES_EXPORTER_URL;
+  const logsUrl = otlpEndpoint ? `${otlpEndpoint}/v1/logs` : DEFAULT_OTEL_LOGS_EXPORTER_URL;
+  const metricsUrl = otlpEndpoint ? `${otlpEndpoint}/v1/metrics` : DEFAULT_OTEL_METRICS_EXPORTER_URL;
+
   ui.succeed(`Service name is configured to be "${defaultServiceName}"`);
 
   if (!env.OTEL_EXPORTER_OTLP_HEADERS && !defaultApiKey) {
@@ -242,6 +250,7 @@ export const initSDK = (config: SDKConfig) => {
   //--------------------------------------------------
   ui.text = 'Initializing OpenTelemetry Logger...';
   const _logger = new OtelLogger({
+    baseUrl: logsUrl,
     detectResources: defaultDetectResources,
     service: defaultServiceName,
   });
@@ -250,7 +259,7 @@ export const initSDK = (config: SDKConfig) => {
 
   // Health check
   Promise.all([
-    healthCheckUrl(ui, DEFAULT_OTEL_TRACES_EXPORTER_URL, {
+    healthCheckUrl(ui, tracesUrl, {
       method: 'POST',
       headers: healthCheckHeaders,
       body: JSON.stringify({}),
@@ -260,7 +269,7 @@ export const initSDK = (config: SDKConfig) => {
       headers: healthCheckHeaders,
       body: JSON.stringify({}),
     }),
-    healthCheckUrl(ui, DEFAULT_OTEL_METRICS_EXPORTER_URL, {
+    healthCheckUrl(ui, metricsUrl, {
       method: 'POST',
       headers: healthCheckHeaders,
       body: JSON.stringify({}),
@@ -342,7 +351,7 @@ export const initSDK = (config: SDKConfig) => {
     logRecordProcessor: defaultDisableLogs ? undefined : _logger.getProcessor(),
     metricReader:
       config.metricReader ??
-      (defaultDisableMetrics ? undefined : getHyperDXMetricReader()),
+      (defaultDisableMetrics ? undefined : getHyperDXMetricReader(metricsUrl)),
     spanProcessors: [
       ...(defaultDisableTracing
         ? []
@@ -352,11 +361,11 @@ export const initSDK = (config: SDKConfig) => {
                 env.OTEL_EXPORTER_OTLP_PROTOCOL === 'grpc'
                   ? new OTLPTraceExporterGRPC({
                       timeoutMillis: DEFAULT_OTEL_EXPORTER_OTLP_TRACES_TIMEOUT,
-                      url: DEFAULT_OTEL_TRACES_EXPORTER_URL,
+                      url: tracesUrl,
                     })
                   : new OTLPTraceExporterHTTP({
                       timeoutMillis: DEFAULT_OTEL_EXPORTER_OTLP_TRACES_TIMEOUT,
-                      url: DEFAULT_OTEL_TRACES_EXPORTER_URL,
+                      url: tracesUrl,
                     }),
               enableHDXGlobalContext: defaultBetaMode,
               contextManager,
@@ -606,17 +615,17 @@ export const initSDK = (config: SDKConfig) => {
   if (defaultDisableLogs) {
     ui.warn('Logs are disabled');
   } else {
-    ui.succeed(`Sending logs to "${_logger.getExporterUrl()}"`);
+    ui.succeed(`Sending logs to "${logsUrl}"`);
   }
   if (defaultDisableMetrics) {
     ui.warn('Metrics are disabled');
   } else {
-    ui.succeed(`Sending metrics to "${DEFAULT_OTEL_METRICS_EXPORTER_URL}"`);
+    ui.succeed(`Sending metrics to "${metricsUrl}"`);
   }
   if (defaultDisableTracing) {
     ui.warn('Tracing is disabled');
   } else {
-    ui.succeed(`Sending traces to "${DEFAULT_OTEL_TRACES_EXPORTER_URL}"`);
+    ui.succeed(`Sending traces to "${tracesUrl}"`);
   }
 
   ui.stopAndPersist({
