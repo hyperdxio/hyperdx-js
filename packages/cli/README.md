@@ -1,5 +1,11 @@
 # Command Line Interface for HyperDX
 
+> **Moved:** `@hyperdx/cli` is now developed in
+> [ClickHouse/ClickStack](https://github.com/ClickHouse/ClickStack/tree/main/packages/cli),
+> and this copy is no longer maintained or published. The published package's
+> `upload-sourcemaps` command takes the same flags; see its
+> [README](https://github.com/ClickHouse/ClickStack/tree/main/packages/cli#hdx-upload-sourcemaps--source-maps).
+
 Command line tool for [HyperDX](https://www.hyperdx.io/). Currently supports
 uploading JavaScript sourcemaps so stack traces can be symbolicated in HyperDX.
 

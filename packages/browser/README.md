@@ -1,5 +1,13 @@
 # HyperDX Browser SDK
 
+> **Deprecated:** `@hyperdx/browser` is no longer maintained. Use
+> [`@clickhouse/clickstack-browser`](https://github.com/ClickHouse/clickstack-browser)
+> instead. The
+> [migration guide](https://github.com/ClickHouse/clickstack-browser/blob/main/docs/migration.md)
+> maps each option and method to its replacement. To use plain OpenTelemetry
+> instead, see
+> [Using the upstream SDK directly](https://github.com/ClickHouse/clickstack-browser#using-the-upstream-sdk-directly).
+
 Browser SDK for [HyperDX](https://www.hyperdx.io/) — real user monitoring
 (RUM), tracing, and session replay for web applications.
 

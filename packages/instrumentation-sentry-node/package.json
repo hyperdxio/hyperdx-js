@@ -3,6 +3,7 @@
   "author": "Warren <warren@users.noreply.github.com>",
   "license": "Apache-2.0",
   "version": "0.2.1",
+  "description": "Deprecated: run @sentry/node next to the upstream OpenTelemetry SDK or @clickhouse/clickstack-node instead.",
   "homepage": "https://www.hyperdx.io",
   "repository": {
     "type": "git",

@@ -3,6 +3,7 @@
   "author": "Warren <warren@users.noreply.github.com>",
   "license": "Apache-2.0",
   "version": "0.3.0",
+  "description": "Deprecated: @clickhouse/clickstack-node and @clickhouse/clickstack-browser capture exceptions without it.",
   "homepage": "https://www.hyperdx.io",
   "repository": {
     "type": "git",

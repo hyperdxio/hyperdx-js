@@ -1,7 +1,7 @@
 {
   "name": "@hyperdx/otel-web",
   "version": "0.20.0",
-  "description": "HyperDX distribution of OpenTelemetry for real user monitoring (RUM)",
+  "description": "Deprecated: use @clickhouse/clickstack-browser instead.",
   "scripts": {
     "start": "npm-run-all -s compile start:_execute",
     "start:_execute": "node utils/devServer/runDevServer.js",

@@ -1,5 +1,12 @@
 # HyperDX Node.js Logger
 
+> **Deprecated:** `@hyperdx/node-logger` is no longer maintained. Use
+> [`@clickhouse/clickstack-node`](https://github.com/ClickHouse/clickstack-node)
+> instead: it sends winston and pino records, including those from NestJS
+> loggers built on them, through its bundled instrumentations. The
+> [migration guide](https://github.com/ClickHouse/clickstack-node/blob/main/docs/migration.md#hyperdxnode-logger)
+> maps each transport to its replacement.
+
 Node.js Logging Library for [HyperDX](https://www.hyperdx.io/)
 
 ## Installation

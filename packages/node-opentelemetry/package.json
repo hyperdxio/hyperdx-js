@@ -3,6 +3,7 @@
   "author": "Warren <warren@users.noreply.github.com>",
   "license": "MIT",
   "version": "0.11.0",
+  "description": "Deprecated: use @clickhouse/clickstack-node instead.",
   "homepage": "https://www.hyperdx.io",
   "repository": {
     "type": "git",
