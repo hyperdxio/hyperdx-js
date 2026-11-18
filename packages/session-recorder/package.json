@@ -1,7 +1,7 @@
 {
   "name": "@hyperdx/otel-web-session-recorder",
   "version": "4.0.0",
-  "description": "HyperDX distribution OpenTelemetry-based session recording",
+  "description": "Deprecated: use @clickhouse/clickstack-browser instead.",
   "scripts": {
     "prebuild": "npm run postversion",
     "build": "npm run compile",

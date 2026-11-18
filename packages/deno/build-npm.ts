@@ -25,6 +25,7 @@ await build({
   package: {
     name: pkg.name,
     version: pkg.version,
+    description: pkg.description,
     license: pkg.license,
     homepage: pkg.homepage,
     repository: pkg.repository,

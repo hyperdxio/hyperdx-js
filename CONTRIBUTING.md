@@ -1,5 +1,9 @@
 # Contributing
 
+> **Deprecated:** these SDKs are no longer maintained, so new features belong
+> in [`clickstack-browser`](https://github.com/ClickHouse/clickstack-browser)
+> or [`clickstack-node`](https://github.com/ClickHouse/clickstack-node).
+
 Thanks for your interest in contributing to the HyperDX JavaScript SDKs! This
 guide covers the repository layout and the day-to-day development workflow.
 

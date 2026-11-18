@@ -2,6 +2,7 @@
   "name": "@hyperdx/deno",
   "license": "MIT",
   "version": "0.0.2",
+  "description": "Deprecated: use Deno's built-in OpenTelemetry support (OTEL_DENO=true) instead.",
   "homepage": "https://www.hyperdx.io",
   "repository": {
     "type": "git",

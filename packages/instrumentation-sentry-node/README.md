@@ -3,6 +3,18 @@
 [![NPM Published Version][npm-img]][npm-url]
 [![Apache License][license-image]][license-url]
 
+> **Deprecated:** `@hyperdx/instrumentation-sentry-node` is no longer
+> maintained, and neither ClickStack SDK replaces it. Run `@sentry/node` next
+> to the upstream
+> [OpenTelemetry Node.js SDK](https://opentelemetry.io/docs/languages/js/getting-started/nodejs/)
+> or [`@clickhouse/clickstack-node`](https://github.com/ClickHouse/clickstack-node),
+> and where you call `Sentry.captureException(error)`, also call
+> `trace.getActiveSpan()?.recordException(error)` from `@opentelemetry/api`.
+> The
+> [Sentry section](https://github.com/ClickHouse/clickstack-node/blob/main/docs/migration.md#sentry)
+> of the `clickstack-node` migration guide covers start order and how to keep
+> each SDK from tracing the other's requests.
+
 This module provides automatic instrumentation for the [`@sentry/node`](https://github.com/getsentry/sentry-javascript/tree/develop/packages/node) module.
 
 Compatible with OpenTelemetry JS API and SDK `1.0+`.

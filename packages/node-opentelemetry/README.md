@@ -1,5 +1,13 @@
 # HyperDX OpenTelemetry Node
 
+> **Deprecated:** `@hyperdx/node-opentelemetry` is no longer maintained. Use
+> [`@clickhouse/clickstack-node`](https://github.com/ClickHouse/clickstack-node)
+> instead. The
+> [migration guide](https://github.com/ClickHouse/clickstack-node/blob/main/docs/migration.md)
+> maps each environment variable, option, and export to its replacement. To use
+> plain OpenTelemetry instead, see
+> [Using the upstream SDK directly](https://github.com/ClickHouse/clickstack-node#using-the-upstream-sdk-directly).
+
 OpenTelemetry Node Library for [HyperDX](https://www.hyperdx.io/)
 
 ### Install HyperDX OpenTelemetry Instrumentation Package
